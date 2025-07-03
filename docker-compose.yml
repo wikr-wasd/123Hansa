@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hansa123_db
+      POSTGRES_USER: hansa123_user
+      POSTGRES_PASSWORD: hansa123_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hansa123_user -d hansa123_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MinIO for local file storage (S3 compatible)
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: hansa123_admin
+      MINIO_ROOT_PASSWORD: hansa123_password_123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Mailhog for local email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    environment:
+      MH_STORAGE: memory
+
+  # API Development Service
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://hansa123_user:hansa123_password@postgres:5432/hansa123_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-for-development-only
+      EMAIL_FROM_ADDRESS: noreply@123hansa.se
+      STORAGE_PROVIDER: local
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3002
+    ports:
+      - "3002:3001"
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run dev --workspace=apps/api
+
+  # Web Development Service
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    command: npm run dev --workspace=apps/web
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  default:
+    name: hansa123_network

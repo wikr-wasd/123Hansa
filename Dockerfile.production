@@ -1,0 +1,65 @@
+# Multi-stage build for production optimization
+# Stage 1: Build dependencies and compile TypeScript
+FROM node:18-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
+COPY apps/web/package*.json ./apps/web/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Stage 2: Production runtime
+FROM node:18-alpine AS runtime
+
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init curl
+
+# Create app user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S hansa123 -u 1001
+
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=hansa123:nodejs /app/dist ./dist
+COPY --from=builder --chown=hansa123:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=hansa123:nodejs /app/package.json ./package.json
+
+# Copy API specific files
+COPY --from=builder --chown=hansa123:nodejs /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=hansa123:nodejs /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder --chown=hansa123:nodejs /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder --chown=hansa123:nodejs /app/apps/api/prisma ./apps/api/prisma
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Switch to non-root user
+USER hansa123
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "apps/api/dist/index.js"]

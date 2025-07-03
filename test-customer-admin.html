@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Customer Admin & Chat System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .feature { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .working { background-color: #d4edda; border-color: #c3e6cb; }
+        .improved { background-color: #cce7ff; border-color: #99ccff; }
+        ul { margin: 10px 0; }
+        li { margin: 5px 0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Customer Admin & Chat System - Test Guide</h1>
+    
+    <div class="feature improved">
+        <h2>🆕 Nya Förbättringar Implementerade</h2>
+        <h3>1. Anteckningar & Minneslappar</h3>
+        <ul>
+            <li>✅ Nu en egen bred panel under alla admin-tabs</li>
+            <li>✅ Mycket större layout (3-kolumns grid)</li>
+            <li>✅ Bättre design med större text och knappar</li>
+            <li>✅ Synlig i alla admin-vyer</li>
+        </ul>
+        
+        <h3>2. Ekonomi-tabell</h3>
+        <ul>
+            <li>✅ Kompakt design utan skrollning</li>
+            <li>✅ Hela tabellen syns på en gång</li>
+            <li>✅ Behåller alla godkänn/frisläpp-funktioner</li>
+        </ul>
+        
+        <h3>3. Chatt-system</h3>
+        <ul>
+            <li>✅ Användare kan chatta med varandra</li>
+            <li>✅ Support-chatt tillgänglig för alla</li>
+            <li>✅ Admin kan se och delta i alla konversationer</li>
+            <li>✅ Automatisk personalisering baserat på användare</li>
+        </ul>
+        
+        <h3>4. Customer Admin Panel</h3>
+        <ul>
+            <li>✅ Automatiskt tillgängligt i "Mina Sidor"</li>
+            <li>✅ Egna tabs: Profil, Admin Panel, Inställningar</li>
+            <li>✅ Visar användarens egna data</li>
+            <li>✅ Integrerat med chatt-systemet</li>
+        </ul>
+    </div>
+
+    <div class="feature working">
+        <h2>🔗 Test-länkar</h2>
+        <ul>
+            <li><strong>Server:</strong> <a href="http://localhost:3003" target="_blank">http://localhost:3003</a></li>
+            <li><strong>Super Admin (Willi):</strong> <a href="http://localhost:3003/kraken" target="_blank">http://localhost:3003/kraken</a></li>
+            <li><strong>Customer Admin (alla användare):</strong> <a href="http://localhost:3003/profile" target="_blank">http://localhost:3003/profile</a> (efter inloggning)</li>
+        </ul>
+    </div>
+
+    <div class="feature">
+        <h2>👤 Användarkonton för test</h2>
+        
+        <h3>Super Admin (Kraken):</h3>
+        <ul>
+            <li><strong>Username:</strong> Willi</li>
+            <li><strong>Password:</strong> Rickilito00</li>
+            <li><strong>Åtkomst:</strong> Full admin-kontroll, alla funktioner</li>
+        </ul>
+        
+        <h3>Test Customer (Standalone):</h3>
+        <ul>
+            <li><strong>Username:</strong> anna.karlsson</li>
+            <li><strong>Password:</strong> customer123</li>
+            <li><strong>Åtkomst:</strong> Begränsad till egen data</li>
+        </ul>
+        
+        <h3>Befintliga användare (Tubba-systemet):</h3>
+        <ul>
+            <li>Registrera eller logga in som vanligt</li>
+            <li>Gå till "Mina Sidor" → "Min Admin Panel" tab</li>
+            <li>Alla användare får automatiskt sitt eget admin-område</li>
+        </ul>
+    </div>
+
+    <div class="feature">
+        <h2>🧪 Vad du kan testa</h2>
+        
+        <h3>Anna Karlsson specifikt:</h3>
+        <ol>
+            <li>Logga in som Anna Karlsson (om hon finns i systemet)</li>
+            <li>Gå till "Mina Sidor" (Profile)</li>
+            <li>Klicka på "Min Admin Panel" tab</li>
+            <li>Testa chatt-systemet (bla chattkn i nedre högra hörnet)</li>
+            <li>Se hennes personliga data och annonser</li>
+        </ol>
+        
+        <h3>Chatt-funktioner:</h3>
+        <ol>
+            <li>Klicka på chat-ikonen (nedre högra hörnet)</li>
+            <li>Se olika konversationer baserat på vem du är inloggad som</li>
+            <li>Anna får se chatt med Erik och support</li>
+            <li>Admin (Willi) ser alla användares konversationer</li>
+            <li>Skicka testmeddelanden</li>
+        </ol>
+        
+        <h3>Admin Panel (Willi):</h3>
+        <ol>
+            <li>Gå till <a href="http://localhost:3003/kraken">/kraken</a></li>
+            <li>Logga in som Willi</li>
+            <li>Se den stora anteckningspanelen under alla tabs</li>
+            <li>Testa ekonomi-sektionen (kompakt tabell)</li>
+            <li>Öppna chatten - se alla användares konversationer</li>
+        </ol>
+    </div>
+
+    <div class="feature working">
+        <h2>✨ Nyckelfunktioner som fungerar</h2>
+        <ul>
+            <li>🔐 Automatisk admin-panel för alla registrerade användare</li>
+            <li>💬 Chat mellan användare (Anna ↔ Erik, Anna ↔ Support, etc.)</li>
+            <li>👥 Personaliserade konversationer baserat på användare</li>
+            <li>📊 Individual statistics och data för varje användare</li>
+            <li>🛡️ Role-based access (Admin ser allt, users ser bara sina egna data)</li>
+            <li>📝 Stor, lättanvänd anteckningssektion för admin</li>
+            <li>💰 Kompakt ekonomi-tabell utan skrollning</li>
+            <li>🔄 Realtids-chat med online-status och unread-badges</li>
+        </ul>
+    </div>
+
+    <div class="feature">
+        <h2>🚀 Nästa steg</h2>
+        <p>Systemet är nu redo för:</p>
+        <ul>
+            <li>Riktiga användare att registrera sig och få sina admin-paneler automatiskt</li>
+            <li>Anna Karlsson och andra befintliga användare att chatta med varandra</li>
+            <li>Support att hantera alla förfrågningar via chat</li>
+            <li>Admin (Willi) att övervaka och hantera allt centralt</li>
+        </ul>
+    </div>
+</body>
+</html>

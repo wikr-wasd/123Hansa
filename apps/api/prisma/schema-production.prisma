@@ -1,0 +1,281 @@
+// Production-ready Prisma schema for 123hansa.se
+// Optimized for 1000+ concurrent users
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core User Management with indexing for performance
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name") 
+  role              String    @default("USER") // USER, ADMIN, MODERATOR
+  verificationLevel String    @default("NONE") @map("verification_level") // NONE, EMAIL, PHONE, BANKID
+  isActive          Boolean   @default(true) @map("is_active")
+  isEmailVerified   Boolean   @default(false) @map("is_email_verified")
+  country           String    @default("SE")
+  language          String    @default("sv")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  lastLoginAt       DateTime? @map("last_login_at")
+
+  // Relations
+  adminProfile      AdminUser?
+  listings          BusinessListing[]
+  supportTickets    SupportTicket[]
+  auditLogs         AdminLog[]
+  payments          Payment[]
+  transactions      Transaction[]
+  messages          Message[]
+  campaigns         Campaign[]
+
+  // Indexes for performance with 1000+ users
+  @@index([email])
+  @@index([isActive])
+  @@index([role])
+  @@index([createdAt])
+  @@index([lastLoginAt])
+  @@map("users")
+}
+
+// Enhanced Business Listings with better indexing
+model BusinessListing {
+  id               String    @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  askingPrice      Float?    @map("asking_price")
+  status           String    @default("DRAFT") // DRAFT, PENDING_REVIEW, ACTIVE, SOLD, REMOVED
+  publishedAt      DateTime? @map("published_at")
+  ownerId          String    @map("owner_id")
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  viewCount        Int       @default(0) @map("view_count")
+  featured         Boolean   @default(false)
+  boosted          Boolean   @default(false)
+  boostExpiry      DateTime? @map("boost_expiry")
+
+  // Relations
+  moderationActions ModerationAction_Log[]
+  flags            ContentFlag[]
+  transactions     Transaction[]
+  images           ListingImage[]
+
+  // Critical indexes for search performance
+  @@index([status])
+  @@index([category])
+  @@index([askingPrice])
+  @@index([featured])
+  @@index([boosted])
+  @@index([publishedAt])
+  @@index([ownerId])
+  @@fulltext([title, description])
+  @@map("business_listings")
+}
+
+// Payment System Tables
+model Payment {
+  id                String        @id @default(cuid())
+  userId            String        @map("user_id")
+  user              User          @relation(fields: [userId], references: [id])
+  transactionId     String?       @map("transaction_id")
+  transaction       Transaction?  @relation(fields: [transactionId], references: [id])
+  amount            Float
+  currency          String        @default("SEK")
+  paymentMethod     String        @map("payment_method") // CARD, SWISH, BANKGIRO
+  status            String        @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
+  stripePaymentId   String?       @map("stripe_payment_id")
+  metadata          Json?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model Transaction {
+  id                String          @id @default(cuid())
+  buyerId           String          @map("buyer_id")
+  buyer             User            @relation(fields: [buyerId], references: [id])
+  listingId         String?         @map("listing_id")
+  listing           BusinessListing? @relation(fields: [listingId], references: [id])
+  amount            Float
+  currency          String          @default("SEK")
+  status            String          @default("PENDING") // PENDING, IN_ESCROW, COMPLETED, CANCELLED
+  escrowStatus      String?         @map("escrow_status") // PENDING, HELD, RELEASED, DISPUTED
+  commissionAmount  Float?          @map("commission_amount")
+  commissionRate    Float           @default(0.05) @map("commission_rate") // 5% default
+  payments          Payment[]
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([buyerId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+// File Storage for Listings
+model ListingImage {
+  id          String          @id @default(cuid())
+  listingId   String          @map("listing_id")
+  listing     BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  filename    String
+  originalName String         @map("original_name")
+  mimeType    String          @map("mime_type")
+  size        Int
+  url         String
+  isPrimary   Boolean         @default(false) @map("is_primary")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([listingId])
+  @@map("listing_images")
+}
+
+// Enhanced Campaign System
+model Campaign {
+  id              String    @id @default(cuid())
+  title           String
+  description     String
+  fundingGoal     Float     @map("funding_goal")
+  currentAmount   Float     @default(0) @map("current_amount")
+  backers         Int       @default(0)
+  status          String    @default("DRAFT") // DRAFT, ACTIVE, FUNDED, CLOSED, CANCELLED
+  creatorId       String    @map("creator_id")
+  creator         User      @relation(fields: [creatorId], references: [id])
+  startDate       DateTime? @map("start_date")
+  endDate         DateTime? @map("end_date")
+  category        String
+  featured        Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([category])
+  @@index([featured])
+  @@index([creatorId])
+  @@fulltext([title, description])
+  @@map("campaigns")
+}
+
+// Message System for scalability
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String   @map("sender_id")
+  sender      User     @relation(fields: [senderId], references: [id])
+  recipientId String   @map("recipient_id")
+  content     String
+  isRead      Boolean  @default(false) @map("is_read")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([recipientId, isRead])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+// Keep existing CMS models but add indexes
+model AdminUser {
+  id          String    @id @default(cuid())
+  userId      String    @unique @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String    // SUPER_ADMIN, CONTENT_MODERATOR, CUSTOMER_SUPPORT, FINANCIAL_ADMIN
+  permissions String    @default("{}") 
+  ipWhitelist String    @default("[]") @map("ip_whitelist")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdBy   String?   @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  adminLogs         AdminLog[]
+  moderationActions ModerationAction_Log[]
+  assignedTickets   SupportTicket[] @relation("AssignedAdmin")
+
+  @@index([role])
+  @@index([isActive])
+  @@map("admin_users")
+}
+
+model SupportTicket {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id])
+  assignedAdminId String?   @map("assigned_admin_id")
+  assignedAdmin   AdminUser? @relation("AssignedAdmin", fields: [assignedAdminId], references: [id])
+  title           String
+  description     String
+  status          String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  category        String
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  resolvedAt      DateTime? @map("resolved_at")
+
+  @@index([status])
+  @@index([priority])
+  @@index([assignedAdminId])
+  @@index([userId])
+  @@map("support_tickets")
+}
+
+model ContentFlag {
+  id              String          @id @default(cuid())
+  listingId       String          @map("listing_id")
+  listing         BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reportedBy      String          @map("reported_by")
+  reason          String
+  description     String?
+  status          String          @default("PENDING") // PENDING, REVIEWED, RESOLVED, DISMISSED
+  reviewedBy      String?         @map("reviewed_by")
+  reviewedAt      DateTime?       @map("reviewed_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([listingId])
+  @@map("content_flags")
+}
+
+model ModerationAction_Log {
+  id          String          @id @default(cuid())
+  adminId     String          @map("admin_id")
+  admin       AdminUser       @relation(fields: [adminId], references: [id])
+  listingId   String?         @map("listing_id")
+  listing     BusinessListing? @relation(fields: [listingId], references: [id])
+  action      String          // APPROVE, REJECT, FLAG, UNFLAG, FEATURE, UNFEATURE
+  reason      String?
+  metadata    Json?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([listingId])
+  @@index([action])
+  @@map("moderation_actions")
+}
+
+model AdminLog {
+  id         String    @id @default(cuid())
+  adminId    String    @map("admin_id")
+  admin      AdminUser @relation(fields: [adminId], references: [id])
+  userId     String?   @map("user_id")
+  user       User?     @relation(fields: [userId], references: [id])
+  action     String
+  details    String?
+  ipAddress  String    @map("ip_address")
+  userAgent  String?   @map("user_agent")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_logs")
+}

@@ -1,0 +1,355 @@
+// Production-optimized Prisma schema for 123hansa.se (PostgreSQL for 1000+ users)
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "metrics"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core User Management with optimized indexes
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name")
+  role              String    @default("USER") // USER, ADMIN, MODERATOR
+  verificationLevel String    @default("NONE") @map("verification_level") // NONE, EMAIL, PHONE, BANKID
+  isActive          Boolean   @default(true) @map("is_active")
+  isEmailVerified   Boolean   @default(false) @map("is_email_verified")
+  country           String    @default("SE")
+  language          String    @default("sv")
+  lastLoginAt       DateTime? @map("last_login_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // CMS Relations
+  adminProfile      AdminUser?
+  listings          BusinessListing[]
+  supportTickets    SupportTicket[]
+  auditLogs         AdminLog[]
+  
+  // Performance indexes
+  @@index([email])
+  @@index([isActive, verificationLevel])
+  @@index([createdAt])
+  @@index([role, isActive])
+  @@map("users")
+}
+
+// Business Listings with full-text search and optimized indexes
+model BusinessListing {
+  id               String    @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  subcategory      String?
+  askingPrice      Float?    @map("asking_price")
+  status           String    @default("DRAFT") // DRAFT, PENDING_REVIEW, ACTIVE, SOLD, REMOVED
+  publishedAt      DateTime? @map("published_at")
+  viewCount        Int       @default(0) @map("view_count")
+  featured         Boolean   @default(false)
+  region           String?
+  city             String?
+  ownerId          String    @map("owner_id")
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  
+  // Additional fields for search and filtering
+  tags             String[]  @default([])
+  revenue          Float?
+  employees        Int?
+  industry         String?
+
+  // CMS Relations
+  moderationActions ModerationAction_Log[]
+  flags            ContentFlag[]
+  inquiries        ListingInquiry[]
+
+  // Performance indexes for 1000+ users
+  @@index([status, publishedAt])
+  @@index([category, status])
+  @@index([askingPrice, status])
+  @@index([region, city, status])
+  @@index([featured, publishedAt])
+  @@index([ownerId])
+  @@index([createdAt])
+  @@fulltext([title, description])
+  @@map("business_listings")
+}
+
+// New model for tracking listing inquiries (performance optimization)
+model ListingInquiry {
+  id          String          @id @default(cuid())
+  listingId   String          @map("listing_id")
+  listing     BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  inquirerId  String          @map("inquirer_id")
+  message     String
+  email       String?
+  phone       String?
+  status      String          @default("NEW") // NEW, RESPONDED, CLOSED
+  respondedAt DateTime?       @map("responded_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  
+  @@index([listingId, createdAt])
+  @@index([status, createdAt])
+  @@map("listing_inquiries")
+}
+
+// CMS Admin System with enhanced security
+model AdminUser {
+  id          String    @id @default(cuid())
+  userId      String    @unique @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String    // SUPER_ADMIN, CONTENT_MODERATOR, CUSTOMER_SUPPORT, FINANCIAL_ADMIN, ANALYTICS_TEAM
+  permissions String    @default("{}") // JSON string for permissions
+  ipWhitelist String    @default("[]") @map("ip_whitelist") // JSON array of allowed IPs
+  isActive    Boolean   @default(true) @map("is_active")
+  lastActive  DateTime? @map("last_active")
+  createdBy   String?   @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  adminLogs         AdminLog[]
+  moderationActions ModerationAction_Log[]
+  assignedTickets   SupportTicket[] @relation("AssignedAdmin")
+
+  @@index([role, isActive])
+  @@index([lastActive])
+  @@map("admin_users")
+}
+
+// Enhanced Support Ticket System with SLA tracking
+model SupportTicket {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        String
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT, CRITICAL
+  subject         String
+  description     String
+  status          String    @default("OPEN") // OPEN, IN_PROGRESS, WAITING_FOR_USER, RESOLVED, CLOSED, ESCALATED
+  source          String    @default("WEB") // WEB, EMAIL, PHONE, CHAT
+  assignedTo      String?   @map("assigned_to")
+  assignedAdmin   AdminUser? @relation("AssignedAdmin", fields: [assignedTo], references: [id])
+  assignedAt      DateTime? @map("assigned_at")
+  firstResponseAt DateTime? @map("first_response_at")
+  resolvedAt      DateTime? @map("resolved_at")
+  closedAt        DateTime? @map("closed_at")
+  slaDeadline     DateTime? @map("sla_deadline")
+  slaBreached     Boolean   @default(false) @map("sla_breached")
+  tags            String    @default("[]") // JSON array
+  attachments     String    @default("[]") // JSON array of file URLs
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  responses       SupportTicketResponse[]
+
+  @@index([status, priority])
+  @@index([assignedTo, status])
+  @@index([createdAt])
+  @@index([slaDeadline, slaBreached])
+  @@map("support_tickets")
+}
+
+model SupportTicketResponse {
+  id           String        @id @default(cuid())
+  ticketId     String        @map("ticket_id")
+  ticket       SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  responderId  String        @map("responder_id")
+  responderType String       @map("responder_type") // USER, ADMIN
+  content      String
+  attachments  String        @default("[]") // JSON array
+  isInternal   Boolean       @default(false) @map("is_internal")
+  responseTime Int?          @map("response_time") // seconds
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_responses")
+}
+
+// Content Moderation with enhanced tracking
+model ModerationAction_Log {
+  id          String          @id @default(cuid())
+  adminId     String          @map("admin_id")
+  admin       AdminUser       @relation(fields: [adminId], references: [id])
+  targetType  String          @map("target_type") // listing, user, comment, etc.
+  targetId    String          @map("target_id")
+  action      String          // APPROVE, REJECT, SUSPEND, DELETE, EDIT, FEATURE, UNFLAG, ESCALATE
+  reason      String?
+  notes       String?
+  metadata    String          @default("{}") // JSON string
+  ipAddress   String?         @map("ip_address")
+  userAgent   String?         @map("user_agent")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  listing     BusinessListing? @relation(fields: [targetId], references: [id])
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
+  @@map("moderation_action_logs")
+}
+
+model ContentFlag {
+  id          String          @id @default(cuid())
+  targetType  String          @map("target_type") // listing, user, comment
+  targetId    String          @map("target_id")
+  reporterId  String?         @map("reporter_id")
+  reason      String          // SPAM, INAPPROPRIATE_CONTENT, FAKE_LISTING, etc.
+  description String?
+  status      String          @default("PENDING") // PENDING, UNDER_REVIEW, RESOLVED, DISMISSED, ESCALATED
+  priority    String          @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  reviewedBy  String?         @map("reviewed_by")
+  reviewedAt  DateTime?       @map("reviewed_at")
+  resolution  String?
+  metadata    String          @default("{}") // JSON string
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  listing     BusinessListing? @relation(fields: [targetId], references: [id])
+
+  @@index([status, priority])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+  @@map("content_flags")
+}
+
+// Admin Activity Logging with enhanced performance
+model AdminLog {
+  id           String    @id @default(cuid())
+  adminId      String    @map("admin_id")
+  admin        AdminUser @relation(fields: [adminId], references: [id])
+  userId       String?   @map("user_id")
+  user         User?     @relation(fields: [userId], references: [id])
+  action       String    // CREATE, UPDATE, DELETE, ACCESS, etc.
+  resourceType String    @map("resource_type") // USER, LISTING, TICKET, etc.
+  resourceId   String?   @map("resource_id")
+  description  String
+  details      String    @default("{}") // JSON string of details
+  oldValues    String?   @map("old_values") // JSON string
+  newValues    String?   @map("new_values") // JSON string
+  ipAddress    String?   @map("ip_address")
+  userAgent    String?   @map("user_agent")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([adminId, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([action, createdAt])
+  @@map("admin_logs")
+}
+
+// Security Events with enhanced monitoring
+model SecurityEvent {
+  id          String   @id @default(cuid())
+  userId      String?  @map("user_id")
+  eventType   String   @map("event_type") // LOGIN_FAILED, UNAUTHORIZED_ACCESS, etc.
+  severity    String   // INFO, WARNING, ERROR, CRITICAL
+  description String
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  metadata    String   @default("{}") // JSON string
+  riskScore   Int      @default(0) @map("risk_score") // 0-100
+  resolved    Boolean  @default(false)
+  resolvedAt  DateTime? @map("resolved_at")
+  resolvedBy  String?  @map("resolved_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([severity, resolved])
+  @@index([eventType, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([riskScore])
+  @@map("security_events")
+}
+
+// Platform Metrics with partitioning for performance
+model PlatformMetrics {
+  id                   String   @id @default(cuid())
+  date                 DateTime @unique
+  newUsers             Int      @default(0) @map("new_users")
+  activeUsers          Int      @default(0) @map("active_users")
+  dailyActiveUsers     Int      @default(0) @map("daily_active_users")
+  newListings          Int      @default(0) @map("new_listings")
+  activeListings       Int      @default(0) @map("active_listings")
+  listingViews         Int      @default(0) @map("listing_views")
+  totalTransactions    Int      @default(0) @map("total_transactions")
+  transactionVolume    Float    @default(0) @map("transaction_volume")
+  commissionRevenue    Float    @default(0) @map("commission_revenue")
+  supportTickets       Int      @default(0) @map("support_tickets")
+  resolvedTickets      Int      @default(0) @map("resolved_tickets")
+  flaggedContent       Int      @default(0) @map("flagged_content")
+  moderationActions    Int      @default(0) @map("moderation_actions")
+  systemUptime         Float    @default(99.9) @map("system_uptime")
+  averageResponseTime  Int      @default(0) @map("average_response_time") // milliseconds
+  apiRequestCount      Int      @default(0) @map("api_request_count")
+  errorRate            Float    @default(0) @map("error_rate")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  @@index([date])
+  @@map("platform_metrics")
+}
+
+// Data Processing Log (GDPR Compliance)
+model DataProcessingLog {
+  id             String   @id @default(cuid())
+  userId         String?  @map("user_id")
+  adminId        String?  @map("admin_id")
+  operationType  String   @map("operation_type") // EXPORT, DELETE, ANONYMIZE, etc.
+  dataType       String   @map("data_type") // USER_DATA, TRANSACTION_DATA, etc.
+  requestReason  String   @map("request_reason")
+  legalBasis     String   @map("legal_basis") // GDPR Article reference
+  dataRetention  String?  @map("data_retention") // retention period
+  status         String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, FAILED
+  completedAt    DateTime? @map("completed_at")
+  requestedBy    String   @map("requested_by")
+  approvedBy     String?  @map("approved_by")
+  approvedAt     DateTime? @map("approved_at")
+  notes          String?
+  metadata       String   @default("{}") // JSON string
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@index([operationType, status])
+  @@map("data_processing_logs")
+}
+
+// Performance monitoring for real-time metrics
+model PerformanceMetrics {
+  id                String   @id @default(cuid())
+  endpoint          String
+  httpMethod        String   @map("http_method")
+  responseTime      Int      @map("response_time") // milliseconds
+  statusCode        Int      @map("status_code")
+  userAgent         String?  @map("user_agent")
+  ipAddress         String?  @map("ip_address")
+  userId            String?  @map("user_id")
+  timestamp         DateTime @default(now())
+
+  @@index([endpoint, timestamp])
+  @@index([responseTime])
+  @@index([statusCode, timestamp])
+  @@map("performance_metrics")
+}
+
+// Cache entries for improved performance
+model CacheEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON serialized data
+  ttl       DateTime // Time to live
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([ttl])
+  @@map("cache_entries")
+}

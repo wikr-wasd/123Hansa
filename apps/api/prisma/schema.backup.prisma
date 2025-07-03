@@ -1,0 +1,1558 @@
+// Prisma schema for 123hansa Marketplace
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+  LEGAL_ADVISOR
+  BUSINESS_BROKER
+  ACCOUNTANT
+  FINANCIAL_ADVISOR
+  CONSULTANT
+  VALUATION_EXPERT
+}
+
+enum VerificationLevel {
+  NONE
+  EMAIL
+  PHONE
+  BANKID
+}
+
+enum Country {
+  SE // Sweden
+  NO // Norway
+  DK // Denmark
+}
+
+enum Language {
+  sv // Swedish
+  no // Norwegian
+  da // Danish
+  en // English
+}
+
+enum BusinessType {
+  AB        // Aktiebolag (Sweden)
+  AS        // Aksjeselskap (Norway)
+  A_S       // Aktieselskab (Denmark)
+  SOLE_PROP // Sole Proprietorship
+  PARTNER   // Partnership
+  OTHER
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  SOLD
+  EXPIRED
+  REMOVED
+}
+
+enum ListingCategory {
+  BUSINESS
+  ECOMMERCE
+  SAAS
+  WEBSITE
+  DOMAIN
+  INVOICE
+  REAL_ESTATE
+  EQUIPMENT
+  OTHER
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  DELETED
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  IMAGE
+  SYSTEM
+  INQUIRY
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  BLOCKED
+  CLOSED
+}
+
+enum NotificationType {
+  MESSAGE
+  LISTING_INQUIRY
+  LISTING_UPDATE
+  TRANSACTION
+  SYSTEM
+  MARKETING
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+  SMS
+}
+
+enum TransactionStatus {
+  DRAFT
+  PENDING
+  PENDING_PAYMENT
+  PAYMENT_FAILED
+  ESCROW
+  ESCROW_FUNDED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE_CARD
+  STRIPE_SEPA
+  STRIPE_BANK_TRANSFER
+  SWISH
+  MOBILEPAY
+  VIPPS
+  BANK_TRANSFER
+  PAYPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  REQUIRES_ACTION
+  REQUIRES_CONFIRMATION
+}
+
+enum EscrowStatus {
+  CREATED
+  FUNDED
+  RELEASED
+  PARTIAL_RELEASE
+  DISPUTED
+  REFUNDED
+  EXPIRED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+enum Currency {
+  SEK
+  NOK
+  DKK
+  EUR
+  USD
+  GBP
+}
+
+// Professional Services Enums
+enum ServiceCategory {
+  LEGAL_SERVICES
+  BUSINESS_BROKERAGE
+  FINANCIAL_ADVISORY
+  ACCOUNTING
+  BUSINESS_CONSULTING
+  DUE_DILIGENCE
+  VALUATION_SERVICES
+  TAX_ADVISORY
+  MERGER_ACQUISITION
+  CONTRACT_REVIEW
+}
+
+enum ServiceType {
+  CONSULTATION
+  DOCUMENT_REVIEW
+  DUE_DILIGENCE
+  VALUATION
+  LEGAL_REPRESENTATION
+  TRANSACTION_SUPPORT
+  ONGOING_ADVISORY
+  CUSTOM
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum ProfessionalVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum ConsultationFormat {
+  VIDEO_CALL
+  PHONE_CALL
+  IN_PERSON
+  EMAIL_CONSULTATION
+  DOCUMENT_REVIEW
+}
+
+// User Management
+model User {
+  id                 String            @id @default(uuid())
+  email              String            @unique
+  passwordHash       String            @map("password_hash")
+  firstName          String            @map("first_name")
+  lastName           String            @map("last_name")
+  phone              String?
+  country            Country           @default(SE)
+  language           Language          @default(sv)
+  role               UserRole          @default(USER)
+  verificationLevel  VerificationLevel @default(NONE) @map("verification_level")
+  isEmailVerified    Boolean           @default(false) @map("is_email_verified")
+  isPhoneVerified    Boolean           @default(false) @map("is_phone_verified")
+  isBankIdVerified   Boolean           @default(false) @map("is_bankid_verified")
+  avatar             String?
+  bio                String?
+  website            String?
+  linkedinProfile    String?           @map("linkedin_profile")
+  companyName        String?           @map("company_name")
+  companyRegistration String?          @map("company_registration")
+  vatNumber          String?           @map("vat_number")
+  isActive           Boolean           @default(true) @map("is_active")
+  isOnline           Boolean           @default(false) @map("is_online")
+  lastSeenAt         DateTime?         @map("last_seen_at")
+  lastLoginAt        DateTime?         @map("last_login_at")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  listings                BusinessListing[]
+  sentMessages            Message[]         @relation("SentMessages")
+  receivedMessages        Message[]         @relation("ReceivedMessages")
+  conversationsInitiated  Conversation[]    @relation("ConversationInitiator")
+  conversationsReceived   Conversation[]    @relation("ConversationReceiver")
+  transactions            Transaction[]
+  savedListings           SavedListing[]
+  userSessions            UserSession[]
+  emailVerifications      EmailVerification[]
+  notifications           Notification[]
+  notificationSettings    NotificationSettings[]
+  typingIndicators        TypingIndicator[]
+  payments                Payment[]
+  userPaymentMethods      UserPaymentMethod[]
+  escrowAccounts          EscrowAccount[]       @relation("EscrowUser")
+  buyerTransactions       Transaction[]         @relation("BuyerTransactions")
+  sellerTransactions      Transaction[]         @relation("SellerTransactions")
+  disputeCases            DisputeCase[]
+  
+  // Professional Services Relations
+  professionalProfile     ProfessionalProfile?
+  serviceListings         ServiceListing[]
+  clientBookings          ServiceBooking[]      @relation("ClientBookings")
+  professionalBookings    ServiceBooking[]      @relation("ProfessionalBookings")
+  reviews                 ProfessionalReview[]  @relation("ReviewAuthor")
+  receivedReviews         ProfessionalReview[]  @relation("ReviewReceiver")
+  consultationRequests    ConsultationRequest[] @relation("RequestClient")
+  consultationOffers      ConsultationRequest[] @relation("RequestProfessional")
+  
+  // CMS Relations
+  adminProfile            AdminUser?
+  supportTickets          SupportTicket[]
+  contentFlags            ContentFlag[]
+  securityEvents          SecurityEvent[]
+  dataProcessingLogs      DataProcessingLog[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  refreshToken String    @unique @map("refresh_token")
+  userAgent    String?   @map("user_agent")
+  ipAddress    String?   @map("ip_address")
+  isActive     Boolean   @default(true) @map("is_active")
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model EmailVerification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
+}
+
+// Business Listings
+model BusinessListing {
+  id                String          @id @default(uuid())
+  userId            String          @map("user_id")
+  title             String
+  description       String?
+  shortDescription  String?         @map("short_description")
+  category          ListingCategory
+  subcategory       String?
+  businessType      BusinessType?   @map("business_type")
+  askingPrice       Decimal?        @map("asking_price") @db.Decimal(15, 2)
+  currency          String          @default("SEK")
+  isNegotiable      Boolean         @default(true) @map("is_negotiable")
+  monthlyRevenue    Decimal?        @map("monthly_revenue") @db.Decimal(15, 2)
+  monthlyProfit     Decimal?        @map("monthly_profit") @db.Decimal(15, 2)
+  employees         Int?
+  establishedYear   Int?            @map("established_year")
+  website           String?
+  location          String?
+  isRemote          Boolean         @default(false) @map("is_remote")
+  reasonForSale     String?         @map("reason_for_sale")
+  includedAssets    String[]        @map("included_assets")
+  status            ListingStatus   @default(DRAFT)
+  isActive          Boolean         @default(true) @map("is_active")
+  isFeatured        Boolean         @default(false) @map("is_featured")
+  viewCount         Int             @default(0) @map("view_count")
+  inquiryCount      Int             @default(0) @map("inquiry_count")
+  publishedAt       DateTime?       @map("published_at")
+  expiresAt         DateTime?       @map("expires_at")
+  soldAt            DateTime?       @map("sold_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  owner         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images        ListingImage[]
+  documents     ListingDocument[]
+  savedBy       SavedListing[]
+  conversations Conversation[]
+  transactions  Transaction[]
+  analytics     ListingAnalytics[]
+
+  @@map("business_listings")
+}
+
+model ListingImage {
+  id        String   @id @default(uuid())
+  listingId String   @map("listing_id")
+  filename  String
+  originalName String @map("original_name")
+  mimeType  String   @map("mime_type")
+  size      Int
+  url       String
+  isMain    Boolean  @default(false) @map("is_main")
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  listing BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_images")
+}
+
+model ListingDocument {
+  id        String   @id @default(uuid())
+  listingId String   @map("listing_id")
+  filename  String
+  originalName String @map("original_name")
+  mimeType  String   @map("mime_type")
+  size      Int
+  url       String
+  documentType String @map("document_type") // financial, legal, operational, etc.
+  isPublic  Boolean  @default(false) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  listing BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_documents")
+}
+
+model SavedListing {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  listingId String   @map("listing_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@map("saved_listings")
+}
+
+// Advanced Communication System
+model Conversation {
+  id           String             @id @default(uuid())
+  initiatorId  String             @map("initiator_id")
+  receiverId   String             @map("receiver_id")
+  listingId    String?            @map("listing_id")
+  subject      String?
+  status       ConversationStatus @default(ACTIVE)
+  isEncrypted  Boolean            @default(false) @map("is_encrypted")
+  lastMessageAt DateTime?         @map("last_message_at")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  initiator User             @relation("ConversationInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  receiver  User             @relation("ConversationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  listing   BusinessListing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  messages  Message[]
+
+  @@unique([initiatorId, receiverId, listingId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String      @map("conversation_id")
+  senderId       String      @map("sender_id")
+  receiverId     String      @map("receiver_id")
+  type           MessageType @default(TEXT)
+  content        String
+  encryptedContent String?   @map("encrypted_content")
+  metadata       Json?       // For file info, etc.
+  status         MessageStatus @default(SENT)
+  readAt         DateTime?   @map("read_at")
+  deletedAt      DateTime?   @map("deleted_at")
+  editedAt       DateTime?   @map("edited_at")
+  isSystemMessage Boolean    @default(false) @map("is_system_message")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  attachments  MessageAttachment[]
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  filename  String
+  originalName String @map("original_name")
+  mimeType  String   @map("mime_type")
+  size      Int
+  url       String
+  isEncrypted Boolean @default(false) @map("is_encrypted")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("message_attachments")
+}
+
+model TypingIndicator {
+  id             String   @id @default(uuid())
+  conversationId String   @map("conversation_id")
+  userId         String   @map("user_id")
+  isTyping       Boolean  @default(true) @map("is_typing")
+  expiresAt      DateTime @map("expires_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@map("typing_indicators")
+}
+
+// Enhanced Transactions & Payment System
+model Transaction {
+  id              String            @id @default(uuid())
+  buyerId         String            @map("buyer_id")
+  sellerId        String            @map("seller_id")
+  listingId       String            @map("listing_id")
+  
+  // Financial Details
+  amount          Decimal           @db.Decimal(15, 2)
+  currency        Currency          @default(SEK)
+  commissionRate  Decimal           @default(5.0) @map("commission_rate") @db.Decimal(5, 2) // Percentage
+  commissionAmount Decimal          @map("commission_amount") @db.Decimal(15, 2)
+  netAmount       Decimal           @map("net_amount") @db.Decimal(15, 2) // Amount after commission
+  
+  // Payment & Status
+  paymentMethod   PaymentMethod?    @map("payment_method")
+  status          TransactionStatus @default(DRAFT)
+  
+  // Escrow Information  
+  escrowAccountId String?           @map("escrow_account_id")
+  escrowFundedAt  DateTime?         @map("escrow_funded_at")
+  escrowReleaseAt DateTime?         @map("escrow_release_at")
+  autoReleaseAt   DateTime?         @map("auto_release_at")
+  
+  // Important Dates
+  agreedAt        DateTime?         @map("agreed_at")
+  paidAt          DateTime?         @map("paid_at")
+  completedAt     DateTime?         @map("completed_at")
+  cancelledAt     DateTime?         @map("cancelled_at")
+  refundedAt      DateTime?         @map("refunded_at")
+  
+  // Additional Info
+  description     String?
+  buyerNotes      String?           @map("buyer_notes")
+  sellerNotes     String?           @map("seller_notes")
+  internalNotes   String?           @map("internal_notes")
+  
+  // Terms & Conditions
+  terms           Json?             // Specific terms for this transaction
+  milestones      Json?             // Payment milestones if applicable
+  
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  buyer         User            @relation("BuyerTransactions", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller        User            @relation("SellerTransactions", fields: [sellerId], references: [id], onDelete: Cascade)
+  listing       BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  escrowAccount EscrowAccount?  @relation(fields: [escrowAccountId], references: [id])
+  payments      Payment[]
+  disputeCase   DisputeCase?
+
+  @@map("transactions")
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  transactionId         String        @map("transaction_id")
+  userId                String        @map("user_id")
+  
+  // Payment Details
+  amount                Decimal       @db.Decimal(15, 2)
+  currency              Currency      @default(SEK)
+  paymentMethod         PaymentMethod @map("payment_method")
+  status                PaymentStatus @default(PENDING)
+  
+  // Provider Details
+  stripePaymentIntentId String?       @map("stripe_payment_intent_id")
+  swishPaymentId        String?       @map("swish_payment_id")
+  mobilepayPaymentId    String?       @map("mobilepay_payment_id")
+  vippsPaymentId        String?       @map("vipps_payment_id")
+  
+  // Payment Flow
+  clientSecret          String?       @map("client_secret")
+  confirmationUrl       String?       @map("confirmation_url")
+  
+  // Amounts & Fees
+  originalAmount        Decimal       @map("original_amount") @db.Decimal(15, 2)
+  feeAmount             Decimal       @default(0) @map("fee_amount") @db.Decimal(15, 2)
+  netAmount             Decimal       @map("net_amount") @db.Decimal(15, 2)
+  
+  // Metadata
+  metadata              Json?
+  providerResponse      Json?         @map("provider_response")
+  failureReason         String?       @map("failure_reason")
+  
+  // Important Dates
+  authorizedAt          DateTime?     @map("authorized_at")
+  capturedAt            DateTime?     @map("captured_at")
+  failedAt              DateTime?     @map("failed_at")
+  refundedAt            DateTime?     @map("refunded_at")
+  
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refunds     PaymentRefund[]
+
+  @@index([transactionId])
+  @@index([userId])
+  @@index([status])
+  @@map("payments")
+}
+
+model PaymentRefund {
+  id          String    @id @default(uuid())
+  paymentId   String    @map("payment_id")
+  amount      Decimal   @db.Decimal(15, 2)
+  currency    Currency  @default(SEK)
+  reason      String
+  status      String    @default("pending")
+  
+  // Provider Details
+  providerRefundId String? @map("provider_refund_id")
+  providerResponse Json?   @map("provider_response")
+  
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@map("payment_refunds")
+}
+
+model EscrowAccount {
+  id            String        @id @default(uuid())
+  transactionId String        @unique @map("transaction_id")
+  userId        String        @map("user_id")
+  
+  // Account Details
+  escrowAmount  Decimal       @map("escrow_amount") @db.Decimal(15, 2)
+  currency      Currency      @default(SEK)
+  status        EscrowStatus  @default(CREATED)
+  
+  // Release Conditions
+  autoReleaseAt DateTime?     @map("auto_release_at")
+  releaseConditions Json?     @map("release_conditions")
+  
+  // Financial Tracking
+  fundedAmount  Decimal       @default(0) @map("funded_amount") @db.Decimal(15, 2)
+  releasedAmount Decimal      @default(0) @map("released_amount") @db.Decimal(15, 2)
+  refundedAmount Decimal      @default(0) @map("refunded_amount") @db.Decimal(15, 2)
+  
+  // External References
+  stripeAccountId String?     @map("stripe_account_id")
+  
+  fundedAt      DateTime?     @map("funded_at")
+  releasedAt    DateTime?     @map("released_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation("EscrowUser", fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("escrow_accounts")
+}
+
+model UserPaymentMethod {
+  id                String        @id @default(uuid())
+  userId            String        @map("user_id")
+  paymentMethod     PaymentMethod @map("payment_method")
+  
+  // Method Details
+  isDefault         Boolean       @default(false) @map("is_default")
+  isActive          Boolean       @default(true) @map("is_active")
+  
+  // Provider Specific Data
+  stripeCustomerId  String?       @map("stripe_customer_id")
+  stripePaymentMethodId String?   @map("stripe_payment_method_id")
+  swishPhoneNumber  String?       @map("swish_phone_number")
+  mobilepayPhoneNumber String?    @map("mobilepay_phone_number")
+  vippsPhoneNumber  String?       @map("vipps_phone_number")
+  
+  // Card Details (encrypted/tokenized)
+  cardLast4         String?       @map("card_last4")
+  cardBrand         String?       @map("card_brand")
+  cardExpiryMonth   Int?          @map("card_expiry_month")
+  cardExpiryYear    Int?          @map("card_expiry_year")
+  
+  // Bank Details
+  bankName          String?       @map("bank_name")
+  accountHolderName String?       @map("account_holder_name")
+  
+  metadata          Json?
+  
+  lastUsedAt        DateTime?     @map("last_used_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_payment_methods")
+}
+
+model DisputeCase {
+  id            String        @id @default(uuid())
+  transactionId String        @unique @map("transaction_id")
+  reporterId    String        @map("reporter_id")
+  
+  // Dispute Details
+  reason        String
+  description   String
+  amount        Decimal       @db.Decimal(15, 2)
+  currency      Currency      @default(SEK)
+  status        DisputeStatus @default(OPEN)
+  
+  // Evidence & Documentation
+  evidence      Json?         // Files, messages, documents
+  resolution    String?
+  adminNotes    String?       @map("admin_notes")
+  
+  // Resolution
+  resolvedBy    String?       @map("resolved_by")
+  resolvedAt    DateTime?     @map("resolved_at")
+  
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  reporter    User        @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("dispute_cases")
+}
+
+// Analytics
+model ListingAnalytics {
+  id         String   @id @default(uuid())
+  listingId  String   @map("listing_id")
+  date       DateTime @db.Date
+  views      Int      @default(0)
+  inquiries  Int      @default(0)
+  saves      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  listing BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, date])
+  @@map("listing_analytics")
+}
+
+// Notification System
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  content   String
+  data      Json?            // Additional notification data
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  channel   NotificationChannel
+  sentAt    DateTime?        @map("sent_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationSettings {
+  id                    String              @id @default(uuid())
+  userId                String              @map("user_id")
+  emailMessages         Boolean             @default(true) @map("email_messages")
+  emailInquiries        Boolean             @default(true) @map("email_inquiries")
+  emailListingUpdates   Boolean             @default(true) @map("email_listing_updates")
+  emailTransactions     Boolean             @default(true) @map("email_transactions")
+  emailMarketing        Boolean             @default(false) @map("email_marketing")
+  inAppMessages         Boolean             @default(true) @map("in_app_messages")
+  inAppInquiries        Boolean             @default(true) @map("in_app_inquiries")
+  inAppListingUpdates   Boolean             @default(true) @map("in_app_listing_updates")
+  inAppTransactions     Boolean             @default(true) @map("in_app_transactions")
+  pushMessages          Boolean             @default(true) @map("push_messages")
+  pushInquiries         Boolean             @default(true) @map("push_inquiries")
+  quietHoursStart       String?             @map("quiet_hours_start") // HH:MM format
+  quietHoursEnd         String?             @map("quiet_hours_end")   // HH:MM format
+  timezone              String              @default("Europe/Stockholm")
+  language              Language            @default(sv)
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("notification_settings")
+}
+
+model EmailTemplate {
+  id          String   @id @default(uuid())
+  type        NotificationType
+  language    Language @default(sv)
+  subject     String
+  htmlContent String   @map("html_content")
+  textContent String   @map("text_content")
+  variables   String[] // Available template variables
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([type, language])
+  @@map("email_templates")
+}
+
+// System Configuration
+model SystemSettings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_date")
+
+  @@map("system_settings")
+}
+
+// Professional Services Models
+model ProfessionalProfile {
+  id                    String                         @id @default(uuid())
+  userId                String                         @unique @map("user_id")
+  
+  // Professional Details
+  businessName          String?                        @map("business_name")
+  registrationNumber    String?                        @map("registration_number")
+  vatNumber             String?                        @map("vat_number")
+  professionalTitle     String                         @map("professional_title")
+  
+  // Specializations
+  serviceCategories     ServiceCategory[]              @map("service_categories")
+  specializations       String[]                       // Specific areas of expertise
+  languages             String[]                       // Supported languages
+  
+  // Credentials & Experience
+  credentials           Json                           // Certifications, licenses, education
+  experience            Json                           // Years of experience, notable cases
+  caseStudies           Json?                          @map("case_studies")
+  
+  // Pricing & Availability
+  hourlyRate            Decimal?                       @map("hourly_rate") @db.Decimal(10, 2)
+  minimumEngagement     Int?                           @map("minimum_engagement") // Hours
+  consultationFee       Decimal?                       @map("consultation_fee") @db.Decimal(10, 2)
+  currency              Currency                       @default(SEK)
+  
+  // Availability
+  timezone              String                         @default("Europe/Stockholm")
+  workingHours          Json?                          @map("working_hours") // Weekly schedule
+  unavailablePeriods    Json?                          @map("unavailable_periods")
+  
+  // Verification & Trust
+  verificationStatus    ProfessionalVerificationStatus @default(PENDING) @map("verification_status")
+  verificationDocuments Json?                          @map("verification_documents")
+  verifiedAt            DateTime?                      @map("verified_at")
+  verifiedBy            String?                        @map("verified_by")
+  
+  // Profile Information
+  profilePicture        String?                        @map("profile_picture")
+  coverImage            String?                        @map("cover_image")
+  bio                   String?
+  achievements          String[]
+  clientTestimonials    Json?                          @map("client_testimonials")
+  
+  // Statistics
+  totalBookings         Int                            @default(0) @map("total_bookings")
+  completedBookings     Int                            @default(0) @map("completed_bookings")
+  averageRating         Decimal?                       @map("average_rating") @db.Decimal(3, 2)
+  totalReviews          Int                            @default(0) @map("total_reviews")
+  
+  // Settings
+  isActive              Boolean                        @default(true) @map("is_active")
+  acceptsNewClients     Boolean                        @default(true) @map("accepts_new_clients")
+  requiresNDA           Boolean                        @default(false) @map("requires_nda")
+  
+  createdAt             DateTime                       @default(now()) @map("created_at")
+  updatedAt             DateTime                       @updatedAt @map("updated_at")
+
+  // Relations
+  user                  User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceListings       ServiceListing[]
+  bookings              ServiceBooking[]               @relation("ProfessionalBookings")
+  reviews               ProfessionalReview[]           @relation("ProfessionalReviews")
+  consultationRequests  ConsultationRequest[]          @relation("ProfessionalRequests")
+
+  @@index([verificationStatus])
+  @@index([serviceCategories])
+  @@index([isActive])
+  @@map("professional_profiles")
+}
+
+model ServiceListing {
+  id                  String          @id @default(uuid())
+  professionalId      String          @map("professional_id")
+  userId              String          @map("user_id")
+  
+  // Service Details
+  title               String
+  description         String
+  shortDescription    String?         @map("short_description")
+  category            ServiceCategory
+  serviceType         ServiceType     @map("service_type")
+  
+  // Pricing
+  basePrice           Decimal         @map("base_price") @db.Decimal(10, 2)
+  currency            Currency        @default(SEK)
+  pricingModel        String          @default("HOURLY") @map("pricing_model") // HOURLY, FIXED, CUSTOM
+  minimumEngagement   Int?            @map("minimum_engagement") // Hours or days
+  
+  // Service Specifications
+  estimatedDuration   String?         @map("estimated_duration") // "2-4 hours", "1-2 weeks"
+  deliverables        String[]        // What client receives
+  prerequisites       String[]        // What client needs to provide
+  consultationFormats ConsultationFormat[] @map("consultation_formats")
+  
+  // Availability
+  isActive            Boolean         @default(true) @map("is_active")
+  maxConcurrentJobs   Int?            @map("max_concurrent_jobs")
+  leadTime            Int?            @map("lead_time") // Days notice required
+  
+  // SEO & Discovery
+  tags                String[]
+  searchKeywords      String[]        @map("search_keywords")
+  
+  // Media
+  images              String[]
+  documents           String[]        // Sample contracts, portfolios
+  
+  // Statistics
+  viewCount           Int             @default(0) @map("view_count")
+  inquiryCount        Int             @default(0) @map("inquiry_count")
+  bookingCount        Int             @default(0) @map("booking_count")
+  
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  professional        ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings            ServiceBooking[]
+  consultationRequests ConsultationRequest[]
+
+  @@index([category])
+  @@index([serviceType])
+  @@index([isActive])
+  @@map("service_listings")
+}
+
+model ServiceBooking {
+  id                    String            @id @default(uuid())
+  clientId              String            @map("client_id")
+  professionalId        String            @map("professional_id")
+  serviceListingId      String?           @map("service_listing_id")
+  
+  // Booking Details
+  status                BookingStatus     @default(PENDING)
+  bookingType           ServiceType       @map("booking_type")
+  consultationFormat    ConsultationFormat @map("consultation_format")
+  
+  // Scheduling
+  requestedStartDate    DateTime?         @map("requested_start_date")
+  confirmedStartDate    DateTime?         @map("confirmed_start_date")
+  estimatedEndDate      DateTime?         @map("estimated_end_date")
+  actualEndDate         DateTime?         @map("actual_end_date")
+  
+  // Meeting Details
+  meetingLink           String?           @map("meeting_link")
+  meetingPassword       String?           @map("meeting_password")
+  meetingLocation       String?           @map("meeting_location")
+  
+  // Scope & Requirements
+  title                 String
+  description           String
+  requirements          String[]
+  deliverables          String[]
+  clientNotes           String?           @map("client_notes")
+  professionalNotes     String?           @map("professional_notes")
+  
+  // Financial
+  agreedPrice           Decimal           @map("agreed_price") @db.Decimal(10, 2)
+  currency              Currency          @default(SEK)
+  hourlyRate            Decimal?          @map("hourly_rate") @db.Decimal(10, 2)
+  estimatedHours        Decimal?          @map("estimated_hours") @db.Decimal(5, 2)
+  actualHours           Decimal?          @map("actual_hours") @db.Decimal(5, 2)
+  
+  // Payment
+  paymentStatus         PaymentStatus     @default(PENDING) @map("payment_status")
+  depositRequired       Boolean           @default(false) @map("deposit_required")
+  depositAmount         Decimal?          @map("deposit_amount") @db.Decimal(10, 2)
+  depositPaidAt         DateTime?         @map("deposit_paid_at")
+  
+  // Commission
+  platformCommission    Decimal           @default(10.0) @map("platform_commission") @db.Decimal(5, 2) // Percentage
+  commissionAmount      Decimal           @map("commission_amount") @db.Decimal(10, 2)
+  
+  // Documents & Communication
+  contractSigned        Boolean           @default(false) @map("contract_signed")
+  ndaSigned            Boolean           @default(false) @map("nda_signed")
+  documents            String[]          // Uploaded files
+  
+  // Important Dates
+  bookedAt             DateTime?         @map("booked_at")
+  confirmedAt          DateTime?         @map("confirmed_at")
+  startedAt            DateTime?         @map("started_at")
+  completedAt          DateTime?         @map("completed_at")
+  cancelledAt          DateTime?         @map("cancelled_at")
+  
+  // Cancellation
+  cancellationReason   String?           @map("cancellation_reason")
+  cancelledBy          String?           @map("cancelled_by")
+  refundAmount         Decimal?          @map("refund_amount") @db.Decimal(10, 2)
+  
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  client               User              @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  professional         User              @relation("ProfessionalBookings", fields: [professionalId], references: [id], onDelete: Cascade)
+  serviceListing       ServiceListing?   @relation(fields: [serviceListingId], references: [id], onDelete: SetNull)
+  review               ProfessionalReview?
+  payments             ServicePayment[]
+
+  @@index([clientId])
+  @@index([professionalId])
+  @@index([status])
+  @@index([confirmedStartDate])
+  @@map("service_bookings")
+}
+
+model ConsultationRequest {
+  id                  String              @id @default(uuid())
+  clientId            String              @map("client_id")
+  professionalId      String?             @map("professional_id")
+  serviceListingId    String?             @map("service_listing_id")
+  
+  // Request Details
+  title               String
+  description         String
+  urgency             String              @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  budget              Decimal?            @db.Decimal(10, 2)
+  currency            Currency            @default(SEK)
+  
+  // Preferred Consultation
+  preferredFormat     ConsultationFormat  @map("preferred_format")
+  preferredDates      Json                @map("preferred_dates") // Array of date/time preferences
+  estimatedDuration   String?             @map("estimated_duration")
+  
+  // Requirements
+  requiredExpertise   ServiceCategory[]   @map("required_expertise")
+  specificRequirements String[]           @map("specific_requirements")
+  confidentiality     Boolean             @default(true)
+  
+  // Location (for in-person meetings)
+  preferredLocation   String?             @map("preferred_location")
+  canTravel           Boolean             @default(false) @map("can_travel")
+  
+  // Status
+  status              String              @default("OPEN") // OPEN, ASSIGNED, QUOTED, ACCEPTED, DECLINED
+  responseDeadline    DateTime?           @map("response_deadline")
+  
+  // Professional Response
+  professionalResponse String?            @map("professional_response")
+  quotedPrice         Decimal?            @map("quoted_price") @db.Decimal(10, 2)
+  quotedDuration      String?             @map("quoted_duration")
+  proposedDates       Json?               @map("proposed_dates")
+  
+  respondedAt         DateTime?           @map("responded_at")
+  acceptedAt          DateTime?           @map("accepted_at")
+  declinedAt          DateTime?           @map("declined_at")
+  
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  // Relations
+  client              User                @relation("RequestClient", fields: [clientId], references: [id], onDelete: Cascade)
+  professional        User?               @relation("RequestProfessional", fields: [professionalId], references: [id], onDelete: SetNull)
+  serviceListing      ServiceListing?     @relation(fields: [serviceListingId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([professionalId])
+  @@index([status])
+  @@index([requiredExpertise])
+  @@map("consultation_requests")
+}
+
+model ProfessionalReview {
+  id                  String            @id @default(uuid())
+  bookingId           String            @unique @map("booking_id")
+  clientId            String            @map("client_id")
+  professionalId      String            @map("professional_id")
+  
+  // Review Content
+  rating              Int               // 1-5 stars
+  title               String?
+  comment             String?
+  
+  // Rating Categories
+  communicationRating Int?              @map("communication_rating")
+  expertiseRating     Int?              @map("expertise_rating")
+  timelinessRating    Int?              @map("timeliness_rating")
+  valueRating         Int?              @map("value_rating")
+  
+  // Review Details
+  wouldRecommend      Boolean           @default(true) @map("would_recommend")
+  isAnonymous         Boolean           @default(false) @map("is_anonymous")
+  isVerified          Boolean           @default(false) @map("is_verified")
+  
+  // Professional Response
+  professionalResponse String?          @map("professional_response")
+  respondedAt         DateTime?         @map("responded_at")
+  
+  // Moderation
+  isApproved          Boolean           @default(true) @map("is_approved")
+  moderatedAt         DateTime?         @map("moderated_at")
+  moderatedBy         String?           @map("moderated_by")
+  
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  booking             ServiceBooking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client              User              @relation("ReviewAuthor", fields: [clientId], references: [id], onDelete: Cascade)
+  professional        User              @relation("ReviewReceiver", fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalProfile ProfessionalProfile @relation("ProfessionalReviews", fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId])
+  @@index([rating])
+  @@index([isApproved])
+  @@map("professional_reviews")
+}
+
+model ServicePayment {
+  id                  String            @id @default(uuid())
+  bookingId           String            @map("booking_id")
+  clientId            String            @map("client_id")
+  professionalId      String            @map("professional_id")
+  
+  // Payment Details
+  amount              Decimal           @db.Decimal(10, 2)
+  currency            Currency          @default(SEK)
+  paymentType         String            // DEPOSIT, FULL, MILESTONE, FINAL
+  paymentMethod       PaymentMethod     @map("payment_method")
+  status              PaymentStatus     @default(PENDING)
+  
+  // Platform Commission
+  commissionRate      Decimal           @map("commission_rate") @db.Decimal(5, 2)
+  commissionAmount    Decimal           @map("commission_amount") @db.Decimal(10, 2)
+  professionalAmount  Decimal           @map("professional_amount") @db.Decimal(10, 2)
+  
+  // External Payment References
+  stripePaymentIntentId String?         @map("stripe_payment_intent_id")
+  swishPaymentId      String?           @map("swish_payment_id")
+  
+  // Payment Flow
+  dueDate             DateTime?         @map("due_date")
+  paidAt              DateTime?         @map("paid_at")
+  releasedAt          DateTime?         @map("released_at")
+  refundedAt          DateTime?         @map("refunded_at")
+  
+  // Descriptions
+  description         String?
+  invoiceNumber       String?           @map("invoice_number")
+  
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  booking             ServiceBooking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+  @@map("service_payments")
+}
+
+// ===== CMS ADMINISTRATION SYSTEM =====
+
+// Admin Users and Roles
+enum AdminRole {
+  SUPER_ADMIN      // Platform owner - full access
+  CONTENT_MODERATOR // Listing & campaign moderation
+  CUSTOMER_SUPPORT // Support tickets & user help
+  FINANCIAL_ADMIN  // Payment & escrow management
+  ANALYTICS_TEAM   // Platform metrics & reporting
+}
+
+enum ModerationAction {
+  APPROVE
+  REJECT
+  SUSPEND
+  DELETE
+  EDIT
+  FEATURE
+  UNFLAG
+  ESCALATE
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_USER
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+model AdminUser {
+  id                String      @id @default(uuid())
+  userId            String      @map("user_id")
+  role              AdminRole
+  permissions       Json        // Detailed permissions object
+  isActive          Boolean     @default(true) @map("is_active")
+  
+  // Access Control
+  ipWhitelist       String[]    @map("ip_whitelist")
+  requiresTwoFactor Boolean     @default(true) @map("requires_two_factor")
+  lastLoginAt       DateTime?   @map("last_login_at")
+  lastLoginIp       String?     @map("last_login_ip")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil       DateTime?   @map("locked_until")
+  
+  // Audit & Management
+  createdBy         String?     @map("created_by")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  deactivatedAt     DateTime?   @map("deactivated_at")
+
+  // Relations
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moderationActions ModerationAction_Log[]
+  supportTickets    SupportTicket[] @relation("AssignedSupport")
+  adminLogs         AdminLog[]
+  settingsUpdated   PlatformSettings[] @relation("SettingsUpdater")
+
+  @@unique([userId])
+  @@index([role])
+  @@index([isActive])
+  @@map("admin_users")
+}
+
+model ModerationAction_Log {
+  id           String           @id @default(uuid())
+  adminId      String           @map("admin_id")
+  targetType   String           // 'listing', 'campaign', 'user', 'comment', 'review'
+  targetId     String           @map("target_id")
+  action       ModerationAction
+  reason       String?
+  notes        String?
+  metadata     Json?            // Additional context data
+  
+  // Audit Trail
+  ipAddress    String?          @map("ip_address")
+  userAgent    String?          @map("user_agent")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  admin        AdminUser        @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("moderation_actions")
+}
+
+model SupportTicket {
+  id              String                 @id @default(uuid())
+  userId          String                 @map("user_id")
+  category        String                 // 'account', 'payment', 'listing', 'technical', 'billing'
+  priority        SupportTicketPriority  @default(MEDIUM)
+  status          SupportTicketStatus    @default(OPEN)
+  
+  // Ticket Content
+  subject         String
+  description     String
+  attachments     String[]               // File URLs
+  
+  // Assignment & Resolution
+  assignedTo      String?                @map("assigned_to")
+  assignedAt      DateTime?              @map("assigned_at")
+  firstResponseAt DateTime?              @map("first_response_at")
+  resolvedAt      DateTime?              @map("resolved_at")
+  closedAt        DateTime?              @map("closed_at")
+  
+  // SLA Tracking
+  slaDeadline     DateTime?              @map("sla_deadline")
+  slaBreached     Boolean                @default(false) @map("sla_breached")
+  
+  // User Satisfaction
+  satisfactionRating Int?                @map("satisfaction_rating") // 1-5
+  satisfactionComment String?            @map("satisfaction_comment")
+  
+  // Metadata
+  source          String                 @default("WEB") // WEB, EMAIL, PHONE, CHAT
+  tags            String[]
+  internalNotes   String?                @map("internal_notes")
+  
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  // Relations
+  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAdmin   AdminUser?             @relation("AssignedSupport", fields: [assignedTo], references: [id], onDelete: SetNull)
+  responses       SupportTicketResponse[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([assignedTo])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketResponse {
+  id                String        @id @default(uuid())
+  ticketId          String        @map("ticket_id")
+  responderId       String?       @map("responder_id") // Admin or User
+  responderType     String        // 'ADMIN' or 'USER'
+  
+  // Response Content
+  content           String
+  attachments       String[]
+  isInternal        Boolean       @default(false) @map("is_internal") // Only visible to admins
+  
+  // Metadata
+  responseTime      Int?          @map("response_time") // Seconds since last message
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  ticket            SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([createdAt])
+  @@map("support_ticket_responses")
+}
+
+model AdminLog {
+  id            String    @id @default(uuid())
+  adminId       String    @map("admin_id")
+  action        String    // 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT'
+  resourceType  String    // 'USER', 'LISTING', 'TRANSACTION', 'SETTINGS'
+  resourceId    String?   @map("resource_id")
+  
+  // Event Details
+  description   String?
+  details       Json?     // Detailed change log
+  oldValues     Json?     @map("old_values")
+  newValues     Json?     @map("new_values")
+  
+  // Request Info
+  ipAddress     String?   @map("ip_address")
+  userAgent     String?   @map("user_agent")
+  sessionId     String?   @map("session_id")
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  admin         AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@map("admin_logs")
+}
+
+model PlatformSettings {
+  id              String    @id @default(uuid())
+  category        String    // 'GENERAL', 'PAYMENT', 'EMAIL', 'SECURITY', 'FEATURES'
+  key             String
+  value           Json      // Can store strings, numbers, booleans, objects
+  description     String?
+  dataType        String    // 'STRING', 'NUMBER', 'BOOLEAN', 'JSON', 'ARRAY'
+  
+  // Validation
+  validationRules Json?     @map("validation_rules")
+  isEncrypted     Boolean   @default(false) @map("is_encrypted")
+  
+  // Management
+  isActive        Boolean   @default(true) @map("is_active")
+  isPublic        Boolean   @default(false) @map("is_public") // Can be accessed by frontend
+  updatedBy       String    @map("updated_by")
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  updatedByAdmin  AdminUser @relation("SettingsUpdater", fields: [updatedBy], references: [id])
+
+  @@unique([category, key])
+  @@index([category])
+  @@index([isPublic])
+  @@map("platform_settings")
+}
+
+// Platform Analytics and Metrics
+model PlatformMetrics {
+  id                    String   @id @default(uuid())
+  date                  DateTime @db.Date
+  
+  // User Metrics
+  totalUsers            Int      @default(0) @map("total_users")
+  newUsers              Int      @default(0) @map("new_users")
+  activeUsers           Int      @default(0) @map("active_users")
+  verifiedUsers         Int      @default(0) @map("verified_users")
+  
+  // Listing Metrics
+  totalListings         Int      @default(0) @map("total_listings")
+  newListings           Int      @default(0) @map("new_listings")
+  activeListings        Int      @default(0) @map("active_listings")
+  soldListings          Int      @default(0) @map("sold_listings")
+  
+  // Financial Metrics
+  totalTransactions     Int      @default(0) @map("total_transactions")
+  transactionVolume     Decimal  @default(0) @map("transaction_volume") @db.Decimal(15, 2)
+  commissionRevenue     Decimal  @default(0) @map("commission_revenue") @db.Decimal(15, 2)
+  escrowBalance         Decimal  @default(0) @map("escrow_balance") @db.Decimal(15, 2)
+  
+  // Platform Health
+  supportTickets        Int      @default(0) @map("support_tickets")
+  averageResponseTime   Int?     @map("average_response_time") // Minutes
+  systemUptime          Decimal? @map("system_uptime") @db.Decimal(5, 2) // Percentage
+  
+  // Engagement
+  pageViews             Int      @default(0) @map("page_views")
+  uniqueVisitors        Int      @default(0) @map("unique_visitors")
+  averageSessionDuration Int?    @map("average_session_duration") // Seconds
+  bounceRate            Decimal? @map("bounce_rate") @db.Decimal(5, 2) // Percentage
+  
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@unique([date])
+  @@map("platform_metrics")
+}
+
+// Content Flagging and Reporting System
+enum FlagReason {
+  SPAM
+  INAPPROPRIATE_CONTENT
+  FAKE_LISTING
+  SCAM_ATTEMPT
+  COPYRIGHT_VIOLATION
+  MISLEADING_INFO
+  TERMS_VIOLATION
+  OTHER
+}
+
+enum FlagStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+  ESCALATED
+}
+
+model ContentFlag {
+  id              String     @id @default(uuid())
+  reporterId      String     @map("reporter_id")
+  targetType      String     // 'listing', 'user', 'review', 'message'
+  targetId        String     @map("target_id")
+  
+  // Flag Details
+  reason          FlagReason
+  description     String?
+  evidence        Json?      // Screenshots, links, additional info
+  
+  // Review Process
+  status          FlagStatus @default(PENDING)
+  reviewedBy      String?    @map("reviewed_by")
+  reviewedAt      DateTime?  @map("reviewed_at")
+  reviewNotes     String?    @map("review_notes")
+  resolution      String?    // What action was taken
+  
+  // Priority & Classification
+  priority        SupportTicketPriority @default(MEDIUM)
+  category        String?    // Auto-categorized for ML
+  isValid         Boolean?   @map("is_valid")
+  
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  reporter        User       @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+  @@index([status])
+  @@index([reason])
+  @@index([priority])
+  @@map("content_flags")
+}
+
+// Security and Audit Trail
+model SecurityEvent {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  eventType       String   // 'LOGIN_ATTEMPT', 'PASSWORD_CHANGE', 'SUSPICIOUS_ACTIVITY'
+  severity        String   @default("INFO") // 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+  
+  // Event Details
+  description     String
+  metadata        Json?
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent")
+  location        Json?    // Geolocation data
+  
+  // Risk Assessment
+  riskScore       Int?     @map("risk_score") // 0-100
+  isBlocked       Boolean  @default(false) @map("is_blocked")
+  action          String?  // Action taken by system
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("security_events")
+}
+
+// GDPR and Compliance
+model DataProcessingLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  processingType  String   // 'EXPORT', 'DELETION', 'ANONYMIZATION', 'CONSENT_UPDATE'
+  legalBasis      String   // 'CONSENT', 'CONTRACT', 'LEGITIMATE_INTEREST'
+  
+  // Processing Details
+  dataTypes       String[] @map("data_types") // What type of data was processed
+  purpose         String   // Why the processing occurred
+  requestSource   String   @map("request_source") // 'USER_REQUEST', 'ADMIN_ACTION', 'AUTOMATED'
+  
+  // Execution
+  status          String   @default("PENDING") // 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'
+  processedBy     String?  @map("processed_by") // Admin ID if manual
+  startedAt       DateTime? @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  
+  // Results
+  affectedRecords Int?     @map("affected_records")
+  exportLocation  String?  @map("export_location") // For data exports
+  errors          Json?    // Any errors that occurred
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([processingType])
+  @@index([status])
+  @@map("data_processing_logs")
+}
+

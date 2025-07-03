@@ -1,0 +1,1043 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import {
+  ArrowLeft,
+  MapPin,
+  Building2,
+  Globe,
+  FileText,
+  Briefcase,
+  Calendar,
+  Eye,
+  Users,
+  Star,
+  Shield,
+  CheckCircle,
+  Heart,
+  Share2,
+  MessageCircle,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  Award,
+  Phone,
+  Mail,
+  ExternalLink,
+  Send,
+  X
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+// Types
+interface Listing {
+  id: string;
+  title: string;
+  category: string;
+  subcategory: string;
+  askingPrice: number;
+  currency: string;
+  location: string;
+  description: string;
+  highlights: string[];
+  images: string[];
+  seller: {
+    name: string;
+    verified: boolean;
+    joinedDate: string;
+  };
+  status: 'ACTIVE' | 'PENDING' | 'SOLD';
+  createdAt: string;
+  viewCount: number;
+  interestedBuyers: number;
+  [key: string]: any;
+}
+
+// Enhanced Category mappings
+const CATEGORY_INFO = {
+  companies: { name: 'Företag & Bolag', icon: Building2, color: 'blue' },
+  ecommerce: { name: 'E-handel & Webshops', icon: Globe, color: 'green' },
+  domains: { name: 'Domäner & Webbplatser', icon: Globe, color: 'purple' },
+  content: { name: 'Content & Media', icon: FileText, color: 'orange' },
+  social: { name: 'Social Media', icon: Users, color: 'pink' },
+  affiliate: { name: 'Affiliate & Passive Income', icon: TrendingUp, color: 'indigo' },
+  digital: { name: 'Digitala Tillgångar', icon: Building2, color: 'cyan' },
+  documents: { name: 'Dokument & Rättigheter', icon: FileText, color: 'gray' },
+  properties: { name: 'Fastigheter & Lokaler', icon: MapPin, color: 'yellow' },
+  services: { name: 'Företagstjänster', icon: Briefcase, color: 'red' }
+};
+
+const STATUS_INFO = {
+  ACTIVE: { name: 'Aktiv', color: 'green' },
+  PENDING: { name: 'Under förhandling', color: 'yellow' },
+  SOLD: { name: 'Såld', color: 'gray' }
+};
+
+const ListingDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showInterestModal, setShowInterestModal] = useState(false);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidComment, setBidComment] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Fetch listing details
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch(`/api/listings/${id}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Annonsen hittades inte');
+          }
+          throw new Error('Kunde inte ladda annonsen');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data?.listing) {
+          // Transform API data to match component interface
+          const apiListing = data.data.listing;
+          const transformedListing = {
+            ...apiListing,
+            subcategory: apiListing.subcategory || '',
+            highlights: apiListing.highlights || [],
+            images: apiListing.images || [],
+            seller: {
+              name: apiListing.owner?.firstName ? `${apiListing.owner.firstName} ${apiListing.owner.lastName}` : 'Anonym säljare',
+              verified: true,
+              joinedDate: apiListing.createdAt
+            },
+            viewCount: apiListing.viewCount || 0,
+            interestedBuyers: apiListing.interestedBuyers || 0
+          };
+          setListing(transformedListing);
+        } else {
+          throw new Error('Ogiltig data från servern');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ett okänt fel inträffade');
+        console.error('Error fetching listing:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListing();
+  }, [id]);
+
+  // Handle interest submission
+  const handleInterest = async () => {
+    if (!listing) return;
+    
+    try {
+      const response = await fetch(`/api/listings/${listing.id}/interest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Jag är intresserad av denna annons'
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.data.message);
+        setShowInterestModal(false);
+        // Update interested buyers count
+        setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
+      } else {
+        toast.error('Kunde inte skicka intresse');
+      }
+    } catch (err) {
+      toast.error('Ett fel inträffade');
+      console.error('Error submitting interest:', err);
+    }
+  };
+
+  // Enhanced email validation
+  const validateEmail = (email: string) => {
+    // RFC 5322 compliant regex for email validation
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    
+    if (!email || typeof email !== 'string') {
+      return { valid: false, error: 'E-post är obligatorisk' };
+    }
+    
+    if (email.length > 254) {
+      return { valid: false, error: 'E-post är för lång' };
+    }
+    
+    if (!emailRegex.test(email)) {
+      return { valid: false, error: 'Ogiltig e-postadress format' };
+    }
+    
+    // Check for common disposable email domains
+    const disposableDomains = [
+      '10minutemail.com', 'temp-mail.org', 'guerrillamail.com', 
+      'mailinator.com', 'throwaway.email', 'tempmail.com',
+      'sharklasers.com', 'yopmail.com'
+    ];
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (disposableDomains.includes(domain)) {
+      return { valid: false, error: 'Temporära e-postadresser är inte tillåtna' };
+    }
+    
+    return { valid: true };
+  };
+
+  // Legacy function for backward compatibility
+  const isValidEmail = (email: string) => {
+    return validateEmail(email).valid;
+  };
+
+  // Handle bid submission
+  const handleBid = async () => {
+    if (!listing || !bidAmount) {
+      toast.error('Ange ett budbelopp');
+      return;
+    }
+    
+    // Validate required fields
+    if (!contactInfo.name.trim()) {
+      toast.error('Ange ditt namn');
+      return;
+    }
+    
+    if (!contactInfo.email.trim()) {
+      toast.error('Ange din email-adress');
+      return;
+    }
+    
+    if (!isValidEmail(contactInfo.email)) {
+      toast.error('Ange en giltig email-adress');
+      return;
+    }
+    
+    const amount = parseFloat(bidAmount.replace(/\s/g, ''));
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Ange ett giltigt budbelopp');
+      return;
+    }
+    
+    try {
+      // Simulate API call for now
+      toast.success('Ditt bud har skickats! Säljaren kommer att kontakta dig inom kort.');
+      setShowBidModal(false);
+      setBidAmount('');
+      setBidComment('');
+      setContactInfo({ name: '', email: '', phone: '' });
+      // Update interested buyers count
+      setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
+    } catch (err) {
+      toast.error('Ett fel inträffade');
+      console.error('Error submitting bid:', err);
+    }
+  };
+
+  // Share functions
+  const shareToWhatsApp = () => {
+    const url = window.location.href;
+    const text = `Kolla in denna annons: ${listing?.title} - ${formatPrice(listing?.askingPrice || 0, listing?.currency || 'SEK')}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const shareToMessenger = () => {
+    const url = window.location.href;
+    const messengerUrl = `https://www.facebook.com/dialog/send?app_id=YOUR_APP_ID&link=${encodeURIComponent(url)}&redirect_uri=${encodeURIComponent(url)}`;
+    window.open(messengerUrl, '_blank');
+  };
+
+  const shareToTelegram = () => {
+    const url = window.location.href;
+    const text = `Kolla in denna annons: ${listing?.title}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    window.open(telegramUrl, '_blank');
+  };
+
+  const shareToEmail = () => {
+    const url = window.location.href;
+    const subject = `Intressant annons: ${listing?.title}`;
+    const body = `Hej!\n\nJag hittade denna intressanta annons som jag tänkte du skulle vara intresserad av:\n\n${listing?.title}\nPris: ${formatPrice(listing?.askingPrice || 0, listing?.currency || 'SEK')}\n\n${url}\n\nMvh`;
+    const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = emailUrl;
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Länk kopierad till urklipp!');
+    } catch (err) {
+      toast.error('Kunde inte kopiera länk');
+    }
+  };
+
+  // Handle contact seller
+  const handleContact = async () => {
+    if (!listing || !contactMessage) return;
+    
+    // Validate form data
+    if (!contactMessage.trim()) {
+      toast.error('Meddelandet är obligatoriskt');
+      return;
+    }
+    
+    if (contactMessage.length < 10) {
+      toast.error('Meddelandet måste vara minst 10 tecken långt');
+      return;
+    }
+    
+    if (!contactInfo.name.trim()) {
+      toast.error('Ditt namn är obligatoriskt');
+      return;
+    }
+    
+    if (contactInfo.name.length < 2) {
+      toast.error('Namnet måste vara minst 2 tecken långt');
+      return;
+    }
+    
+    if (!contactInfo.email.trim()) {
+      toast.error('E-post är obligatorisk');
+      return;
+    }
+    
+    const emailValidation = validateEmail(contactInfo.email);
+    if (!emailValidation.valid) {
+      toast.error(emailValidation.error);
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/listings/${listing.id}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: contactMessage,
+          contactInfo
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.data.message);
+        setShowContactModal(false);
+        setContactMessage('');
+        setContactInfo({ name: '', email: '', phone: '' });
+      } else {
+        toast.error('Kunde inte skicka meddelande');
+      }
+    } catch (err) {
+      toast.error('Ett fel inträffade');
+      console.error('Error contacting seller:', err);
+    }
+  };
+
+  // Handle share listing
+  const handleShare = async (platform?: string) => {
+    if (!listing) return;
+    
+    try {
+      const response = await fetch(`/api/listings/${listing.id}/share`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ platform })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Copy link to clipboard
+        const shareUrl = `${window.location.origin}/listings/${listing.id}`;
+        navigator.clipboard.writeText(shareUrl);
+        toast.success('Länk kopierad till urklipp!');
+      }
+    } catch (err) {
+      // Fallback: just copy current URL
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Länk kopierad till urklipp!');
+    }
+  };
+
+  // Format price
+  const formatPrice = (price: number, currency: string = 'SEK') => {
+    return price.toLocaleString('sv-SE') + ' ' + currency;
+  };
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('sv-SE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Get category info
+  const getCategoryInfo = (category: string) => {
+    return CATEGORY_INFO[category as keyof typeof CATEGORY_INFO] || CATEGORY_INFO.companies;
+  };
+
+  // Get category color classes
+  const getCategoryColorClasses = (category: string) => {
+    const colorMap = {
+      blue: 'bg-blue-100 text-blue-800',
+      green: 'bg-green-100 text-green-800',
+      purple: 'bg-purple-100 text-purple-800',
+      orange: 'bg-orange-100 text-orange-800',
+      red: 'bg-red-100 text-red-800',
+      pink: 'bg-pink-100 text-pink-800',
+      indigo: 'bg-indigo-100 text-indigo-800',
+      cyan: 'bg-cyan-100 text-cyan-800',
+      gray: 'bg-gray-100 text-gray-800',
+      yellow: 'bg-yellow-100 text-yellow-800'
+    };
+    const color = getCategoryInfo(category).color;
+    return colorMap[color as keyof typeof colorMap];
+  };
+
+  // Get status color classes
+  const getStatusColorClasses = (status: string) => {
+    const colorMap = {
+      green: 'bg-green-100 text-green-800',
+      yellow: 'bg-yellow-100 text-yellow-800',
+      gray: 'bg-gray-100 text-gray-800'
+    };
+    const color = STATUS_INFO[status as keyof typeof STATUS_INFO]?.color || 'gray';
+    return colorMap[color as keyof typeof colorMap];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Laddar annons...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Building2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Annonsen hittades inte</h2>
+          <p className="text-gray-600 mb-4">{error || 'Annonsen du söker efter finns inte längre.'}</p>
+          <Link 
+            to="/listings"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Tillbaka till annonser
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const categoryInfo = getCategoryInfo(listing.category);
+  const IconComponent = categoryInfo.icon;
+
+  return (
+    <>
+      <Helmet>
+        <title>{listing.title} - Tubba</title>
+        <meta name="description" content={listing.description} />
+        <meta property="og:title" content={listing.title} />
+        <meta property="og:description" content={listing.description} />
+        {listing.images.length > 0 && (
+          <meta property="og:image" content={listing.images[0]} />
+        )}
+      </Helmet>
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <Link 
+              to="/listings"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Tillbaka till annonser
+            </Link>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Images and Details */}
+            <div className="lg:col-span-2">
+              {/* Image Gallery */}
+              {listing.images && listing.images.length > 0 && (
+                <div className="mb-8">
+                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden mb-4">
+                    <img 
+                      src={listing.images[selectedImageIndex]} 
+                      alt={listing.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop';
+                      }}
+                    />
+                  </div>
+                  {listing.images.length > 1 && (
+                    <div className="flex space-x-2 overflow-x-auto">
+                      {listing.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 ${
+                            index === selectedImageIndex ? 'border-blue-500' : 'border-gray-300'
+                          }`}
+                        >
+                          <img 
+                            src={image} 
+                            alt={`${listing.title} ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Basic Info */}
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColorClasses(listing.category)}`}>
+                      <IconComponent className="w-4 h-4 mr-1 inline" />
+                      {categoryInfo.name}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColorClasses(listing.status)}`}>
+                      {STATUS_INFO[listing.status as keyof typeof STATUS_INFO]?.name}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Eye className="w-4 h-4 mr-1" />
+                      {listing.viewCount} visningar
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="w-4 h-4 mr-1" />
+                      {listing.interestedBuyers} intresserade
+                    </div>
+                  </div>
+                </div>
+                
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">{listing.title}</h1>
+                
+                <div className="flex items-center text-gray-600 mb-6">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  {listing.location}
+                </div>
+                
+                <p className="text-gray-700 leading-relaxed">{listing.description}</p>
+              </div>
+
+              {/* Highlights */}
+              {listing.highlights && listing.highlights.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Höjdpunkter</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {listing.highlights.map((highlight, index) => (
+                      <div key={index} className="flex items-start">
+                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Category-specific details */}
+              {listing.category === 'companies' && (
+                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Företagsinformation</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {listing.employees && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Antal anställda</div>
+                        <div className="text-lg font-semibold">{listing.employees}</div>
+                      </div>
+                    )}
+                    {listing.foundedYear && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Grundat år</div>
+                        <div className="text-lg font-semibold">{listing.foundedYear}</div>
+                      </div>
+                    )}
+                    {listing.monthlyRevenue && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Månadsomsättning</div>
+                        <div className="text-lg font-semibold">{formatPrice(listing.monthlyRevenue)} / mån</div>
+                      </div>
+                    )}
+                    {listing.monthlyProfit && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Månadsvinst</div>
+                        <div className="text-lg font-semibold text-green-600">{formatPrice(listing.monthlyProfit)} / mån</div>
+                      </div>
+                    )}
+                    {listing.businessType && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Bolagsform</div>
+                        <div className="text-lg font-semibold">{listing.businessType}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Digital assets specific details */}
+              {listing.category === 'digital' && (
+                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Digital tillgång</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {listing.monthlyRevenue && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Månadsinkomst</div>
+                        <div className="text-lg font-semibold">{formatPrice(listing.monthlyRevenue)} / mån</div>
+                      </div>
+                    )}
+                    {listing.traffic?.monthly && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Månadstrafik</div>
+                        <div className="text-lg font-semibold">{listing.traffic.monthly.toLocaleString('sv-SE')} besökare</div>
+                      </div>
+                    )}
+                    {listing.downloads && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Nedladdningar</div>
+                        <div className="text-lg font-semibold">{listing.downloads.toLocaleString('sv-SE')}</div>
+                      </div>
+                    )}
+                    {listing.activeUsers && (
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Aktiva användare</div>
+                        <div className="text-lg font-semibold">{listing.activeUsers.toLocaleString('sv-SE')}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Seller Information */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Säljare</h2>
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                    <Users className="w-6 h-6 text-gray-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center">
+                      <span className="font-semibold text-gray-900">{listing.seller.name}</span>
+                      {listing.seller.verified && (
+                        <Shield className="w-4 h-4 text-green-500 ml-2" title="Verifierad säljare" />
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Medlem sedan {formatDate(listing.seller.joinedDate)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Price and Actions */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
+                <div className="text-center mb-6">
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {formatPrice(listing.askingPrice, listing.currency)}
+                  </div>
+                  <div className="text-sm text-gray-500">Utgångspris</div>
+                </div>
+                
+                <div className="space-y-3 mb-6">
+                  <button
+                    onClick={() => setShowBidModal(true)}
+                    disabled={listing.status !== 'ACTIVE'}
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+                      listing.status === 'ACTIVE'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    <DollarSign className="w-5 h-5 mr-2 inline" />
+                    {listing.status === 'ACTIVE' ? 'Lämna bud' : 'Ej tillgänglig'}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowContactModal(true)}
+                    disabled={listing.status !== 'ACTIVE'}
+                    className={`w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold transition-colors ${
+                      listing.status === 'ACTIVE'
+                        ? 'text-gray-700 hover:bg-gray-50'
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2 inline" />
+                    Kontakta säljare
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Share2 className="w-5 h-5 mr-2 inline" />
+                    Dela annons
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowInterestModal(true)}
+                    disabled={listing.status !== 'ACTIVE'}
+                    className={`w-full py-2 px-4 border border-gray-300 rounded-lg font-medium transition-colors ${
+                      listing.status === 'ACTIVE'
+                        ? 'text-gray-600 hover:bg-gray-50'
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Heart className="w-4 h-4 mr-2 inline" />
+                    Visa intresse
+                  </button>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-6">
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div className="flex justify-between">
+                      <span>Publicerad:</span>
+                      <span>{formatDate(listing.createdAt)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Kategori:</span>
+                      <span>{categoryInfo.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Annons-ID:</span>
+                      <span className="font-mono text-xs">{listing.id}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bid Modal */}
+      {showBidModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Lämna bud</h3>
+            <p className="text-gray-600 mb-6">
+              Lämna ett seriöst bud på {listing?.title}. Säljaren kommer att svara inom 48 timmar.
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Budbelopp (SEK) *
+                </label>
+                <input
+                  type="text"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  placeholder={`t.ex. ${listing?.askingPrice.toLocaleString('sv-SE')}`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kommentar (valfritt)
+                </label>
+                <textarea
+                  value={bidComment}
+                  onChange={(e) => setBidComment(e.target.value)}
+                  placeholder="Motivera ditt bud eller ställ frågor..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={contactInfo.name}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ditt namn *"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="email"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="E-post *"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowBidModal(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={handleBid}
+                disabled={!bidAmount || !contactInfo.name || !contactInfo.email}
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Skicka bud
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Kontakta säljare</h3>
+            <p className="text-gray-600 mb-6">
+              Skicka ett meddelande till {listing?.seller.name} om {listing?.title}.
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Meddelande *
+                </label>
+                <textarea
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  placeholder="Skriv ditt meddelande här..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={contactInfo.name}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ditt namn *"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="email"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="E-post *"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <input
+                type="tel"
+                value={contactInfo.phone}
+                onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="Telefon (valfritt)"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={handleContact}
+                disabled={!contactMessage || !contactInfo.name || !contactInfo.email}
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Skicka meddelande
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Dela annons</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Dela denna annons med dina kontakter på sociala medier eller kopiera länken.
+            </p>
+            
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <button
+                onClick={() => {
+                  shareToWhatsApp();
+                  handleShare('whatsapp');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                WhatsApp
+              </button>
+              
+              <button
+                onClick={() => {
+                  shareToTelegram();
+                  handleShare('telegram');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                <Send className="w-5 h-5 mr-2" />
+                Telegram
+              </button>
+              
+              <button
+                onClick={() => {
+                  shareToMessenger();
+                  handleShare('messenger');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Messenger
+              </button>
+              
+              <button
+                onClick={() => {
+                  shareToEmail();
+                  handleShare('email');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <Mail className="w-5 h-5 mr-2" />
+                E-post
+              </button>
+              
+              <button
+                onClick={() => {
+                  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
+                  window.open(linkedinUrl, '_blank');
+                  handleShare('linkedin');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+              >
+                <ExternalLink className="w-5 h-5 mr-2" />
+                LinkedIn
+              </button>
+              
+              <button
+                onClick={() => {
+                  const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`Kolla in denna annons: ${listing?.title}`)}`;
+                  window.open(twitterUrl, '_blank');
+                  handleShare('twitter');
+                  setShowShareModal(false);
+                }}
+                className="flex items-center justify-center px-4 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
+              >
+                <ExternalLink className="w-5 h-5 mr-2" />
+                Twitter
+              </button>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={window.location.href}
+                  readOnly
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50"
+                />
+                <button
+                  onClick={() => {
+                    copyToClipboard();
+                    handleShare('clipboard');
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Kopiera
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interest Modal */}
+      {showInterestModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Visa intresse</h3>
+            <p className="text-gray-600 mb-6">
+              Genom att visa intresse kommer säljaren att kontakta dig med mer information inom 24 timmar.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowInterestModal(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={handleInterest}
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Skicka intresse
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default ListingDetailPage;

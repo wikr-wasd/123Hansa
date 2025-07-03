@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for production
+  postgres:
+    image: postgres:15-alpine
+    container_name: 123hansa-postgres
+    environment:
+      POSTGRES_DB: 123hansa_production
+      POSTGRES_USER: 123hansa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/prisma/migrations:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U 123hansa -d 123hansa_production"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - hansa123-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: 123hansa-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - hansa123-network
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: 123hansa-api
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://123hansa:${POSTGRES_PASSWORD}@postgres:5432/123hansa_production
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      EMAIL_API_KEY: ${EMAIL_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      CORS_ORIGINS: https://123hansa.se,https://www.123hansa.se
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - hansa123-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Nginx reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: 123hansa-nginx
+    volumes:
+      - ./nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - hansa123-network
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: 123hansa-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - hansa123-network
+
+  # Grafana for monitoring dashboards (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: 123hansa-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - hansa123-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  hansa123-network:
+    driver: bridge

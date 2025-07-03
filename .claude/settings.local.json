@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:app.uizard.io)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(true)",
+      "Bash(docker-compose up:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(/dev/null)",
+      "Bash(grep:*)",
+      "Bash(npm start)",
+      "Bash(npm run dev:*)",
+      "Bash(ss:*)",
+      "Bash(kill:*)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(touch:*)",
+      "Bash(rg:*)",
+      "Bash(PORT=3000 npm run dev:api)",
+      "Bash(mkdir:*)",
+      "Bash(npx eslint:*)",
+      "Bash(cat:*)",
+      "Bash(timeout:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(PORT=3002 npm run dev)",
+      "Bash(mv:*)",
+      "Bash(npx vite:*)"
+    ],
+    "deny": []
+  }
+}
