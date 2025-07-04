@@ -117,3 +117,5 @@ export const useAuthStore = () => {
   }
   return context;
 };
+
+export const useAuth = useAuthStore;
