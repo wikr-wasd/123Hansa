@@ -25,7 +25,7 @@ import {
   Info,
   Calculator,
   Gavel,
-  Handshake,
+  HandHeart,
   AlertCircle
 } from 'lucide-react';
 import { BusinessListing } from '../../types/business';
@@ -451,7 +451,7 @@ const MakeOfferModal: React.FC<MakeOfferModalProps> = ({
                 </>
               ) : (
                 <>
-                  <Handshake className="w-4 h-4 mr-2" />
+                  <HandHeart className="w-4 h-4 mr-2" />
                   Skicka bud
                 </>
               )}

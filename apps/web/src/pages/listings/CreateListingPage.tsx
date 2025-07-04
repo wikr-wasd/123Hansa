@@ -7,7 +7,7 @@ import {
   FileText, 
   Users, 
   MapPin, 
-  Handshake, 
+  HandHeart, 
   Calendar,
   TrendingUp,
   Phone,
@@ -65,7 +65,7 @@ const CreateListingPage: React.FC = () => {
     
     // Avtal och villkor
     acceptTerms: false,
-    acceptHandshake: false,
+    acceptHandHeart: false,
     
     // Metadata
     reasonForSelling: '',
@@ -221,7 +221,7 @@ const CreateListingPage: React.FC = () => {
 
       case 4:
         if (!formData.acceptTerms) newErrors.acceptTerms = 'Du måste acceptera villkoren';
-        if (!formData.acceptHandshake) newErrors.acceptHandshake = 'Du måste acceptera Handshake-avtal';
+        if (!formData.acceptHandHeart) newErrors.acceptHandHeart = 'Du måste acceptera HandHeart-avtal';
         break;
     }
 
@@ -833,27 +833,27 @@ const CreateListingPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Handshake Agreement */}
+                      {/* HandHeart Agreement */}
                       <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                         <div className="flex items-start">
                           <input
                             type="checkbox"
-                            checked={formData.acceptHandshake}
-                            onChange={(e) => handleInputChange('acceptHandshake', e.target.checked)}
+                            checked={formData.acceptHandHeart}
+                            onChange={(e) => handleInputChange('acceptHandHeart', e.target.checked)}
                             className="mt-1 mr-3"
                           />
                           <div>
                             <div className="flex items-center mb-2">
-                              <Handshake className="w-5 h-5 text-purple-600 mr-2" />
-                              <span className="font-medium text-purple-900">Handshake Avtalsstöd</span>
+                              <HandHeart className="w-5 h-5 text-purple-600 mr-2" />
+                              <span className="font-medium text-purple-900">HandHeart Avtalsstöd</span>
                             </div>
                             <p className="text-sm text-purple-800">
-                              Jag godkänner att alla avtal hanteras via Handshake-appen för säker digital signering 
+                              Jag godkänner att alla avtal hanteras via HandHeart-appen för säker digital signering 
                               och escrow-tjänster. Detta säkerställer transparens och trygghet för alla parter.
                             </p>
                           </div>
                         </div>
-                        {errors.acceptHandshake && <p className="mt-2 text-sm text-red-600">{errors.acceptHandshake}</p>}
+                        {errors.acceptHandHeart && <p className="mt-2 text-sm text-red-600">{errors.acceptHandHeart}</p>}
                       </div>
 
                       {/* Terms */}
@@ -947,7 +947,7 @@ const CreateListingPage: React.FC = () => {
                 <h3 className="font-semibold text-green-900 mb-4">Fördelar med Tubba</h3>
                 <ul className="space-y-2 text-sm text-green-800">
                   <li>• Endast 3% provision vid genomförd affär</li>
-                  <li>• Säkra avtal via Handshake-appen</li>
+                  <li>• Säkra avtal via HandHeart-appen</li>
                   <li>• Professionell marknadsföring</li>
                   <li>• Kvalificerade köpare</li>
                   <li>• Juridisk support</li>
