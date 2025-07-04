@@ -1,37 +1,11 @@
 {
   "version": 2,
   "name": "123hansa-marketplace",
-  "builds": [
-    {
-      "src": "apps/api/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["apps/api/prisma/**"]
-      }
-    },
-    {
-      "src": "apps/web/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "apps/api/src/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "apps/web/$1"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   },
   "functions": {
-    "apps/api/src/index.ts": {
+    "api/index.ts": {
       "maxDuration": 30
     }
   },
