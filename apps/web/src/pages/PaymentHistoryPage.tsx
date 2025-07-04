@@ -153,150 +153,150 @@ const PaymentHistoryPage: React.FC = () => {
     <>
       <Helmet>
         <title>Betalningshistorik - Tubba</title>
-        <meta name=\"description\" content=\"Se din betalningshistorik och transaktioner på Tubba\" />
+        <meta name="description" content="Se din betalningshistorik och transaktioner på Tubba" />
       </Helmet>
 
-      <div className=\"min-h-screen bg-nordic-gray-50 py-8\">
-        <div className=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\">
+      <div className="min-h-screen bg-nordic-gray-50 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className=\"mb-8\">
-            <h1 className=\"text-3xl font-bold text-nordic-gray-900\">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-nordic-gray-900">
               Betalningshistorik
             </h1>
-            <p className=\"mt-2 text-nordic-gray-600\">
+            <p className="mt-2 text-nordic-gray-600">
               Översikt över alla dina betalningar och transaktioner
             </p>
           </div>
 
           {/* Filters */}
-          <div className=\"bg-white rounded-lg shadow-sm p-6 mb-6\">
-            <h2 className=\"text-lg font-semibold text-nordic-gray-900 mb-4\">Filter</h2>
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-lg font-semibold text-nordic-gray-900 mb-4">Filter</h2>
             
-            <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4\">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Status filter */}
               <div>
-                <label className=\"block text-sm font-medium text-nordic-gray-700 mb-2\">
+                <label className="block text-sm font-medium text-nordic-gray-700 mb-2">
                   Status
                 </label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className=\"input-field\"
+                  className="input-field"
                 >
-                  <option value=\"all\">Alla statusar</option>
-                  <option value=\"SUCCEEDED\">Genomförda</option>
-                  <option value=\"PENDING\">Väntar</option>
-                  <option value=\"FAILED\">Misslyckade</option>
-                  <option value=\"CANCELLED\">Avbrutna</option>
-                  <option value=\"REFUNDED\">Återbetalda</option>
+                  <option value="all">Alla statusar</option>
+                  <option value="SUCCEEDED">Genomförda</option>
+                  <option value="PENDING">Väntar</option>
+                  <option value="FAILED">Misslyckade</option>
+                  <option value="CANCELLED">Avbrutna</option>
+                  <option value="REFUNDED">Återbetalda</option>
                 </select>
               </div>
 
               {/* Payment method filter */}
               <div>
-                <label className=\"block text-sm font-medium text-nordic-gray-700 mb-2\">
+                <label className="block text-sm font-medium text-nordic-gray-700 mb-2">
                   Betalningsmetod
                 </label>
                 <select
                   value={filters.paymentMethod}
                   onChange={(e) => handleFilterChange('paymentMethod', e.target.value)}
-                  className=\"input-field\"
+                  className="input-field"
                 >
-                  <option value=\"all\">Alla metoder</option>
-                  <option value=\"STRIPE_CARD\">Kort</option>
-                  <option value=\"SWISH\">Swish</option>
-                  <option value=\"MOBILEPAY\">MobilePay</option>
-                  <option value=\"VIPPS\">Vipps</option>
-                  <option value=\"STRIPE_SEPA\">SEPA</option>
+                  <option value="all">Alla metoder</option>
+                  <option value="STRIPE_CARD">Kort</option>
+                  <option value="SWISH">Swish</option>
+                  <option value="MOBILEPAY">MobilePay</option>
+                  <option value="VIPPS">Vipps</option>
+                  <option value="STRIPE_SEPA">SEPA</option>
                 </select>
               </div>
 
               {/* Currency filter */}
               <div>
-                <label className=\"block text-sm font-medium text-nordic-gray-700 mb-2\">
+                <label className="block text-sm font-medium text-nordic-gray-700 mb-2">
                   Valuta
                 </label>
                 <select
                   value={filters.currency}
                   onChange={(e) => handleFilterChange('currency', e.target.value)}
-                  className=\"input-field\"
+                  className="input-field"
                 >
-                  <option value=\"all\">Alla valutor</option>
-                  <option value=\"SEK\">SEK</option>
-                  <option value=\"NOK\">NOK</option>
-                  <option value=\"DKK\">DKK</option>
-                  <option value=\"EUR\">EUR</option>
-                  <option value=\"USD\">USD</option>
+                  <option value="all">Alla valutor</option>
+                  <option value="SEK">SEK</option>
+                  <option value="NOK">NOK</option>
+                  <option value="DKK">DKK</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
                 </select>
               </div>
 
               {/* Date range filter */}
               <div>
-                <label className=\"block text-sm font-medium text-nordic-gray-700 mb-2\">
+                <label className="block text-sm font-medium text-nordic-gray-700 mb-2">
                   Tidsperiod
                 </label>
                 <select
                   value={filters.dateRange}
                   onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                  className=\"input-field\"
+                  className="input-field"
                 >
-                  <option value=\"all\">Alla datum</option>
-                  <option value=\"week\">Senaste veckan</option>
-                  <option value=\"month\">Senaste månaden</option>
-                  <option value=\"3months\">Senaste 3 månaderna</option>
-                  <option value=\"year\">Senaste året</option>
+                  <option value="all">Alla datum</option>
+                  <option value="week">Senaste veckan</option>
+                  <option value="month">Senaste månaden</option>
+                  <option value="3months">Senaste 3 månaderna</option>
+                  <option value="year">Senaste året</option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* Payments list */}
-          <div className=\"bg-white rounded-lg shadow-sm\">
+          <div className="bg-white rounded-lg shadow-sm">
             {isLoading ? (
-              <div className=\"flex items-center justify-center py-12\">
-                <LoadingSpinner size=\"lg\" />
-                <span className=\"ml-3 text-nordic-gray-600\">Laddar betalningar...</span>
+              <div className="flex items-center justify-center py-12">
+                <LoadingSpinner size="lg" />
+                <span className="ml-3 text-nordic-gray-600">Laddar betalningar...</span>
               </div>
             ) : payments.length === 0 ? (
-              <div className=\"text-center py-12\">
-                <div className=\"text-nordic-gray-400 mb-4\">💳</div>
-                <h3 className=\"text-lg font-medium text-nordic-gray-900 mb-2\">
+              <div className="text-center py-12">
+                <div className="text-nordic-gray-400 mb-4">💳</div>
+                <h3 className="text-lg font-medium text-nordic-gray-900 mb-2">
                   Inga betalningar hittades
                 </h3>
-                <p className=\"text-nordic-gray-600\">
+                <p className="text-nordic-gray-600">
                   Inga betalningar matchar dina valda filter.
                 </p>
               </div>
             ) : (
               <>
                 {/* Table header */}
-                <div className=\"px-6 py-4 border-b border-nordic-gray-200\">
-                  <div className=\"grid grid-cols-12 gap-4 text-sm font-medium text-nordic-gray-700\">
-                    <div className=\"col-span-3\">Betalning</div>
-                    <div className=\"col-span-2\">Belopp</div>
-                    <div className=\"col-span-2\">Metod</div>
-                    <div className=\"col-span-2\">Status</div>
-                    <div className=\"col-span-3\">Datum</div>
+                <div className="px-6 py-4 border-b border-nordic-gray-200">
+                  <div className="grid grid-cols-12 gap-4 text-sm font-medium text-nordic-gray-700">
+                    <div className="col-span-3">Betalning</div>
+                    <div className="col-span-2">Belopp</div>
+                    <div className="col-span-2">Metod</div>
+                    <div className="col-span-2">Status</div>
+                    <div className="col-span-3">Datum</div>
                   </div>
                 </div>
 
                 {/* Payment rows */}
-                <div className=\"divide-y divide-nordic-gray-200\">
+                <div className="divide-y divide-nordic-gray-200">
                   {payments.map((payment, index) => (
-                    <div key={payment.id} className=\"px-6 py-4 hover:bg-nordic-gray-50 transition-colors\">
-                      <div className=\"grid grid-cols-12 gap-4 items-center\">
+                    <div key={payment.id} className="px-6 py-4 hover:bg-nordic-gray-50 transition-colors">
+                      <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Payment info */}
-                        <div className=\"col-span-3\">
-                          <div className=\"flex items-center space-x-3\">
-                            <div className=\"text-2xl\">
+                        <div className="col-span-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="text-2xl">
                               {paymentService.getPaymentMethodIcon(payment.paymentMethod)}
                             </div>
                             <div>
-                              <p className=\"text-sm font-medium text-nordic-gray-900\">
+                              <p className="text-sm font-medium text-nordic-gray-900">
                                 #{payment.id.slice(-8)}
                               </p>
                               {payment.metadata?.description && (
-                                <p className=\"text-xs text-nordic-gray-600 truncate max-w-32\">
+                                <p className="text-xs text-nordic-gray-600 truncate max-w-32">
                                   {payment.metadata.description}
                                 </p>
                               )}
@@ -305,20 +305,20 @@ const PaymentHistoryPage: React.FC = () => {
                         </div>
 
                         {/* Amount */}
-                        <div className=\"col-span-2\">
-                          <p className=\"text-sm font-semibold text-nordic-gray-900\">
+                        <div className="col-span-2">
+                          <p className="text-sm font-semibold text-nordic-gray-900">
                             {paymentService.formatCurrency(payment.amount, payment.currency)}
                           </p>
                           {payment.feeAmount > 0 && (
-                            <p className=\"text-xs text-nordic-gray-500\">
+                            <p className="text-xs text-nordic-gray-500">
                               Avgift: {paymentService.formatCurrency(payment.feeAmount, payment.currency)}
                             </p>
                           )}
                         </div>
 
                         {/* Payment method */}
-                        <div className=\"col-span-2\">
-                          <p className=\"text-sm text-nordic-gray-900\">
+                        <div className="col-span-2">
+                          <p className="text-sm text-nordic-gray-900">
                             {payment.paymentMethod === 'STRIPE_CARD' ? 'Kort' :
                              payment.paymentMethod === 'SWISH' ? 'Swish' :
                              payment.paymentMethod === 'MOBILEPAY' ? 'MobilePay' :
@@ -328,16 +328,16 @@ const PaymentHistoryPage: React.FC = () => {
                         </div>
 
                         {/* Status */}
-                        <div className=\"col-span-2\">
+                        <div className="col-span-2">
                           {getPaymentStatusBadge(payment.status)}
                         </div>
 
                         {/* Date */}
-                        <div className=\"col-span-3\">
-                          <p className=\"text-sm text-nordic-gray-900\">
+                        <div className="col-span-3">
+                          <p className="text-sm text-nordic-gray-900">
                             {formatPaymentDate(payment.createdAt)}
                           </p>
-                          <p className=\"text-xs text-nordic-gray-500\">
+                          <p className="text-xs text-nordic-gray-500">
                             {new Date(payment.createdAt).toLocaleDateString('sv-SE')}
                           </p>
                         </div>
@@ -345,9 +345,9 @@ const PaymentHistoryPage: React.FC = () => {
 
                       {/* Failure reason */}
                       {payment.failureReason && (
-                        <div className=\"mt-3 p-3 bg-red-50 rounded-lg\">
-                          <p className=\"text-sm text-red-800\">
-                            <span className=\"font-medium\">Felorsak:</span> {payment.failureReason}
+                        <div className="mt-3 p-3 bg-red-50 rounded-lg">
+                          <p className="text-sm text-red-800">
+                            <span className="font-medium">Felorsak:</span> {payment.failureReason}
                           </p>
                         </div>
                       )}
@@ -357,15 +357,15 @@ const PaymentHistoryPage: React.FC = () => {
 
                 {/* Load more button */}
                 {hasMore && (
-                  <div className=\"px-6 py-4 border-t border-nordic-gray-200\">
+                  <div className="px-6 py-4 border-t border-nordic-gray-200">
                     <button
                       onClick={() => loadPayments(false)}
                       disabled={isLoadingMore}
-                      className=\"w-full py-2 px-4 text-nordic-blue-600 hover:text-nordic-blue-700 font-medium transition-colors\"
+                      className="w-full py-2 px-4 text-nordic-blue-600 hover:text-nordic-blue-700 font-medium transition-colors"
                     >
                       {isLoadingMore ? (
-                        <div className=\"flex items-center justify-center space-x-2\">
-                          <LoadingSpinner size=\"sm\" />
+                        <div className="flex items-center justify-center space-x-2">
+                          <LoadingSpinner size="sm" />
                           <span>Laddar fler...</span>
                         </div>
                       ) : (
@@ -380,30 +380,30 @@ const PaymentHistoryPage: React.FC = () => {
 
           {/* Summary statistics */}
           {payments.length > 0 && (
-            <div className=\"mt-8 grid grid-cols-1 md:grid-cols-3 gap-6\">
-              <div className=\"bg-white rounded-lg shadow-sm p-6\">
-                <h3 className=\"text-lg font-semibold text-nordic-gray-900 mb-2\">
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-nordic-gray-900 mb-2">
                   Totalt antal betalningar
                 </h3>
-                <p className=\"text-3xl font-bold text-nordic-blue-600\">
+                <p className="text-3xl font-bold text-nordic-blue-600">
                   {payments.length}
                 </p>
               </div>
 
-              <div className=\"bg-white rounded-lg shadow-sm p-6\">
-                <h3 className=\"text-lg font-semibold text-nordic-gray-900 mb-2\">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-nordic-gray-900 mb-2">
                   Genomförda betalningar
                 </h3>
-                <p className=\"text-3xl font-bold text-nordic-green-600\">
+                <p className="text-3xl font-bold text-nordic-green-600">
                   {payments.filter(p => p.status === 'SUCCEEDED').length}
                 </p>
               </div>
 
-              <div className=\"bg-white rounded-lg shadow-sm p-6\">
-                <h3 className=\"text-lg font-semibold text-nordic-gray-900 mb-2\">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-nordic-gray-900 mb-2">
                   Totalt belopp (SEK)
                 </h3>
-                <p className=\"text-3xl font-bold text-nordic-gray-900\">
+                <p className="text-3xl font-bold text-nordic-gray-900">
                   {paymentService.formatCurrency(
                     payments
                       .filter(p => p.status === 'SUCCEEDED' && p.currency === 'SEK')

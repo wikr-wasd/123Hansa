@@ -91,36 +91,36 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className=\"space-y-6\">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Amount summary */}
-      <div className=\"bg-nordic-gray-50 p-4 rounded-lg\">
-        <div className=\"flex justify-between items-center text-sm text-nordic-gray-700 mb-2\">
+      <div className="bg-nordic-gray-50 p-4 rounded-lg">
+        <div className="flex justify-between items-center text-sm text-nordic-gray-700 mb-2">
           <span>Belopp:</span>
           <span>{paymentService.formatCurrency(amount, currency)}</span>
         </div>
         {description && (
-          <p className=\"text-sm text-nordic-gray-600\">{description}</p>
+          <p className="text-sm text-nordic-gray-600">{description}</p>
         )}
       </div>
 
       {/* Card input */}
-      <div className=\"space-y-2\">
-        <label className=\"block text-sm font-medium text-nordic-gray-700\">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-nordic-gray-700">
           Kortuppgifter
         </label>
-        <div className=\"border border-nordic-gray-300 rounded-lg p-3 bg-white\">
+        <div className="border border-nordic-gray-300 rounded-lg p-3 bg-white">
           <CardElement options={cardElementOptions} />
         </div>
-        <p className=\"text-xs text-nordic-gray-500\">
+        <p className="text-xs text-nordic-gray-500">
           Dina kortuppgifter krypteras säkert och lagras aldrig på våra servrar.
         </p>
       </div>
 
       {/* Security info */}
-      <div className=\"flex items-start space-x-2 p-3 bg-nordic-blue-50 rounded-lg\">
-        <div className=\"text-nordic-blue-600 mt-0.5\">🛡️</div>
-        <div className=\"text-sm text-nordic-blue-800\">
-          <p className=\"font-medium mb-1\">Säker betalning med 3D Secure</p>
+      <div className="flex items-start space-x-2 p-3 bg-nordic-blue-50 rounded-lg">
+        <div className="text-nordic-blue-600 mt-0.5">🛡️</div>
+        <div className="text-sm text-nordic-blue-800">
+          <p className="font-medium mb-1">Säker betalning med 3D Secure</p>
           <p>
             Du kan behöva bekräfta betalningen med din banks app eller SMS-kod.
           </p>
@@ -129,7 +129,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
 
       {/* Submit button */}
       <button
-        type=\"submit\"
+        type="submit"
         disabled={!stripe || isProcessing}
         className={`
           w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-200
@@ -140,8 +140,8 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         `}
       >
         {isProcessing ? (
-          <div className=\"flex items-center justify-center space-x-2\">
-            <LoadingSpinner size=\"sm\" />
+          <div className="flex items-center justify-center space-x-2">
+            <LoadingSpinner size="sm" />
             <span>Behandlar betalning...</span>
           </div>
         ) : (
@@ -209,20 +209,20 @@ const NordicPaymentForm: React.FC<{
 
   if (confirmationUrl) {
     return (
-      <div className=\"text-center space-y-6\">
-        <div className=\"text-6xl\">{methodInfo?.icon}</div>
+      <div className="text-center space-y-6">
+        <div className="text-6xl">{methodInfo?.icon}</div>
         <div>
-          <h3 className=\"text-xl font-semibold text-nordic-gray-900 mb-2\">
+          <h3 className="text-xl font-semibold text-nordic-gray-900 mb-2">
             Slutför betalning i {methodInfo?.name}
           </h3>
-          <p className=\"text-nordic-gray-600 mb-4\">
+          <p className="text-nordic-gray-600 mb-4">
             Klicka på länken nedan för att slutföra din betalning i {methodInfo?.name}-appen.
           </p>
           <a
             href={confirmationUrl}
-            target=\"_blank\"
-            rel=\"noopener noreferrer\"
-            className=\"btn-primary inline-flex items-center space-x-2\"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary inline-flex items-center space-x-2"
           >
             <span>Öppna {methodInfo?.name}</span>
             <span>🔗</span>
@@ -231,7 +231,7 @@ const NordicPaymentForm: React.FC<{
         {onCancel && (
           <button
             onClick={onCancel}
-            className=\"btn-secondary\"
+            className="btn-secondary"
           >
             Avbryt betalning
           </button>
@@ -241,37 +241,37 @@ const NordicPaymentForm: React.FC<{
   }
 
   return (
-    <div className=\"space-y-6\">
+    <div className="space-y-6">
       {/* Amount summary */}
-      <div className=\"bg-nordic-gray-50 p-4 rounded-lg\">
-        <div className=\"flex justify-between items-center text-sm text-nordic-gray-700 mb-2\">
+      <div className="bg-nordic-gray-50 p-4 rounded-lg">
+        <div className="flex justify-between items-center text-sm text-nordic-gray-700 mb-2">
           <span>Belopp:</span>
           <span>{paymentService.formatCurrency(amount, currency)}</span>
         </div>
         {description && (
-          <p className=\"text-sm text-nordic-gray-600\">{description}</p>
+          <p className="text-sm text-nordic-gray-600">{description}</p>
         )}
       </div>
 
       {/* Payment method header */}
-      <div className=\"text-center\">
-        <div className=\"text-4xl mb-2\">{methodInfo?.icon}</div>
-        <h3 className=\"text-xl font-semibold text-nordic-gray-900\">
+      <div className="text-center">
+        <div className="text-4xl mb-2">{methodInfo?.icon}</div>
+        <h3 className="text-xl font-semibold text-nordic-gray-900">
           Betala med {methodInfo?.name}
         </h3>
-        <p className=\"text-nordic-gray-600 mt-1\">
+        <p className="text-nordic-gray-600 mt-1">
           {methodInfo?.description}
         </p>
       </div>
 
       {/* Phone number input for mobile payments */}
       {requiresPhoneNumber && (
-        <div className=\"space-y-2\">
-          <label className=\"block text-sm font-medium text-nordic-gray-700\">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-nordic-gray-700">
             Mobilnummer
           </label>
           <input
-            type=\"tel\"
+            type="tel"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder={methodInfo?.placeholder}
@@ -281,7 +281,7 @@ const NordicPaymentForm: React.FC<{
             `}
           />
           {!isValidPhone && phoneNumber && (
-            <p className=\"text-sm text-red-600\">
+            <p className="text-sm text-red-600">
               Ange ett giltigt mobilnummer
             </p>
           )}
@@ -378,13 +378,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   }
 
   return (
-    <div className=\"max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6\">
+    <div className="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6">
       {/* Header */}
-      <div className=\"text-center mb-6\">
-        <h2 className=\"text-2xl font-bold text-nordic-gray-900 mb-2\">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-nordic-gray-900 mb-2">
           Slutför betalning
         </h2>
-        <p className=\"text-nordic-gray-600\">
+        <p className="text-nordic-gray-600">
           Säker och krypterad betalning för din transaktion
         </p>
       </div>
@@ -403,7 +403,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
           {/* Continue button */}
           {selectedPaymentMethod && (
-            <div className=\"mt-6 space-y-4\">
+            <div className="mt-6 space-y-4">
               <button
                 onClick={createPayment}
                 disabled={isCreatingPayment}
@@ -416,8 +416,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
                 `}
               >
                 {isCreatingPayment ? (
-                  <div className=\"flex items-center justify-center space-x-2\">
-                    <LoadingSpinner size=\"sm\" />
+                  <div className="flex items-center justify-center space-x-2">
+                    <LoadingSpinner size="sm" />
                     <span>Skapar betalning...</span>
                   </div>
                 ) : (
@@ -428,7 +428,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
               {onCancel && (
                 <button
                   onClick={onCancel}
-                  className=\"w-full py-2 px-4 text-nordic-gray-600 hover:text-nordic-gray-800 transition-colors\"
+                  className="w-full py-2 px-4 text-nordic-gray-600 hover:text-nordic-gray-800 transition-colors"
                 >
                   Avbryt
                 </button>
@@ -457,9 +457,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
               onCancel={onCancel}
             />
           ) : (
-            <div className=\"text-center py-8\">
-              <LoadingSpinner size=\"lg\" />
-              <p className=\"mt-4 text-nordic-gray-600\">Förbereder betalning...</p>
+            <div className="text-center py-8">
+              <LoadingSpinner size="lg" />
+              <p className="mt-4 text-nordic-gray-600">Förbereder betalning...</p>
             </div>
           )}
         </>

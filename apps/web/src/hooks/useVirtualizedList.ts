@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 interface VirtualizedListOptions {
   itemHeight: number;
@@ -79,21 +79,16 @@ export const VirtualizedTable = ({
     setScrollTop(e.currentTarget.scrollTop);
   };
 
-  return (
-    <div 
-      className="overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-      style={{ height: containerHeight }}
-      onScroll={handleScroll}
-    >
-      <div style={{ height: totalHeight, position: 'relative' }}>
-        <div style={{ transform: `translateY(${offsetY}px)` }}>
-          {visibleItems.map((item, index) => (
-            <div key={item.id || startIndex + index} style={{ height: itemHeight }}>
-              {renderItem(item, startIndex + index)}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  return {
+    visibleItems,
+    startIndex,
+    totalHeight,
+    offsetY,
+    handleScroll,
+    containerProps: {
+      className: "overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
+      style: { height: containerHeight },
+      onScroll: handleScroll
+    }
+  };
 };

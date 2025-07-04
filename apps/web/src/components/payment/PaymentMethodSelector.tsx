@@ -83,18 +83,18 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   if (isLoading) {
     return (
-      <div className=\"flex items-center justify-center py-8\">
-        <LoadingSpinner size=\"md\" />
-        <span className=\"ml-2 text-nordic-gray-600\">Laddar betalningsmetoder...</span>
+      <div className="flex items-center justify-center py-8">
+        <LoadingSpinner size="md" />
+        <span className="ml-2 text-nordic-gray-600">Laddar betalningsmetoder...</span>
       </div>
     );
   }
 
   if (availableMethods.length === 0) {
     return (
-      <div className=\"text-center py-8\">
-        <div className=\"text-nordic-gray-400 mb-2\">🚫</div>
-        <p className=\"text-nordic-gray-600\">
+      <div className="text-center py-8">
+        <div className="text-nordic-gray-400 mb-2">🚫</div>
+        <p className="text-nordic-gray-600">
           Inga betalningsmetoder tillgängliga för {currency}
         </p>
       </div>
@@ -102,8 +102,8 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   }
 
   return (
-    <div className=\"space-y-3\">
-      <h3 className=\"text-lg font-semibold text-nordic-gray-900 mb-4\">
+    <div className="space-y-3">
+      <h3 className="text-lg font-semibold text-nordic-gray-900 mb-4">
         Välj betalningsmetod
       </h3>
       
@@ -133,47 +133,47 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
               }
             `}>
               {isSelected && (
-                <div className=\"w-full h-full flex items-center justify-center\">
-                  <div className=\"w-2 h-2 bg-white rounded-full\"></div>
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
               )}
             </div>
 
-            <div className=\"flex items-start space-x-4 pr-8\">
+            <div className="flex items-start space-x-4 pr-8">
               {/* Method icon */}
-              <div className=\"text-2xl\">{method.icon}</div>
+              <div className="text-2xl">{method.icon}</div>
               
               {/* Method details */}
-              <div className=\"flex-1\">
-                <div className=\"flex items-center space-x-2 mb-1\">
-                  <h4 className=\"font-semibold text-nordic-gray-900\">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-1">
+                  <h4 className="font-semibold text-nordic-gray-900">
                     {method.name}
                   </h4>
                   {method.type === 'mobile' && (
-                    <span className=\"text-xs bg-nordic-green-100 text-nordic-green-800 px-2 py-1 rounded-full\">
+                    <span className="text-xs bg-nordic-green-100 text-nordic-green-800 px-2 py-1 rounded-full">
                       Mobil
                     </span>
                   )}
                 </div>
                 
-                <p className=\"text-sm text-nordic-gray-600 mb-2\">
+                <p className="text-sm text-nordic-gray-600 mb-2">
                   {method.description}
                 </p>
                 
                 {/* Fee information */}
                 {fees && (
-                  <div className=\"text-sm\">
-                    <div className=\"flex justify-between items-center text-nordic-gray-700\">
+                  <div className="text-sm">
+                    <div className="flex justify-between items-center text-nordic-gray-700">
                       <span>Belopp:</span>
                       <span>{paymentService.formatCurrency(fees.baseAmount, currency)}</span>
                     </div>
                     {fees.feeAmount > 0 && (
-                      <div className=\"flex justify-between items-center text-nordic-gray-600\">
+                      <div className="flex justify-between items-center text-nordic-gray-600">
                         <span>Avgift:</span>
                         <span>{paymentService.formatCurrency(fees.feeAmount, currency)}</span>
                       </div>
                     )}
-                    <div className=\"flex justify-between items-center font-semibold text-nordic-gray-900 border-t pt-1 mt-1\">
+                    <div className="flex justify-between items-center font-semibold text-nordic-gray-900 border-t pt-1 mt-1">
                       <span>Totalt:</span>
                       <span>{paymentService.formatCurrency(fees.totalAmount, currency)}</span>
                     </div>
@@ -182,7 +182,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
                 
                 {/* Setup required indicator */}
                 {method.requiresSetup && (
-                  <div className=\"mt-2 text-xs text-nordic-orange-600 bg-nordic-orange-50 px-2 py-1 rounded\">
+                  <div className="mt-2 text-xs text-nordic-orange-600 bg-nordic-orange-50 px-2 py-1 rounded">
                     ⚠️ Kräver konfiguration
                   </div>
                 )}
@@ -193,11 +193,11 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       })}
       
       {/* Payment security note */}
-      <div className=\"mt-6 p-3 bg-nordic-gray-50 rounded-lg\">
-        <div className=\"flex items-start space-x-2\">
-          <div className=\"text-nordic-green-600 mt-0.5\">🔒</div>
-          <div className=\"text-sm text-nordic-gray-700\">
-            <p className=\"font-medium mb-1\">Säker betalning</p>
+      <div className="mt-6 p-3 bg-nordic-gray-50 rounded-lg">
+        <div className="flex items-start space-x-2">
+          <div className="text-nordic-green-600 mt-0.5">🔒</div>
+          <div className="text-sm text-nordic-gray-700">
+            <p className="font-medium mb-1">Säker betalning</p>
             <p>
               Alla betalningar krypteras och skyddas enligt PCI DSS-standarder. 
               Dina kortuppgifter lagras aldrig på våra servrar.
@@ -208,11 +208,11 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       
       {/* 3D Secure note for card payments */}
       {selectedMethod === 'STRIPE_CARD' && (
-        <div className=\"mt-3 p-3 bg-nordic-blue-50 rounded-lg\">
-          <div className=\"flex items-start space-x-2\">
-            <div className=\"text-nordic-blue-600 mt-0.5\">🛡️</div>
-            <div className=\"text-sm text-nordic-blue-800\">
-              <p className=\"font-medium mb-1\">3D Secure autentisering</p>
+        <div className="mt-3 p-3 bg-nordic-blue-50 rounded-lg">
+          <div className="flex items-start space-x-2">
+            <div className="text-nordic-blue-600 mt-0.5">🛡️</div>
+            <div className="text-sm text-nordic-blue-800">
+              <p className="font-medium mb-1">3D Secure autentisering</p>
               <p>
                 Du kan behöva bekräfta betalningen med din banks app eller SMS-kod 
                 för extra säkerhet.
