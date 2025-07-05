@@ -665,6 +665,7 @@ const getMockListing = (id: string) => {
 const ListingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<Listing | null>(null);
+  const [recommendedListings, setRecommendedListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -694,6 +695,7 @@ const ListingDetailPage: React.FC = () => {
           if (mockResponse.recommended) {
             setRecommendedListings(mockResponse.recommended);
           }
+          setLoading(false);
           return;
         }
 
@@ -729,6 +731,11 @@ const ListingDetailPage: React.FC = () => {
             interestedBuyers: apiListing.interestedBuyers || 0
           };
           setListing(transformedListing);
+          
+          // Set recommended listings if available
+          if (data.data?.recommended) {
+            setRecommendedListings(data.data.recommended);
+          }
         } else {
           throw new Error('Ogiltig data från servern');
         }
