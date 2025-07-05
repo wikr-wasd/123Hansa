@@ -21,7 +21,7 @@ import {
   Star,
   Shield,
   Zap,
-  HeartHeart,
+  Heart,
   LogIn,
   UserPlus
 } from 'lucide-react';
@@ -95,7 +95,7 @@ const CreateListingPreview: React.FC = () => {
       description: 'Säkrad process för alla avtal'
     },
     {
-      icon: HeartHeart,
+      icon: Heart,
       title: 'Professionell Support',
       description: '3% mäklararvode inkluderar experthjälp'
     },

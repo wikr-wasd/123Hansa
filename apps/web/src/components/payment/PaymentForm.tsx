@@ -7,7 +7,7 @@ import PaymentMethodSelector from './PaymentMethodSelector';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { useAuth } from '../../stores/authStore';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 interface PaymentFormProps {
   transactionId: string;
