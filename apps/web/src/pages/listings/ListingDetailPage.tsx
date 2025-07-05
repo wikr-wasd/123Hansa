@@ -73,6 +73,325 @@ const STATUS_INFO = {
   SOLD: { name: 'Såld', color: 'gray' }
 };
 
+// Mock data for development - alla 30 listings
+const getMockListing = (id: string) => {
+  const mockListings = [
+    {
+      id: '1',
+      title: 'TechStartup AB - AI & Maskininlärning',
+      category: 'companies',
+      subcategory: 'tech',
+      askingPrice: 2500000,
+      currency: 'SEK',
+      location: 'Stockholm',
+      description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning. Etablerat 2020 med stabil kundkrets och flera stora B2B-kontrakt.',
+      highlights: ['AI-teknik', 'Stark tillväxt', 'Erfaren team', '15 anställda'],
+      images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'],
+      seller: { name: 'Anna Karlsson', verified: true, joinedDate: '2024-06-20' },
+      status: 'ACTIVE',
+      createdAt: '2024-06-20',
+      viewCount: 156,
+      interestedBuyers: 8,
+      owner: { firstName: 'Anna', lastName: 'Karlsson' },
+      monthlyRevenue: 450000,
+      monthlyProfit: 180000,
+      employees: 15,
+      isNegotiable: true,
+      businessType: 'AB'
+    },
+    {
+      id: '2',
+      title: 'Nordic Fashion E-handel',
+      category: 'ecommerce',
+      subcategory: 'fashion',
+      askingPrice: 850000,
+      currency: 'SEK',
+      location: 'Göteborg',
+      description: 'Välestablerad e-handel inom mode med egen varumärke. Stark återkommande kundkrets och växande försäljning.',
+      highlights: ['Egen varumärke', 'Återkommande kunder', 'Etablerat brand'],
+      images: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop'],
+      seller: { name: 'Erik Johansson', verified: true, joinedDate: '2024-05-15' },
+      status: 'ACTIVE',
+      createdAt: '2024-05-15',
+      viewCount: 234,
+      interestedBuyers: 12,
+      owner: { firstName: 'Erik', lastName: 'Johansson' },
+      isNegotiable: true
+    },
+    {
+      id: '3',
+      title: 'ProjectFlow SaaS - Projekthantering',
+      category: 'digital',
+      subcategory: 'saas',
+      askingPrice: 4200000,
+      currency: 'SEK',
+      location: 'Malmö',
+      description: 'Modern SaaS-plattform för projekthantering med över 500 betalande kunder. Stark tillväxt och återkommande intäkter.',
+      highlights: ['500+ kunder', 'Återkommande intäkter', 'Skalbar teknik'],
+      images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop'],
+      seller: { name: 'Sara Lindberg', verified: true, joinedDate: '2024-04-10' },
+      status: 'ACTIVE',
+      createdAt: '2024-04-10',
+      viewCount: 412,
+      interestedBuyers: 23,
+      owner: { firstName: 'Sara', lastName: 'Lindberg' },
+      isNegotiable: false
+    },
+    {
+      id: '4',
+      title: 'Café & Restaurang Central Stockholm',
+      category: 'companies',
+      subcategory: 'restaurant',
+      askingPrice: 1200000,
+      currency: 'SEK',
+      location: 'Stockholm',
+      description: 'Populär café och lunchrestaurang mitt i Stockholm. Välkänd bland lokalbefolkning med hög lönsamhet.',
+      highlights: ['Central lokalisering', 'Lojala kunder', 'Hög marginal'],
+      images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'],
+      seller: { name: 'Maria Andersson', verified: true, joinedDate: '2024-05-28' },
+      status: 'ACTIVE',
+      createdAt: '2024-05-28',
+      viewCount: 189,
+      interestedBuyers: 15,
+      owner: { firstName: 'Maria', lastName: 'Andersson' },
+      isNegotiable: true
+    },
+    {
+      id: '5',
+      title: 'Webbyrå med 25+ kunder',
+      category: 'services',
+      subcategory: 'webdesign',
+      askingPrice: 950000,
+      currency: 'SEK',
+      location: 'Uppsala',
+      description: 'Etablerad webbyrå specialiserad på WordPress och e-handel. Fasta månadsavtal med lokala företag.',
+      highlights: ['25+ aktiva kunder', 'Återkommande intäkter', 'Stark portfölj'],
+      images: ['https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=400&h=300&fit=crop'],
+      seller: { name: 'Johan Nilsson', verified: true, joinedDate: '2024-04-22' },
+      status: 'ACTIVE',
+      createdAt: '2024-04-22',
+      viewCount: 298,
+      interestedBuyers: 18,
+      owner: { firstName: 'Johan', lastName: 'Nilsson' },
+      isNegotiable: true
+    },
+    {
+      id: '6',
+      title: 'Fitness-app med 10k+ användare',
+      category: 'digital',
+      subcategory: 'mobile-app',
+      askingPrice: 1800000,
+      currency: 'SEK',
+      location: 'Västerås',
+      description: 'Populär fitness-app med över 10,000 aktiva användare. Freemium-modell med premium-prenumerationer.',
+      highlights: ['10k+ användare', 'Premium-modell', 'Stark engagement'],
+      images: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'],
+      seller: { name: 'Lisa Borg', verified: true, joinedDate: '2024-05-01' },
+      status: 'ACTIVE',
+      createdAt: '2024-05-01',
+      viewCount: 367,
+      interestedBuyers: 29,
+      owner: { firstName: 'Lisa', lastName: 'Borg' },
+      isNegotiable: true
+    },
+    {
+      id: '7',
+      title: 'Instagram-konto @nordiclifestyle (45k följare)',
+      category: 'social',
+      subcategory: 'instagram',
+      askingPrice: 320000,
+      currency: 'SEK',
+      location: 'Online',
+      description: 'Verifierat Instagram-konto inom lifestyle och hälsa. Hög engagement-rate och samarbeten med varumärken.',
+      highlights: ['45k följare', 'Verifierat konto', 'Hög engagement'],
+      images: ['https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=300&fit=crop'],
+      seller: { name: 'Emma Svensson', verified: true, joinedDate: '2024-06-05' },
+      status: 'ACTIVE',
+      createdAt: '2024-06-05',
+      viewCount: 445,
+      interestedBuyers: 34,
+      owner: { firstName: 'Emma', lastName: 'Svensson' },
+      isNegotiable: true
+    },
+    {
+      id: '8',
+      title: 'E-learning Platform för Kodning',
+      category: 'digital',
+      subcategory: 'education',
+      askingPrice: 3500000,
+      currency: 'SEK',
+      location: 'Linköping',
+      description: 'Online-plattform för kodutbildning med över 1000 betalande studenter. Komplett LMS-system.',
+      highlights: ['1000+ studenter', 'Komplett kursmaterial', 'Skalbar plattform'],
+      images: ['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop'],
+      seller: { name: 'David Olsson', verified: true, joinedDate: '2024-03-15' },
+      status: 'ACTIVE',
+      createdAt: '2024-03-15',
+      viewCount: 578,
+      interestedBuyers: 41,
+      owner: { firstName: 'David', lastName: 'Olsson' },
+      isNegotiable: false
+    },
+    {
+      id: '9',
+      title: 'Premium Domän: NordicTech.se',
+      category: 'domains',
+      subcategory: 'premium',
+      askingPrice: 125000,
+      currency: 'SEK',
+      location: 'Online',
+      description: 'Premium .se-domän perfekt för teknikföretag. Kort, minnesvärd och SEO-stark inom tech-branschen.',
+      highlights: ['Premium domän', '.se TLD', 'Tech-fokuserad'],
+      images: ['https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop'],
+      seller: { name: 'Peter Gustafsson', verified: true, joinedDate: '2024-06-12' },
+      status: 'ACTIVE',
+      createdAt: '2024-06-12',
+      viewCount: 167,
+      interestedBuyers: 12,
+      owner: { firstName: 'Peter', lastName: 'Gustafsson' },
+      isNegotiable: true
+    },
+    {
+      id: '10',
+      title: 'YouTube-kanal Gaming (120k prenumeranter)',
+      category: 'content',
+      subcategory: 'youtube',
+      askingPrice: 890000,
+      currency: 'SEK',
+      location: 'Online',
+      description: 'Etablerad gaming-kanal med över 120,000 prenumeranter. Monetiserad med sponsorkontrakt.',
+      highlights: ['120k prenumeranter', 'Monetiserad', 'Gaming-nisch'],
+      images: ['https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=300&fit=crop'],
+      seller: { name: 'Alexander Berg', verified: true, joinedDate: '2024-04-30' },
+      status: 'ACTIVE',
+      createdAt: '2024-04-30',
+      viewCount: 634,
+      interestedBuyers: 47,
+      owner: { firstName: 'Alexander', lastName: 'Berg' },
+      isNegotiable: true
+    },
+    {
+      id: '11',
+      title: 'Redovisningsbyrå med 80 kunder',
+      category: 'services',
+      subcategory: 'accounting',
+      askingPrice: 2100000,
+      currency: 'SEK',
+      location: 'Örebro',
+      description: 'Välkänd redovisningsbyrå med 80 fasta kunder. Lång erfarenhet och stark lokal reputation.',
+      highlights: ['80 fasta kunder', 'Lokal reputation', 'Stabil affär'],
+      images: ['https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop'],
+      seller: { name: 'Margareta Lind', verified: true, joinedDate: '2024-03-22' },
+      status: 'ACTIVE',
+      createdAt: '2024-03-22',
+      viewCount: 245,
+      interestedBuyers: 19,
+      owner: { firstName: 'Margareta', lastName: 'Lind' },
+      isNegotiable: true
+    },
+    {
+      id: '12',
+      title: 'Affiliate-sajt inom Husdjur (50k SEK/mån)',
+      category: 'affiliate',
+      subcategory: 'pets',
+      askingPrice: 750000,
+      currency: 'SEK',
+      location: 'Online',
+      description: 'Lönsam affiliate-sajt inom husdjursnischen. Genererar 50,000 SEK per månad i passiv inkomst.',
+      highlights: ['50k SEK/mån', 'Passiv inkomst', 'Etablerad trafik'],
+      images: ['https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop'],
+      seller: { name: 'Caroline Hedström', verified: true, joinedDate: '2024-05-18' },
+      status: 'ACTIVE',
+      createdAt: '2024-05-18',
+      viewCount: 523,
+      interestedBuyers: 38,
+      owner: { firstName: 'Caroline', lastName: 'Hedström' },
+      isNegotiable: true
+    },
+    // Lägg till fler listings här för att få alla 30...
+    {
+      id: '13',
+      title: 'Hårfrisör-salong Centrala Göteborg',
+      category: 'companies',
+      subcategory: 'beauty',
+      askingPrice: 680000,
+      currency: 'SEK',
+      location: 'Göteborg',
+      description: 'Modern hårfrisör-salong i centrala Göteborg. Lojal kundkrets och fullt bokad 3 månader framåt.',
+      highlights: ['Central lokalisering', 'Lojala kunder', 'Fullt bokad'],
+      images: ['https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop'],
+      seller: { name: 'Jessica Palmqvist', verified: true, joinedDate: '2024-04-08' },
+      status: 'ACTIVE',
+      createdAt: '2024-04-08',
+      viewCount: 312,
+      interestedBuyers: 22,
+      owner: { firstName: 'Jessica', lastName: 'Palmqvist' },
+      isNegotiable: true
+    },
+    {
+      id: '14',
+      title: 'CRM-system för Småföretag (SaaS)',
+      category: 'digital',
+      subcategory: 'saas',
+      askingPrice: 2800000,
+      currency: 'SEK',
+      location: 'Helsingborg',
+      description: 'Enkelt CRM-system speciellt utvecklat för småföretag. 300+ betalande kunder och växande.',
+      highlights: ['300+ kunder', 'SMB-fokus', 'Återkommande intäkter'],
+      images: ['https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop'],
+      seller: { name: 'Thomas Rydberg', verified: true, joinedDate: '2024-02-14' },
+      status: 'ACTIVE',
+      createdAt: '2024-02-14',
+      viewCount: 467,
+      interestedBuyers: 31,
+      owner: { firstName: 'Thomas', lastName: 'Rydberg' },
+      isNegotiable: true
+    },
+    {
+      id: '15',
+      title: 'E-handel Hemtextil & Inredning',
+      category: 'ecommerce',
+      subcategory: 'home',
+      askingPrice: 1450000,
+      currency: 'SEK',
+      location: 'Växjö',
+      description: 'Välsorterad e-handel inom hemtextil och inredning. Stark tillväxt under senaste året.',
+      highlights: ['Bred produktsortiment', 'Stark tillväxt', 'Etablerade leverantörer'],
+      images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop'],
+      seller: { name: 'Helena Åkerlund', verified: true, joinedDate: '2024-03-09' },
+      status: 'ACTIVE',
+      createdAt: '2024-03-09',
+      viewCount: 389,
+      interestedBuyers: 26,
+      owner: { firstName: 'Helena', lastName: 'Åkerlund' },
+      isNegotiable: true
+    }
+  ];
+
+  const listing = mockListings.find(l => l.id === id);
+  if (!listing) return null;
+
+  // Create recommended listings (excluding current one)
+  const recommended = mockListings.filter(l => l.id !== id).slice(0, 3);
+
+  return {
+    listing: {
+      ...listing,
+      subcategory: listing.subcategory || '',
+      highlights: listing.highlights || [],
+      images: listing.images || [],
+      seller: {
+        name: listing.owner?.firstName ? `${listing.owner.firstName} ${listing.owner.lastName}` : 'Anonym säljare',
+        verified: true,
+        joinedDate: listing.createdAt
+      },
+      viewCount: listing.viewCount || 0,
+      interestedBuyers: listing.interestedBuyers || 0
+    },
+    recommended
+  };
+};
+
 const ListingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [listing, setListing] = useState<Listing | null>(null);
@@ -97,9 +416,29 @@ const ListingDetailPage: React.FC = () => {
       setError(null);
       
       try {
+        // For development, use mock data directly if API fails
+        const isDevelopment = import.meta.env.DEV;
         const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
         console.log('Fetching listing details from:', `${API_URL}/listings/${id}`);
-        const response = await fetch(`${API_URL}/listings/${id}`);
+        
+        let response;
+        try {
+          response = await fetch(`${API_URL}/listings/${id}`);
+        } catch (networkError) {
+          if (isDevelopment) {
+            console.log('API call failed in development, using mock data');
+            // Use mock data for development
+            const mockResponse = getMockListing(id);
+            if (mockResponse) {
+              setListing(mockResponse.listing);
+              if (mockResponse.recommended) {
+                setRecommendedListings(mockResponse.recommended);
+              }
+              return;
+            }
+          }
+          throw networkError;
+        }
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -677,13 +1016,18 @@ const ListingDetailPage: React.FC = () => {
 
             {/* Right Column - Price and Actions */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
+              {/* Premium Bid Section - Not Sticky */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
                 <div className="text-center mb-6">
+                  <div className="text-sm font-medium text-gray-500 mb-1">Utgångspris</div>
                   <div className="text-3xl font-bold text-gray-900 mb-2">
                     {formatPrice(listing.askingPrice, listing.currency)}
                   </div>
-                  <div className="text-sm text-gray-500">Utgångspris</div>
+                  {listing.isNegotiable && (
+                    <div className="text-sm text-gray-600">Förhandlingsbart</div>
+                  )}
                 </div>
+                
                 
                 <div className="space-y-3 mb-6">
                   <button
@@ -751,6 +1095,81 @@ const ListingDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Recommended Listings Section */}
+              {recommendedListings.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+                    Rekommenderade annonser
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">Andra annonser som våra kunder kan finna intressanta</p>
+                  <div className="space-y-4">
+                    {recommendedListings.map((rec) => {
+                      const recCategoryInfo = getCategoryInfo(rec.category);
+                      const RecIconComponent = recCategoryInfo.icon;
+                      return (
+                        <Link
+                          key={rec.id}
+                          to={`/listings/${rec.id}`}
+                          className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                        >
+                          <div className="flex space-x-3">
+                            <div className="flex-shrink-0">
+                              <img
+                                src={rec.images[0]}
+                                alt={rec.title}
+                                className="w-16 h-16 object-cover rounded-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop';
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColorClasses(rec.category)}`}>
+                                  <RecIconComponent className="w-3 h-3 mr-1 inline" />
+                                  {recCategoryInfo.name}
+                                </span>
+                              </div>
+                              <h4 className="font-semibold text-gray-900 truncate mb-1">{rec.title}</h4>
+                              <div className="flex items-center justify-between">
+                                <div className="text-lg font-bold text-blue-600">
+                                  {formatPrice(rec.askingPrice, rec.currency)}
+                                </div>
+                                <div className="flex items-center space-x-3 text-xs text-gray-500">
+                                  <div className="flex items-center">
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    {rec.viewCount}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Users className="w-3 h-3 mr-1" />
+                                    {rec.interestedBuyers}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center text-xs text-gray-500 mt-1">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                {rec.location}
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Link
+                      to="/listings"
+                      className="flex items-center justify-center w-full py-2 px-4 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                    >
+                      Se alla annonser
+                      <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

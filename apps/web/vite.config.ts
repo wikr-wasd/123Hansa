@@ -45,14 +45,6 @@ export default defineConfig({
     port: 3002,
     host: true,
     strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path,
-      },
-    },
   },
   build: {
     outDir: 'dist',
