@@ -1,9 +1,6 @@
 {
   "version": 2,
   "name": "123hansa-marketplace",
-  "buildCommand": "cd apps/web && npm install && npm run build",
-  "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production",
     "VITE_API_URL": "/api"
