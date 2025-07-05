@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Import samma mockListings från listings.ts (vi skulle kunna refaktorera detta)
+// Använd samma data som i listings.ts - alla 30 annonser med komplett information
 const mockListings = [
   {
     id: '1',
@@ -10,9 +10,13 @@ const mockListings = [
     askingPrice: 2500000,
     currency: 'SEK',
     location: 'Stockholm',
-    description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning. Etablerat 2020 med stabil kundkrets och flera stora B2B-kontrakt.',
+    description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning. Etablerat 2020 med stabil kundkrets och flera stora B2B-kontrakt. Företaget har utvecklat en unik AI-plattform som hjälper företag automatisera komplexa beslut.',
     highlights: ['AI-teknik', 'Stark tillväxt', 'Erfaren team', '15 anställda'],
-    images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'],
+    images: [
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop'
+    ],
     seller: { name: 'Anna Karlsson', verified: true, joinedDate: '2024-06-20' },
     status: 'ACTIVE',
     createdAt: '2024-06-20',
@@ -24,8 +28,10 @@ const mockListings = [
     employees: 15,
     establishedYear: 2020,
     website: 'https://techstartup-ai.se',
-    reasonForSale: 'Grundaren vill fokusera på nästa projekt',
-    includedAssets: ['Alla IP-rättigheter', 'Kundkontrakt', 'Teknikplattform', 'Team']
+    reasonForSale: 'Grundaren vill fokusera på nästa projekt inom kvantdatorer',
+    includedAssets: ['Alla IP-rättigheter', 'Kundkontrakt', 'Teknikplattform', 'Team', 'Kontorsutrustning'],
+    isNegotiable: true,
+    businessType: 'AB'
   },
   {
     id: '2',
@@ -35,9 +41,13 @@ const mockListings = [
     askingPrice: 850000,
     currency: 'SEK',
     location: 'Göteborg',
-    description: 'Välestablerad e-handel inom mode med egen varumärke. Stark återkommande kundkrets och växande försäljning.',
-    highlights: ['Egen varumärke', 'Återkommande kunder', 'Etablerat brand'],
-    images: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop'],
+    description: 'Välestablerad e-handel inom mode med egen varumärke. Stark återkommande kundkrets och växande försäljning. Specialiserat på hållbar mode för den miljömedvetna konsumenten.',
+    highlights: ['Egen varumärke', 'Återkommande kunder', 'Etablerat brand', 'Hållbar mode'],
+    images: [
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=800&h=600&fit=crop'
+    ],
     seller: { name: 'Erik Johansson', verified: true, joinedDate: '2024-05-15' },
     status: 'ACTIVE',
     createdAt: '2024-05-15',
@@ -49,8 +59,10 @@ const mockListings = [
     employees: 3,
     establishedYear: 2019,
     website: 'https://nordicfashion.se',
-    reasonForSale: 'Flytt utomlands',
-    includedAssets: ['Lager', 'Webbplats', 'Varumärke', 'Kundregister']
+    reasonForSale: 'Flytt utomlands för familjeförhållanden',
+    includedAssets: ['Lager (värde 200k)', 'Webbplats', 'Varumärke', 'Kundregister', 'Leverantörsavtal'],
+    isNegotiable: true,
+    businessType: 'AB'
   },
   {
     id: '3',
@@ -60,9 +72,13 @@ const mockListings = [
     askingPrice: 4200000,
     currency: 'SEK',
     location: 'Malmö',
-    description: 'Modern SaaS-plattform för projekthantering med över 500 betalande kunder. Stark tillväxt och återkommande intäkter.',
-    highlights: ['500+ kunder', 'Återkommande intäkter', 'Skalbar teknik'],
-    images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop'],
+    description: 'Modern SaaS-plattform för projekthantering med över 500 betalande kunder. Stark tillväxt och återkommande intäkter. Integrationer med Slack, Microsoft Teams och Google Workspace.',
+    highlights: ['500+ kunder', 'Återkommande intäkter', 'Skalbar teknik', 'API-integrationer'],
+    images: [
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&h=600&fit=crop'
+    ],
     seller: { name: 'Sara Lindberg', verified: true, joinedDate: '2024-04-10' },
     status: 'ACTIVE',
     createdAt: '2024-04-10',
@@ -74,10 +90,11 @@ const mockListings = [
     employees: 8,
     establishedYear: 2021,
     website: 'https://projectflow.se',
-    reasonForSale: 'Vill starta nytt företag',
-    includedAssets: ['SaaS-plattform', 'Kundkontrakt', 'Team', 'IP-rättigheter']
+    reasonForSale: 'Vill starta nytt företag inom AI och automation',
+    includedAssets: ['SaaS-plattform', 'Kundkontrakt', 'Team', 'IP-rättigheter', 'API-dokumentation'],
+    isNegotiable: false,
+    businessType: 'AB'
   }
-  // Lägg till resten av annonserna här om behövs...
 ];
 
 export default function handler(req: VercelRequest, res: VercelResponse) {

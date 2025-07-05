@@ -97,7 +97,9 @@ const ListingDetailPage: React.FC = () => {
       setError(null);
       
       try {
-        const response = await fetch(`/api/listings/${id}`);
+        const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+        console.log('Fetching listing details from:', `${API_URL}/listings/${id}`);
+        const response = await fetch(`${API_URL}/listings/${id}`);
         
         if (!response.ok) {
           if (response.status === 404) {
