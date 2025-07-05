@@ -3,7 +3,7 @@
   "name": "123hansa-marketplace",
   "buildCommand": "cd apps/web && npm install && npm run build",
   "outputDirectory": "apps/web/dist",
-  "installCommand": "echo 'Skipping root install'",
+  "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production",
     "VITE_API_URL": "/api"
