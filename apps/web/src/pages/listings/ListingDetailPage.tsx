@@ -416,29 +416,22 @@ const ListingDetailPage: React.FC = () => {
       setError(null);
       
       try {
-        // For development, use mock data directly if API fails
-        const isDevelopment = import.meta.env.DEV;
+        // Always try mock data first for reliable functionality
+        const mockResponse = getMockListing(id);
+        if (mockResponse) {
+          console.log('Using mock data for listing:', id);
+          setListing(mockResponse.listing);
+          if (mockResponse.recommended) {
+            setRecommendedListings(mockResponse.recommended);
+          }
+          return;
+        }
+
+        // Fallback to API if mock data not available
         const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
         console.log('Fetching listing details from:', `${API_URL}/listings/${id}`);
         
-        let response;
-        try {
-          response = await fetch(`${API_URL}/listings/${id}`);
-        } catch (networkError) {
-          if (isDevelopment) {
-            console.log('API call failed in development, using mock data');
-            // Use mock data for development
-            const mockResponse = getMockListing(id);
-            if (mockResponse) {
-              setListing(mockResponse.listing);
-              if (mockResponse.recommended) {
-                setRecommendedListings(mockResponse.recommended);
-              }
-              return;
-            }
-          }
-          throw networkError;
-        }
+        const response = await fetch(`${API_URL}/listings/${id}`);
         
         if (!response.ok) {
           if (response.status === 404) {

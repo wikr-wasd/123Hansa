@@ -85,8 +85,16 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "source": "/api/listings/([^/]+)",
+      "destination": "/api/listings/[id].ts?id=$1"
+    },
+    {
+      "source": "/api/listings",
+      "destination": "/api/listings.ts"
+    },
+    {
+      "source": "/api/auth",
+      "destination": "/api/auth.ts"
     },
     {
       "source": "/sitemap.xml",
