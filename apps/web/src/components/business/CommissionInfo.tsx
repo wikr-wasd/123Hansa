@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, HandHeart, Shield, CheckCircle } from 'lucide-react';
+import { Calculator, Heart, Shield, CheckCircle } from 'lucide-react';
 
 interface CommissionInfoProps {
   salePrice: number;
@@ -46,14 +46,14 @@ const CommissionInfo: React.FC<CommissionInfoProps> = ({ salePrice, className = 
           </div>
         </div>
 
-        {/* HandHeart Integration */}
+        {/* Heart Integration */}
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <div className="flex items-center mb-3">
-            <HandHeart className="w-5 h-5 text-purple-600 mr-2" />
-            <h4 className="font-semibold text-purple-900">Säkra Avtal med HandHeart</h4>
+            <Heart className="w-5 h-5 text-purple-600 mr-2" />
+            <h4 className="font-semibold text-purple-900">Säkra Avtal med Heart</h4>
           </div>
           <p className="text-sm text-purple-800 mb-3">
-            Alla avtal hanteras via vår partner-app <strong>HandHeart</strong> för maximal säkerhet och transparens.
+            Alla avtal hanteras via vår partner-app <strong>Heart</strong> för maximal säkerhet och transparens.
           </p>
           <div className="space-y-2">
             <div className="flex items-center text-sm text-purple-700">
@@ -100,7 +100,7 @@ const CommissionInfo: React.FC<CommissionInfoProps> = ({ salePrice, className = 
             </div>
             <div className="flex items-center">
               <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              HandHeart avtalsstöd
+              Heart avtalsstöd
             </div>
           </div>
         </div>

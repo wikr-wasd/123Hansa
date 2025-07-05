@@ -73,3 +73,16 @@ export const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, 
     </p>
   );
 };
+
+interface DialogFooterProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className = '' }) => {
+  return (
+    <div className={`mt-6 flex gap-2 ${className}`}>
+      {children}
+    </div>
+  );
+};

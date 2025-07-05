@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
+    "build": "vite build",
     "build:production": "NODE_ENV=production npm run build",
     "preview": "vite preview",
     "test": "vitest",

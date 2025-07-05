@@ -14,7 +14,7 @@ import {
   Clock,
   Star,
   Target,
-  HandHeart,
+  Heart,
   Trophy,
   Search
 } from 'lucide-react';
@@ -267,7 +267,7 @@ const SalesDemo: React.FC = () => {
                     <div>
                       <div className="text-sm font-medium text-gray-700 mb-2">Köpare:</div>
                       <div className="flex items-center text-purple-600">
-                        <HandHeart className="w-4 h-4 mr-2" />
+                        <Heart className="w-4 h-4 mr-2" />
                         {story.buyerType}
                       </div>
                     </div>

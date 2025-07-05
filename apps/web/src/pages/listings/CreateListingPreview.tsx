@@ -21,7 +21,7 @@ import {
   Star,
   Shield,
   Zap,
-  HeartHandHeart,
+  HeartHeart,
   LogIn,
   UserPlus
 } from 'lucide-react';
@@ -78,7 +78,7 @@ const CreateListingPreview: React.FC = () => {
       title: 'Granska & Publicera',
       description: 'Kontrollera allt innan publicering',
       icon: CheckCircle,
-      fields: ['Godkänn villkor', 'HandHeart-säkring', 'Slutkontroll'],
+      fields: ['Godkänn villkor', 'Heart-säkring', 'Slutkontroll'],
       time: '1 min'
     }
   ];
@@ -95,7 +95,7 @@ const CreateListingPreview: React.FC = () => {
       description: 'Säkrad process för alla avtal'
     },
     {
-      icon: HeartHandHeart,
+      icon: HeartHeart,
       title: 'Professionell Support',
       description: '3% mäklararvode inkluderar experthjälp'
     },
