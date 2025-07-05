@@ -1,0 +1,78 @@
+# Development files
+*.log
+*.env.local
+*.env.development
+.DS_Store
+Thumbs.db
+
+# Node modules (will be installed)
+node_modules/
+apps/*/node_modules/
+packages/*/node_modules/
+
+# Build artifacts
+apps/web/dist/
+apps/api/dist/
+*.tsbuildinfo
+
+# Development and testing
+apps/web/coverage/
+apps/api/coverage/
+.nyc_output/
+.coverage/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Local development
+apps/api/prisma/dev.db*
+apps/api/server.log
+apps/api/vite.log
+demo-server.log
+server.log
+
+# Docker files
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile*
+.dockerignore
+
+# Scripts and docs
+scripts/
+docs/
+*.md
+DEPLOYMENT_*.md
+SETUP_*.md
+TEST_*.md
+
+# Test files
+apps/*/test/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Backup and temporary files
+*.backup.*
+*.bak
+*.tmp
+*~
+
+# Admin and demo apps
+apps/admin/
+test-*.html
+*-demo-server.js
+enhanced-demo-server.js

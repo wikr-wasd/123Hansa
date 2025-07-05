@@ -1,12 +1,17 @@
 {
   "version": 2,
   "name": "123hansa-marketplace",
+  "buildCommand": "npm run build --workspace=apps/web",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "npm install",
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VITE_API_URL": "/api"
   },
   "functions": {
     "api/index.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "headers": [
@@ -83,12 +88,20 @@
   ],
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
     {
       "source": "/robots.txt",
       "destination": "/api/robots"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
     }
   ]
 }
