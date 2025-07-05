@@ -178,62 +178,67 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
       <CardContent className="p-4 space-y-3">
         {/* Title and location */}
         <div>
-          <h3 className="font-semibold text-lg leading-tight mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <h3 className="font-bold text-lg leading-tight mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             {listing.title}
           </h3>
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <MapPin className="w-4 h-4" />
-            {listing.location.city}, {listing.location.region}
+          <div className="flex items-center gap-1 text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
+            <MapPin className="w-4 h-4 text-red-500" />
+            <span className="font-medium">{listing.location.city}, {listing.location.region}</span>
           </div>
         </div>
 
         {/* Sector and price */}
         <div className="flex items-center justify-between">
-          <Badge className={getSectorColor(listing.sector)}>
-            {listing.sector}
+          <Badge className={`${getSectorColor(listing.sector)} shadow-sm font-semibold`}>
+            🏢 {listing.sector}
           </Badge>
-          <div className="flex items-center gap-1 text-lg font-bold text-green-600">
+          <div className="flex items-center gap-1 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
             {getPriceTypeIcon(listing.price.type)}
             {formatCurrency(listing.price.amount)}
           </div>
         </div>
 
         {/* Key metrics */}
-        <div className="grid grid-cols-3 gap-3 py-2 border-t border-gray-100">
+        <div className="grid grid-cols-3 gap-3 py-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-100">
           <div className="text-center">
-            <div className="text-sm font-medium text-gray-900">
-              {formatCurrency(listing.financials.revenue)}
+            <div className="text-sm font-bold text-blue-600 mb-1">
+              💰 {formatCurrency(listing.financials.revenue)}
             </div>
-            <div className="text-xs text-gray-500">Omsättning</div>
+            <div className="text-xs text-gray-600 font-medium">Omsättning</div>
+          </div>
+          <div className="text-center border-x border-gray-200">
+            <div className="text-sm font-bold text-purple-600 mb-1">
+              👥 {listing.financials.employees}
+            </div>
+            <div className="text-xs text-gray-600 font-medium">Anställda</div>
           </div>
           <div className="text-center">
-            <div className="text-sm font-medium text-gray-900">
-              {listing.financials.employees}
+            <div className="text-sm font-bold text-orange-600 mb-1">
+              📅 {getEstablishedYears()} år
             </div>
-            <div className="text-xs text-gray-500">Anställda</div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm font-medium text-gray-900">
-              {getEstablishedYears()} år
-            </div>
-            <div className="text-xs text-gray-500">Etablerad</div>
+            <div className="text-xs text-gray-600 font-medium">Etablerad</div>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {listing.description}
-        </p>
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border-l-4 border-blue-400">
+          <p className="text-sm text-gray-700 line-clamp-3 font-medium leading-relaxed">
+            {listing.description}
+          </p>
+        </div>
 
         {/* Features */}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
           {listing.features.slice(0, 3).map((feature, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {feature}
+            <Badge 
+              key={index} 
+              className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+            >
+              ✨ {feature}
             </Badge>
           ))}
           {listing.features.length > 3 && (
-            <Badge variant="outline" className="text-xs">
+            <Badge className="text-xs bg-gradient-to-r from-orange-400 to-pink-400 text-white border-0 shadow-md">
               +{listing.features.length - 3} mer
             </Badge>
           )}
@@ -265,8 +270,8 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
       </CardContent>
 
       {/* Action buttons */}
-      <CardFooter className="p-4 pt-0 space-y-2">
-        <div className="grid grid-cols-2 gap-2 w-full">
+      <CardFooter className="p-4 pt-0 space-y-3">
+        <div className="grid grid-cols-2 gap-3 w-full">
           <Button 
             variant="outline" 
             size="sm"
@@ -274,10 +279,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
               e.stopPropagation();
               onContactSeller(listing.id);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 text-blue-700 hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 transition-all duration-200 font-semibold"
           >
             <MessageCircle className="w-4 h-4" />
-            Kontakta
+            💬 Kontakta
           </Button>
           <Button 
             size="sm"
@@ -285,17 +290,17 @@ const BusinessCard: React.FC<BusinessCardProps> = ({
               e.stopPropagation();
               onMakeOffer(listing.id);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold"
           >
             <DollarSign className="w-4 h-4" />
-            Lägg bud
+            💰 Lägg bud
           </Button>
         </div>
         
         {/* Updated date */}
-        <div className="flex items-center justify-center gap-1 text-xs text-gray-500 w-full">
+        <div className="flex items-center justify-center gap-1 text-xs text-gray-500 w-full bg-gray-50 py-2 rounded-lg">
           <Calendar className="w-3 h-3" />
-          Uppdaterad {new Date(listing.updatedAt).toLocaleDateString('sv-SE')}
+          <span className="font-medium">Uppdaterad {new Date(listing.updatedAt).toLocaleDateString('sv-SE')}</span>
         </div>
       </CardFooter>
     </Card>

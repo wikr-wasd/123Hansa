@@ -79,14 +79,14 @@ const getMockListing = (id: string) => {
   const mockListings = [
     {
       id: '1',
-      title: 'TechStartup AB - AI & Maskininlärning',
+      title: '🚀 TechStartup AB - Revolutionerande AI & Maskininlärning',
       category: 'companies',
       subcategory: 'tech',
       askingPrice: 2500000,
       currency: 'SEK',
       location: 'Stockholm',
-      description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning. Etablerat 2020 med stabil kundkrets och flera stora B2B-kontrakt.',
-      highlights: ['AI-teknik', 'Stark tillväxt', 'Erfaren team', '15 anställda'],
+      description: '✨ Banbrytande teknikföretag som transformerar branschen med cutting-edge AI-lösningar! Etablerat 2020 och redan lönsamt med 450k SEK månadsintäkter. Stabila B2B-kontrakt med Fortune 500-företag och en prestigefylld kundportfölj. Detta är din chans att förvärva nästa unicorn! 🦄',
+      highlights: ['🤖 Banbrytande AI-teknik', '📈 300% tillväxt senaste året', '💎 Erfaret världsklass-team', '👥 15 expertanställda', '💰 Lönsamt från dag 1'],
       images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'],
       seller: { name: 'Anna Karlsson', verified: true, joinedDate: '2024-06-20' },
       status: 'ACTIVE',
@@ -102,14 +102,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '2',
-      title: 'Nordic Fashion E-handel',
+      title: '👗 Nordic Fashion Empire - Lyxig E-handel med Eget Varumärke',
       category: 'ecommerce',
       subcategory: 'fashion',
       askingPrice: 850000,
       currency: 'SEK',
       location: 'Göteborg',
-      description: 'Välestablerad e-handel inom mode med egen varumärke. Stark återkommande kundkrets och växande försäljning.',
-      highlights: ['Egen varumärke', 'Återkommande kunder', 'Etablerat brand'],
+      description: '🌟 Exklusiv modeboutique online som dominerar den nordiska marknaden! Med ett starkt varumärke och lojala kunder som återkommer gång på gång. Perfekt positionerat för internationell expansion. Drömköp för någon som vill träda in i den lukrativa modebranschen! 💎',
+      highlights: ['👑 Exklusivt eget varumärke', '💝 Superlojala återkommande kunder', '🏆 Etablerat premium-brand', '📊 Konstant växande försäljning', '🌍 Redo för global expansion'],
       images: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop'],
       seller: { name: 'Erik Johansson', verified: true, joinedDate: '2024-05-15' },
       status: 'ACTIVE',
@@ -121,14 +121,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '3',
-      title: 'ProjectFlow SaaS - Projekthantering',
+      title: '⚡ ProjectFlow SaaS - Marknadsledande Projekthantering',
       category: 'digital',
       subcategory: 'saas',
       askingPrice: 4200000,
       currency: 'SEK',
       location: 'Malmö',
-      description: 'Modern SaaS-plattform för projekthantering med över 500 betalande kunder. Stark tillväxt och återkommande intäkter.',
-      highlights: ['500+ kunder', 'Återkommande intäkter', 'Skalbar teknik'],
+      description: '🏅 Branschens #1 SaaS-plattform som revolutionerat projekthantering för 500+ betalande företag! Automatiserade återkommande intäkter på 350k SEK/månad. Skalbar cloud-arkitektur redo att hantera 10x tillväxt. Detta är en guldgruva för den rätta köparen! 💰',
+      highlights: ['🎯 500+ betalande premiumkunder', '💎 Garanterade återkommande intäkter', '🚀 Infinit skalbar teknikstack', '📈 85% kundretention', '⭐ 4.9/5 i kundnöjdhet'],
       images: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop'],
       seller: { name: 'Sara Lindberg', verified: true, joinedDate: '2024-04-10' },
       status: 'ACTIVE',
@@ -140,14 +140,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '4',
-      title: 'Café & Restaurang Central Stockholm',
+      title: '☕ Café Crown - Stockholms Mest Instagrammade Hotspot',
       category: 'companies',
       subcategory: 'restaurant',
       askingPrice: 1200000,
       currency: 'SEK',
       location: 'Stockholm',
-      description: 'Populär café och lunchrestaurang mitt i Stockholm. Välkänd bland lokalbefolkning med hög lönsamhet.',
-      highlights: ['Central lokalisering', 'Lojala kunder', 'Hög marginal'],
+      description: '🌟 Legendarisk café som blivit Stockholms hjärta! Kändisbesökt och älskad av tusentals stamgäster. Prime location med enorma marginaler och kö utanför dörren varje dag. Perfekt investering för food & beverage-entusiasten! 👑',
+      highlights: ['🏙️ Premium central Stockholm-läge', '❤️ Kultföljarskap bland stockholmare', '💰 Exceptionella vinstmarginaler', '📸 Social media-magnet', '⭐ 500+ 5-stjärniga recensioner'],
       images: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'],
       seller: { name: 'Maria Andersson', verified: true, joinedDate: '2024-05-28' },
       status: 'ACTIVE',
@@ -159,14 +159,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '5',
-      title: 'Webbyrå med 25+ kunder',
+      title: '💻 WebMasters Pro - Digital Powerhouse med 25+ Premiumkunder',
       category: 'services',
       subcategory: 'webdesign',
       askingPrice: 950000,
       currency: 'SEK',
       location: 'Uppsala',
-      description: 'Etablerad webbyrå specialiserad på WordPress och e-handel. Fasta månadsavtal med lokala företag.',
-      highlights: ['25+ aktiva kunder', 'Återkommande intäkter', 'Stark portfölj'],
+      description: '🔥 Uppsalas mest respekterade webbyrå som skapat digitala mästerverk för 25+ exklusiva kunder! Specialister på high-end WordPress & e-handel med garanterade månadsavtal. Award-winning portfölj och väntelista av potentiella kunder. Ren passiv inkomstmaskin! 💎',
+      highlights: ['👑 25+ premium långtidskunder', '💰 Förutsägbara månadsintäkter', '🏆 Award-winning designportfölj', '📈 Väntelista av nya kunder', '⚡ Turnkey-affärsmodell'],
       images: ['https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=400&h=300&fit=crop'],
       seller: { name: 'Johan Nilsson', verified: true, joinedDate: '2024-04-22' },
       status: 'ACTIVE',
@@ -178,14 +178,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '6',
-      title: 'Fitness-app med 10k+ användare',
+      title: '💪 FitLife Pro - Viral Fitness-App med 10k+ Aktiva Superfans',
       category: 'digital',
       subcategory: 'mobile-app',
       askingPrice: 1800000,
       currency: 'SEK',
       location: 'Västerås',
-      description: 'Populär fitness-app med över 10,000 aktiva användare. Freemium-modell med premium-prenumerationer.',
-      highlights: ['10k+ användare', 'Premium-modell', 'Stark engagement'],
+      description: '🔥 Sveriges mest engagerande fitness-app som förändrat 10,000+ liv! Premium freemium-modell med 35% konverteringsgrad till betalande prenumeranter. Står för launch i Norge & Danmark. App Store featured och 4.8/5 rating. Nästa stora health-tech exit! 🌟',
+      highlights: ['🏅 10k+ dagligt aktiva användare', '💵 35% freemium-till-premium konvertering', '🚀 4.8/5 App Store betyg', '🌍 International expansion klar', '📈 150% user retention'],
       images: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'],
       seller: { name: 'Lisa Borg', verified: true, joinedDate: '2024-05-01' },
       status: 'ACTIVE',
@@ -197,14 +197,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '7',
-      title: 'Instagram-konto @nordiclifestyle (45k följare)',
+      title: '📸 @NordicLifestyle - Viral Instagram Empire (45k Följare)',
       category: 'social',
       subcategory: 'instagram',
       askingPrice: 320000,
       currency: 'SEK',
       location: 'Online',
-      description: 'Verifierat Instagram-konto inom lifestyle och hälsa. Hög engagement-rate och samarbeten med varumärken.',
-      highlights: ['45k följare', 'Verifierat konto', 'Hög engagement'],
+      description: '✨ Verified lifestyle-imperium som dominerar nordisk Instagram! 45k superfans med 8.5% engagement (bransch-ledande!). Lukrativa brand partnerships med stora Nordic brands. Ready-made influencer-business som genererar 25k SEK/månad passivt! 👑',
+      highlights: ['✔️ Verifierat blue-checkmark konto', '🔥 8.5% engagement rate (branschbäst)', '💰 25k SEK/månad i sponsorintakter', '🌟 Premium Nordic lifestyle-nisch', '📈 Konstant organisk tillväxt'],
       images: ['https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=300&fit=crop'],
       seller: { name: 'Emma Svensson', verified: true, joinedDate: '2024-06-05' },
       status: 'ACTIVE',
@@ -216,14 +216,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '8',
-      title: 'E-learning Platform för Kodning',
+      title: '🎓 CodeMaster Academy - Skandinaviens #1 Kodplattform',
       category: 'digital',
       subcategory: 'education',
       askingPrice: 3500000,
       currency: 'SEK',
       location: 'Linköping',
-      description: 'Online-plattform för kodutbildning med över 1000 betalande studenter. Komplett LMS-system.',
-      highlights: ['1000+ studenter', 'Komplett kursmaterial', 'Skalbar plattform'],
+      description: '🚀 Skandinaviens ledande e-learning imperium för kodning! 1000+ betalande premium-studenter genererar 280k SEK/månad i återkommande intäkter. Komplett LMS med AI-driven personalisering. Redo att skala internationellt - nästa Coursera! 🌟',
+      highlights: ['🏆 1000+ betalande premiumstudenter', '💰 280k SEK/månad garanterad revenue', '🤖 AI-driven lärplattform', '🌍 International scalability klar', '📈 94% student completion rate'],
       images: ['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop'],
       seller: { name: 'David Olsson', verified: true, joinedDate: '2024-03-15' },
       status: 'ACTIVE',
@@ -235,14 +235,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '9',
-      title: 'Premium Domän: NordicTech.se',
+      title: '🔥 NordicTech.se - Ultimate Premium Tech-Domän',
       category: 'domains',
       subcategory: 'premium',
       askingPrice: 125000,
       currency: 'SEK',
       location: 'Online',
-      description: 'Premium .se-domän perfekt för teknikföretag. Kort, minnesvärd och SEO-stark inom tech-branschen.',
-      highlights: ['Premium domän', '.se TLD', 'Tech-fokuserad'],
+      description: '💎 Den mest värdefulla tech-domänen i Norden! NordicTech.se - perfekt för startup-unicorns och etablerade tech-giganter. Superkort, brandable och med inbyggd SEO-juice. Endast 2 ord, max impact! 🎆',
+      highlights: ['🏅 Premium .se TLD (högst förtroende)', '🔍 Instant SEO-boost för tech', '💪 Superkort & minnesvärd', '🌍 Nordic tech market leader', '🚀 Unicorn-potential brand'],
       images: ['https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop'],
       seller: { name: 'Peter Gustafsson', verified: true, joinedDate: '2024-06-12' },
       status: 'ACTIVE',
@@ -254,14 +254,14 @@ const getMockListing = (id: string) => {
     },
     {
       id: '10',
-      title: 'YouTube-kanal Gaming (120k prenumeranter)',
+      title: '🎮 GameLegend - Viral YouTube Gaming Empire (120k Fans)',
       category: 'content',
       subcategory: 'youtube',
       askingPrice: 890000,
       currency: 'SEK',
       location: 'Online',
-      description: 'Etablerad gaming-kanal med över 120,000 prenumeranter. Monetiserad med sponsorkontrakt.',
-      highlights: ['120k prenumeranter', 'Monetiserad', 'Gaming-nisch'],
+      description: '🔥 Skandinaviens hetaste gaming-kanal med 120k fanatiska fans! Monetiserad maskin som genererar 65k SEK/månad via sponsorships + AdSense. Verified YouTube Partner med exclusive brand deals. Ready för Twitch + TikTok expansion! 🏆',
+      highlights: ['✔️ YouTube Partner Program verified', '💰 65k SEK/månad passive income', '🔥 120k loyala gaming-fans', '🌟 Exclusive brand partnerships', '🚀 Multi-platform expansion ready'],
       images: ['https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=300&fit=crop'],
       seller: { name: 'Alexander Berg', verified: true, joinedDate: '2024-04-30' },
       status: 'ACTIVE',
@@ -677,6 +677,8 @@ const ListingDetailPage: React.FC = () => {
   const [bidComment, setBidComment] = useState('');
   const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 20);
 
   // Fetch listing details
   useEffect(() => {
@@ -827,6 +829,48 @@ Med vänliga hälsningar`,
   // Legacy function for backward compatibility
   const isValidEmail = (email: string) => {
     return validateEmail(email).valid;
+  };
+
+  // Handle like functionality
+  const handleLike = () => {
+    setIsLiked(prev => {
+      const newLiked = !prev;
+      setLikeCount(prevCount => newLiked ? prevCount + 1 : prevCount - 1);
+      return newLiked;
+    });
+  };
+
+  // Handle share functionality
+  const handleListingShare = (platform?: string) => {
+    const url = window.location.href;
+    const text = `Kolla in denna annons: ${listing?.title} - ${formatPrice(listing?.askingPrice || 0, listing?.currency || 'SEK')}`;
+    
+    if (platform === 'whatsapp') {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+      window.open(whatsappUrl, '_blank');
+    } else if (platform === 'facebook') {
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      window.open(facebookUrl, '_blank');
+    } else if (platform === 'twitter') {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, '_blank');
+    } else if (platform === 'linkedin') {
+      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      window.open(linkedinUrl, '_blank');
+    } else if (platform === 'copy') {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Länk kopierad till urklipp!');
+        setShowShareModal(false);
+      });
+    }
+  };
+
+  // Handle location click - open Google Maps
+  const handleLocationClick = () => {
+    if (listing?.location) {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`;
+      window.open(mapsUrl, '_blank');
+    }
   };
 
   // Handle bid submission
@@ -1156,12 +1200,39 @@ ${contactInfo.name}`;
                   </div>
                 </div>
                 
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{listing.title}</h1>
-                
-                <div className="flex items-center text-gray-600 mb-6">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  {listing.location}
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-3xl font-bold text-gray-900">{listing.title}</h1>
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={handleLike}
+                      className={`p-2 transition-colors flex items-center space-x-1 ${
+                        isLiked 
+                          ? 'text-red-500 hover:text-red-600' 
+                          : 'text-gray-400 hover:text-red-500'
+                      }`}
+                      title={isLiked ? 'Ta bort från favoriter' : 'Lägg till i favoriter'}
+                    >
+                      <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+                      <span className="text-sm font-medium">{likeCount}</span>
+                    </button>
+                    <button 
+                      onClick={() => setShowShareModal(true)}
+                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                      title="Dela annons"
+                    >
+                      <Share2 className="w-6 h-6" />
+                    </button>
+                  </div>
                 </div>
+                
+                <button
+                  onClick={handleLocationClick}
+                  className="flex items-center text-gray-600 mb-6 hover:text-emerald-600 transition-colors cursor-pointer"
+                  title="Visa på Google Maps"
+                >
+                  <MapPin className="w-5 h-5 mr-2" />
+                  <span className="underline">{listing.location}</span>
+                </button>
                 
                 <p className="text-gray-700 leading-relaxed">{listing.description}</p>
               </div>
@@ -1548,8 +1619,7 @@ ${contactInfo.name}`;
             <div className="grid grid-cols-2 gap-3 mb-4">
               <button
                 onClick={() => {
-                  shareToWhatsApp();
-                  handleShare('whatsapp');
+                  handleListingShare('whatsapp');
                   setShowShareModal(false);
                 }}
                 className="flex items-center justify-center px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -1560,64 +1630,35 @@ ${contactInfo.name}`;
               
               <button
                 onClick={() => {
-                  shareToTelegram();
-                  handleShare('telegram');
-                  setShowShareModal(false);
-                }}
-                className="flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <Send className="w-5 h-5 mr-2" />
-                Telegram
-              </button>
-              
-              <button
-                onClick={() => {
-                  shareToMessenger();
-                  handleShare('messenger');
+                  handleListingShare('facebook');
                   setShowShareModal(false);
                 }}
                 className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Messenger
+                <div className="w-5 h-5 mr-2 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
+                Facebook
               </button>
               
               <button
                 onClick={() => {
-                  shareToEmail();
-                  handleShare('email');
+                  handleListingShare('twitter');
                   setShowShareModal(false);
                 }}
-                className="flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center justify-center px-4 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
               >
-                <Mail className="w-5 h-5 mr-2" />
-                E-post
+                <div className="w-5 h-5 mr-2 bg-white rounded text-sky-500 flex items-center justify-center text-xs font-bold">𝕏</div>
+                Twitter
               </button>
               
               <button
                 onClick={() => {
-                  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
-                  window.open(linkedinUrl, '_blank');
-                  handleShare('linkedin');
+                  handleListingShare('linkedin');
                   setShowShareModal(false);
                 }}
                 className="flex items-center justify-center px-4 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
-                <ExternalLink className="w-5 h-5 mr-2" />
+                <div className="w-5 h-5 mr-2 bg-white rounded text-blue-700 flex items-center justify-center text-xs font-bold">in</div>
                 LinkedIn
-              </button>
-              
-              <button
-                onClick={() => {
-                  const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`Kolla in denna annons: ${listing?.title}`)}`;
-                  window.open(twitterUrl, '_blank');
-                  handleShare('twitter');
-                  setShowShareModal(false);
-                }}
-                className="flex items-center justify-center px-4 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
-              >
-                <ExternalLink className="w-5 h-5 mr-2" />
-                Twitter
               </button>
             </div>
             
@@ -1631,8 +1672,8 @@ ${contactInfo.name}`;
                 />
                 <button
                   onClick={() => {
-                    copyToClipboard();
-                    handleShare('clipboard');
+                    handleListingShare('copy');
+                    setShowShareModal(false);
                   }}
                   className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                 >

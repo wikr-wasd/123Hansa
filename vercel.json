@@ -101,6 +101,10 @@
       "destination": "/api/messages.ts"
     },
     {
+      "source": "/api/crm/contact",
+      "destination": "/api/crm/contact.ts"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
