@@ -11,7 +11,7 @@ class ApiService {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || '/api',
+      baseURL: import.meta.env.VITE_API_URL || 'https://123hansa.vercel.app/api',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ class ApiService {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
-              const response = await axios.post('/api/auth/refresh', {
+              const response = await axios.post(`${import.meta.env.VITE_API_URL || 'https://123hansa.vercel.app/api'}/auth/refresh`, {
                 refreshToken,
               });
               

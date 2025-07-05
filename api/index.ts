@@ -79,11 +79,11 @@ app.get('/health', async (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/listings', listingRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/listings', listingRoutes);
+app.use('/messages', messageRoutes);
+app.use('/admin', adminRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

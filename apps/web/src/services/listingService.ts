@@ -160,7 +160,7 @@ interface ApiResponse<T = any> {
 
 // Create axios instance
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

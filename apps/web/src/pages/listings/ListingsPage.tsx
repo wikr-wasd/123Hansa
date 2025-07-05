@@ -115,7 +115,8 @@ const ListingsPage: React.FC = () => {
           if (value) params.append(key, value);
         });
         
-        const response = await fetch(`/api/listings?${params.toString()}`);
+        const API_URL = import.meta.env.VITE_API_URL || 'https://123hansa.vercel.app/api';
+        const response = await fetch(`${API_URL}/listings?${params.toString()}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch listings');

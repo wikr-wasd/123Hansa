@@ -3,7 +3,7 @@
   "name": "123hansa-marketplace",
   "env": {
     "NODE_ENV": "production",
-    "VITE_API_URL": "/api"
+    "VITE_API_URL": "https://123hansa.vercel.app/api"
   },
   "functions": {
     "api/index.ts": {
