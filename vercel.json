@@ -1,9 +1,9 @@
 {
   "version": 2,
   "name": "123hansa-marketplace",
-  "buildCommand": "npm run build --workspace=apps/web",
+  "buildCommand": "cd apps/web && npm install && npm run build",
   "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install",
+  "installCommand": "echo 'Skipping root install'",
   "env": {
     "NODE_ENV": "production",
     "VITE_API_URL": "/api"
