@@ -38,6 +38,7 @@ const CampaignDetailPage: React.FC = () => {
   const [backingAmount, setBackingAmount] = useState<number>(0);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('swish');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'updates' | 'comments' | 'faq'>('updates');
   
   const campaign = demoCampaigns.find(c => c.id === id);
   
@@ -102,7 +103,7 @@ const CampaignDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{campaign.title} - Tubba Crowdfunding</title>
+        <title>{campaign.title} - 123Hansa Crowdfunding</title>
         <meta name="description" content={campaign.description} />
       </Helmet>
 
@@ -220,29 +221,270 @@ const CampaignDetailPage: React.FC = () => {
               {/* Updates & Comments Section */}
               <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
                 <div className="flex items-center space-x-6 mb-6 border-b border-gray-100">
-                  <button className="pb-3 border-b-2 border-emerald-500 text-emerald-600 font-medium">
+                  <button 
+                    onClick={() => setActiveTab('updates')}
+                    className={`pb-3 font-medium transition-colors ${
+                      activeTab === 'updates' 
+                        ? 'border-b-2 border-emerald-500 text-emerald-600' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
                     Uppdateringar (3)
                   </button>
-                  <button className="pb-3 text-gray-500 hover:text-gray-700">
+                  <button 
+                    onClick={() => setActiveTab('comments')}
+                    className={`pb-3 font-medium transition-colors ${
+                      activeTab === 'comments' 
+                        ? 'border-b-2 border-emerald-500 text-emerald-600' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
                     Kommentarer (12)
                   </button>
-                  <button className="pb-3 text-gray-500 hover:text-gray-700">
+                  <button 
+                    onClick={() => setActiveTab('faq')}
+                    className={`pb-3 font-medium transition-colors ${
+                      activeTab === 'faq' 
+                        ? 'border-b-2 border-emerald-500 text-emerald-600' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
                     FAQ (5)
                   </button>
                 </div>
 
-                {/* Sample Update */}
+                {/* Tab Content */}
                 <div className="space-y-6">
-                  <div className="border-l-4 border-emerald-500 pl-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-gray-900">Fantastisk progress - 50% finansierat!</h4>
-                      <span className="text-sm text-gray-500">För 3 dagar sedan</span>
+                  {activeTab === 'updates' && (
+                    <div className="space-y-6">
+                      <div className="border-l-4 border-emerald-500 pl-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">Fantastisk progress - 50% finansierat!</h4>
+                          <span className="text-sm text-gray-500">För 3 dagar sedan</span>
+                        </div>
+                        <p className="text-gray-700 text-sm mb-3">
+                          Vi är helt överväldigade av responsen! Tack till alla som redan stött oss. 
+                          Vi har precis passerat 50% av vårt mål och ser fram emot att dela mer spännande nyheter snart.
+                        </p>
+                        <div className="flex items-center text-gray-500 text-xs">
+                          <Heart className="w-4 h-4 mr-1" />
+                          <span>23 likes</span>
+                          <MessageCircle className="w-4 h-4 ml-4 mr-1" />
+                          <span>5 kommentarer</span>
+                        </div>
+                      </div>
+
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">Ny design-preview släppt!</h4>
+                          <span className="text-sm text-gray-500">För 1 vecka sedan</span>
+                        </div>
+                        <p className="text-gray-700 text-sm mb-3">
+                          Vi har arbetat hårt med designteamet och kan nu visa en förhandsvisning av hur produkten kommer att se ut. 
+                          Kolla in bilderna i uppdateringen - vi är så stolta över resultatet!
+                        </p>
+                        <div className="bg-gray-100 rounded-lg p-4 mb-3">
+                          <div className="flex items-center text-blue-600 text-sm">
+                            <Star className="w-4 h-4 mr-2" />
+                            <span className="font-medium">Exklusivt för supporters</span>
+                          </div>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Som supporter får du tidig tillgång till alla designskisser och prototyper!
+                          </p>
+                        </div>
+                        <div className="flex items-center text-gray-500 text-xs">
+                          <Heart className="w-4 h-4 mr-1" />
+                          <span>67 likes</span>
+                          <MessageCircle className="w-4 h-4 ml-4 mr-1" />
+                          <span>18 kommentarer</span>
+                        </div>
+                      </div>
+
+                      <div className="border-l-4 border-purple-500 pl-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">Kampanj lanserad!</h4>
+                          <span className="text-sm text-gray-500">För 2 veckor sedan</span>
+                        </div>
+                        <p className="text-gray-700 text-sm mb-3">
+                          Äntligen är det dags! Vi lanserar officiellt vår crowdfunding-kampanj idag. 
+                          Det här har varit en dröm i månader och nu blir den verklighet tack vare er.
+                        </p>
+                        <div className="flex items-center text-gray-500 text-xs">
+                          <Heart className="w-4 h-4 mr-1" />
+                          <span>89 likes</span>
+                          <MessageCircle className="w-4 h-4 ml-4 mr-1" />
+                          <span>34 kommentarer</span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-gray-700 text-sm">
-                      Vi är helt överväldigade av responsen! Tack till alla som redan stött oss. 
-                      Vi har precis passerat 50% av vårt mål och ser fram emot att dela mer spännande nyheter snart.
-                    </p>
-                  </div>
+                  )}
+
+                  {activeTab === 'comments' && (
+                    <div className="space-y-6">
+                      <div className="text-center py-4">
+                        <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Kommentarsfunktion</h3>
+                        <p className="text-gray-600 mb-4">
+                          Här kan supporters diskutera projektet och ställa frågor till kampanjskaparen.
+                        </p>
+                      </div>
+
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-medium text-sm">A</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-gray-900">Anna Svensson</span>
+                              <span className="text-xs text-gray-500">Supporter</span>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-500">2 dagar sedan</span>
+                            </div>
+                            <p className="text-gray-700 text-sm">
+                              Fantastiskt projekt! Kan ni berätta mer om när de första produkterna kommer att levereras?
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border border-gray-200 rounded-lg p-4 ml-6">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                            <span className="text-emerald-600 font-medium text-sm">{campaign?.creator.name.charAt(0)}</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-gray-900">{campaign?.creator.name}</span>
+                              <span className="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full">Skapare</span>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-500">1 dag sedan</span>
+                            </div>
+                            <p className="text-gray-700 text-sm">
+                              Hej Anna! Första leveranserna är planerade till sommaren 2024. Vi håller alla supporters uppdaterade via kampanjuppdateringar!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 font-medium text-sm">M</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-gray-900">Magnus Blomqvist</span>
+                              <span className="text-xs text-gray-500">Supporter</span>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-500">3 dagar sedan</span>
+                            </div>
+                            <p className="text-gray-700 text-sm">
+                              Har stöttat med 2500 kr - ser verkligen fram emot att få produkten! Vilka betalningsalternativ kommer finnas?
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-4">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-sm text-gray-600 mb-3">Skriv en kommentar:</p>
+                          <textarea 
+                            placeholder="Ställ en fråga eller dela dina tankar..."
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none"
+                            rows={3}
+                          />
+                          <div className="flex justify-end mt-3">
+                            <button className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors">
+                              Skicka kommentar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'faq' && (
+                    <div className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="border border-gray-200 rounded-lg">
+                          <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <h4 className="font-semibold text-gray-900">När kommer produkten att levereras?</h4>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 text-sm">
+                              Vi planerar att börja leverera de första produkterna i juni-juli 2024. Alla supporters kommer att få uppdateringar om leveransstatus via e-post och kampanjuppdateringar.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="border border-gray-200 rounded-lg">
+                          <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <h4 className="font-semibold text-gray-900">Vad händer om kampanjen inte når sitt mål?</h4>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 text-sm">
+                              Om vi inte når vårt finansieringsmål kommer alla supporters att få sina pengar automatiskt återbetalda. 
+                              Du behöver inte göra något - återbetalningen sker via samma betalmetod som du använde.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="border border-gray-200 rounded-lg">
+                          <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <h4 className="font-semibold text-gray-900">Kan jag ändra eller avbryta mitt stöd?</h4>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 text-sm">
+                              Du kan ändra eller avbryta ditt stöd fram tills kampanjen avslutas. 
+                              Kontakta oss via e-post eller använd kontaktformuläret så hjälper vi dig.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="border border-gray-200 rounded-lg">
+                          <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <h4 className="font-semibold text-gray-900">Vilka betalningsmetoder accepteras?</h4>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 text-sm">
+                              Vi accepterar Swish, alla större kreditkort (Visa, Mastercard), samt PayPal. 
+                              Alla betalningar är säkra och krypterade.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="border border-gray-200 rounded-lg">
+                          <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <h4 className="font-semibold text-gray-900">Levererar ni internationellt?</h4>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 text-sm">
+                              Ja! Vi levererar till hela Norden (Sverige, Norge, Danmark, Finland) utan extra kostnad. 
+                              För övriga Europa tillkommer en fraktkostnad på 150 kr.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-6">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <div className="flex items-start">
+                            <Info className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
+                            <div>
+                              <h4 className="font-medium text-blue-900 mb-2">Har du fler frågor?</h4>
+                              <p className="text-blue-700 text-sm mb-3">
+                                Hittar du inte svaret på din fråga? Kontakta oss direkt så hjälper vi dig inom 24 timmar.
+                              </p>
+                              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                                Kontakta oss
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

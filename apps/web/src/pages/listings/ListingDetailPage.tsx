@@ -675,6 +675,7 @@ const ListingDetailPage: React.FC = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [bidAmount, setBidAmount] = useState('');
   const [bidComment, setBidComment] = useState('');
+  const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Fetch listing details
@@ -754,20 +755,31 @@ const ListingDetailPage: React.FC = () => {
     if (!listing) return;
     
     try {
-      const response = await fetch(`/api/listings/${listing.id}/interest`, {
+      // Send interest message via our messages API
+      const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+      const response = await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: 'Jag är intresserad av denna annons'
+          listingId: listing.id,
+          sellerId: `seller_${listing.id}`,
+          inquiryType: 'GENERAL',
+          message: `Hej ${listing.seller.name},
+
+Jag är intresserad av ditt företag "${listing.title}" och skulle vilja veta mer.
+
+Kan du kontakta mig för att diskutera möjligheterna?
+
+Med vänliga hälsningar`,
+          name: 'Intresserad köpare',
+          email: 'interested@example.com'
         })
       });
       
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.data.message);
+      if (response.ok) {
+        toast.success('Ditt intresse har registrerats! Säljaren kommer att kontakta dig.');
         setShowInterestModal(false);
         // Update interested buyers count
         setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
@@ -840,21 +852,64 @@ const ListingDetailPage: React.FC = () => {
       return;
     }
     
-    const amount = parseFloat(bidAmount.replace(/\s/g, ''));
+    const amount = parseFloat(bidAmount.replace(/\s/g, '').replace(',', '.'));
     if (isNaN(amount) || amount <= 0) {
       toast.error('Ange ett giltigt budbelopp');
       return;
     }
     
     try {
-      // Simulate API call for now
-      toast.success('Ditt bud har skickats! Säljaren kommer att kontakta dig inom kort.');
-      setShowBidModal(false);
-      setBidAmount('');
-      setBidComment('');
-      setContactInfo({ name: '', email: '', phone: '' });
-      // Update interested buyers count
-      setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
+      // Send bid via our messages API
+      const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+      const bidMessage = `Hej ${listing.seller.name},
+
+Jag vill lämna ett bud på "${listing.title}".
+
+BUDDETALJER:
+• Budbelopp: ${formatPrice(amount, listing.currency)}
+• Utgångspris: ${formatPrice(listing.askingPrice, listing.currency)}
+• Budratio: ${((amount / listing.askingPrice) * 100).toFixed(1)}%
+
+${bidComment ? `KOMMENTAR:
+${bidComment}
+
+` : ''}KONTAKTINFORMATION:
+• Namn: ${contactInfo.name}
+• E-post: ${contactInfo.email}
+${contactInfo.phone ? `• Telefon: ${contactInfo.phone}` : ''}
+
+Jag är seriöst intresserad och redo att gå vidare med köpprocessen.
+
+Med vänliga hälsningar,
+${contactInfo.name}`;
+
+      const response = await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          listingId: listing.id,
+          sellerId: `seller_${listing.id}`,
+          inquiryType: 'FINANCIAL',
+          message: bidMessage,
+          name: contactInfo.name,
+          email: contactInfo.email,
+          phone: contactInfo.phone || undefined
+        })
+      });
+      
+      if (response.ok) {
+        toast.success('Ditt bud har skickats! Säljaren kommer att kontakta dig inom kort.');
+        setShowBidModal(false);
+        setBidAmount('');
+        setBidComment('');
+        setContactInfo({ name: '', email: '', phone: '' });
+        // Update interested buyers count
+        setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
+      } else {
+        toast.error('Kunde inte skicka bud');
+      }
     } catch (err) {
       toast.error('Ett fel inträffade');
       console.error('Error submitting bid:', err);
