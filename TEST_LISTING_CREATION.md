@@ -45,7 +45,7 @@
 #### 2. **Smart Form Features** - ✅ COMPLETE
 - **Real-time validation** with error messages
 - **Progress bar** showing completion percentage
-- **Commission calculator** - appears when price is entered (3% Tubba fee)
+- **Commission calculator** - appears when price is entered (3% 123Hansa fee)
 - **Geocoding integration** - automatically converts addresses to coordinates
 - **Dynamic highlights** - add/remove company strengths
 - **Category-based subcategories** - changes based on main category selection

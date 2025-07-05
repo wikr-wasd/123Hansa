@@ -808,7 +808,7 @@ app.get('/api/professionals/search', (req, res) => {
 // Default route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Tubba.se - Nordens Marknadsplats för Företag API',
+    message: '123Hansa.se - Nordens Marknadsplats för Företag API',
     version: '2.0.0',
     description: 'Comprehensive marketplace API supporting all asset types',
     endpoints: {
@@ -841,7 +841,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Tubba.se Marketplace API running on http://localhost:${PORT}`);
+  console.log(`🚀 123Hansa.se Marketplace API running on http://localhost:${PORT}`);
   console.log('📋 Asset Types Available:');
   console.log('  🏢 Företag & Bolag (3 listings)');
   console.log('  🌐 Digitala Tillgångar (3 listings)');

@@ -174,7 +174,7 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Tubba.se - Nordens Marknadsplats för Företag</title>
+        <title>123Hansa.se - Nordens Marknadsplats för Företag</title>
         <meta name="description" content="Köp och sälj företag, digitala tillgångar, fastigheter och affärstjänster på Nordens ledande marknadsplats. Säkra transaktioner med professionell support." />
         <meta name="keywords" content="köpa företag, sälja företag, företagsförvärv, M&A, företagsmäklare, Sverige, Norge, Danmark" />
       </Helmet>
@@ -336,7 +336,7 @@ const HomePage: React.FC = () => {
                 Senaste framgångsrika affärer
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Se exempel på företag som nyligen sålts genom Tubba med framgångsrika resultat
+                Se exempel på företag som nyligen sålts genom 123Hansa med framgångsrika resultat
               </p>
             </div>
 

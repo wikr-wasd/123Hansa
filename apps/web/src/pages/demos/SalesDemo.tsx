@@ -145,8 +145,8 @@ const SalesDemo: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Framgångsrika Affärer - Demo - Tubba</title>
-        <meta name="description" content="Se exempel på framgångsrika företagsförsäljningar genom Tubba med detaljerade case studies och resultat." />
+        <title>Framgångsrika Affärer - Demo - 123Hansa</title>
+        <meta name="description" content="Se exempel på framgångsrika företagsförsäljningar genom 123Hansa med detaljerade case studies och resultat." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -167,7 +167,7 @@ const SalesDemo: React.FC = () => {
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl text-gray-600 mb-8">
-                Upptäck hur Tubba hjälper företagare att sälja sina företag framgångsrikt. 
+                Upptäck hur 123Hansa hjälper företagare att sälja sina företag framgångsrikt. 
                 Här är riktiga exempel på affärer som genomförts med professionell support.
               </p>
 

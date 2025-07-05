@@ -368,9 +368,9 @@ npm run test:e2e:professionals
 ## Contact Information
 
 For technical support or questions regarding the Professional Services system:
-- **Development Team**: dev@tubba.se
-- **Product Manager**: product@tubba.se
-- **Security Team**: security@tubba.se
+- **Development Team**: dev@123hansa.se
+- **Product Manager**: product@123hansa.se
+- **Security Team**: security@123hansa.se
 
 ---
 

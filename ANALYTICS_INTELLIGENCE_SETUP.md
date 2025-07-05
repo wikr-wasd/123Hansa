@@ -531,4 +531,4 @@ Analytics och värderingsverktyg tillhandahålls endast för informationsändam�
 - **Professional Services** (Session 11) - Mäklarnätverk och expertplattform  
 - **Performance Optimization** (Session 12) - Skalning och prestanda för tillväxt
 
-**Nästa steg är Mobile Application** för att göra Tubba tillgängligt överallt med fullständig mobilfunktionalitet.
+**Nästa steg är Mobile Application** för att göra 123Hansa tillgängligt överallt med fullständig mobilfunktionalitet.

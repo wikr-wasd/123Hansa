@@ -1,7 +1,7 @@
-# Tubba Legal & Regulatory Compliance System Setup Guide
+# 123Hansa Legal & Regulatory Compliance System Setup Guide
 
 ## Översikt
-Komplett guide för Tubba's juridiska efterlevnad och regelefterlevnad (Session 8).
+Komplett guide för 123Hansas juridiska efterlevnad och regelefterlevnad (Session 8).
 
 ## Vad som implementerats
 
@@ -423,7 +423,7 @@ Detta system tillhandahåller verktyg för regelefterlevnad men ersätter inte p
 5. Dokumentera alla compliance-processer
 
 **Ansvarsfriskrivning:**
-Användning av detta system sker på egen risk. Tubba AB ansvarar inte för juridiska konsekvenser av felaktig användning.
+Användning av detta system sker på egen risk. 123Hansa AB ansvarar inte för juridiska konsekvenser av felaktig användning.
 
 ## Nästa Steg
 

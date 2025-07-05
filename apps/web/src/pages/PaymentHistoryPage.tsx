@@ -152,8 +152,8 @@ const PaymentHistoryPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Betalningshistorik - Tubba</title>
-        <meta name="description" content="Se din betalningshistorik och transaktioner på Tubba" />
+        <title>Betalningshistorik - 123Hansa</title>
+        <meta name="description" content="Se din betalningshistorik och transaktioner på 123Hansa" />
       </Helmet>
 
       <div className="min-h-screen bg-nordic-gray-50 py-8">

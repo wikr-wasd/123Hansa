@@ -185,7 +185,7 @@ export const ProfessionalProfile: React.FC<ProfessionalProfileProps> = ({
     if (navigator.share) {
       navigator.share({
         title: `${professional?.user.firstName} ${professional?.user.lastName} - ${professional?.professionalTitle}`,
-        text: `Kolla in denna expert på Tubba`,
+        text: `Kolla in denna expert på 123Hansa`,
         url: window.location.href
       });
     } else {

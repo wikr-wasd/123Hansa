@@ -301,8 +301,8 @@ const CreateListingPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Sälj ditt företag - Tubba</title>
-        <meta name="description" content="Skapa en annons för ditt företag med Tubbas professionella mäklarservice." />
+        <title>Sälj ditt företag - 123Hansa</title>
+        <meta name="description" content="Skapa en annons för ditt företag med 123Hansas professionella mäklarservice." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -865,7 +865,7 @@ const CreateListingPage: React.FC = () => {
                           className="mt-1 mr-3"
                         />
                         <p className="text-sm text-gray-600">
-                          Jag accepterar Tubbas användarvillkor och förstår att 3% mäklararvode debiteras vid genomförd försäljning.
+                          Jag accepterar 123Hansas användarvillkor och förstår att 3% mäklararvode debiteras vid genomförd försäljning.
                           Jag intygar att all information är korrekt och att jag har rätt att sälja företaget.
                         </p>
                       </div>
@@ -933,7 +933,7 @@ const CreateListingPage: React.FC = () => {
                   </div>
                   <div className="flex items-start">
                     <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
-                    <span>Publicering på Tubba marketplace</span>
+                    <span>Publicering på 123Hansa marketplace</span>
                   </div>
                   <div className="flex items-start">
                     <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
@@ -944,7 +944,7 @@ const CreateListingPage: React.FC = () => {
 
               {/* Info Card */}
               <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                <h3 className="font-semibold text-green-900 mb-4">Fördelar med Tubba</h3>
+                <h3 className="font-semibold text-green-900 mb-4">Fördelar med 123Hansa</h3>
                 <ul className="space-y-2 text-sm text-green-800">
                   <li>• Endast 3% provision vid genomförd affär</li>
                   <li>• Säkra avtal via Heart-appen</li>

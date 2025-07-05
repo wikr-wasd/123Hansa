@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
   switch (path) {
     case '/':
       response = {
-        message: 'Tubba Minimal Test API',
+        message: '123Hansa Minimal Test API',
         status: 'running',
         port: PORT,
         endpoints: ['/health', '/api/test', '/api/listings'],

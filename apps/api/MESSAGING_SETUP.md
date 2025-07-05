@@ -1,7 +1,7 @@
-# Tubba Messaging & Notification System Setup Guide
+# 123Hansa Messaging & Notification System Setup Guide
 
 ## Översikt
-Detta är den kompletta guiden för att sätta upp Tubba's messaging och notification system (Session 6).
+Detta är den kompletta guiden för att sätta upp 123Hansas messaging och notification system (Session 6).
 
 ## Vad som implementerats
 

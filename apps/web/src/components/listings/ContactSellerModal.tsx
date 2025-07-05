@@ -145,16 +145,27 @@ Tack så mycket!`,
         throw new Error('Ogiltig e-postadress');
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock success
-      console.log('Contact form submitted:', {
-        listingId: listing.id,
-        sellerId: listing.sellerId,
-        ...formData,
-        timestamp: new Date(),
+      // Send message to API
+      const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+      const response = await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          listingId: listing.id,
+          sellerId: listing.sellerId,
+          ...formData,
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Kunde inte skicka meddelandet');
+      }
+
+      const result = await response.json();
+      console.log('Message sent successfully:', result);
 
       setSubmitSuccess(true);
       

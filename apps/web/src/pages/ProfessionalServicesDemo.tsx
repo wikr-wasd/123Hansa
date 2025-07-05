@@ -125,7 +125,7 @@ export default function ProfessionalServicesDemo() {
             <div className="prose prose-lg max-w-none">
               <p className="text-gray-600 mb-6">
                 Välkommen till den kompletta Professional Services-implementationen! 
-                Detta system transformerar Tubba från en enkel marknadsplats till ett 
+                Detta system transformerar 123Hansa från en enkel marknadsplats till ett 
                 fullständigt affärsekosystem där företag kan hitta och anlita verifierade experter.
               </p>
 

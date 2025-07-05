@@ -97,6 +97,10 @@
       "destination": "/api/auth.ts"
     },
     {
+      "source": "/api/messages",
+      "destination": "/api/messages.ts"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },

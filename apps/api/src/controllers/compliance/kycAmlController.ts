@@ -250,7 +250,7 @@ export const uploadVerificationDocument = async (req: AuthenticatedRequest, res:
 
     // In production, handle file upload with multer or similar
     // For now, simulate file upload
-    const mockFileUrl = `https://storage.tubba.se/documents/${userId}/${documentType}-${documentSide}-${Date.now()}.jpg`;
+    const mockFileUrl = `https://storage.123hansa.se/documents/${userId}/${documentType}-${documentSide}-${Date.now()}.jpg`;
 
     res.json({
       success: true,

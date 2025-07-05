@@ -256,12 +256,12 @@ export const getDataProcessingInfo = async (req: Request, res: Response) => {
       controller: {
         name: '123hansa AB',
         address: 'Stockholm, Sweden',
-        email: 'privacy@tubba.se',
+        email: 'privacy@123hansa.se',
         phone: '+46 8 123 456 78',
       },
       dataProtectionOfficer: {
         name: 'Data Protection Officer',
-        email: 'dpo@tubba.se',
+        email: 'dpo@123hansa.se',
       },
       purposes: [
         {

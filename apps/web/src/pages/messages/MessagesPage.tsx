@@ -63,8 +63,8 @@ const MessagesPage: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Meddelanden - Tubba</title>
-          <meta name="description" content="Hantera dina meddelanden och konversationer på Tubba" />
+          <title>Meddelanden - 123Hansa</title>
+          <meta name="description" content="Hantera dina meddelanden och konversationer på 123Hansa" />
         </Helmet>
         
         <div className="min-h-screen bg-nordic-gray-50 flex items-center justify-center">
@@ -80,8 +80,8 @@ const MessagesPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Meddelanden - Tubba</title>
-        <meta name="description" content="Hantera dina meddelanden och konversationer på Tubba" />
+        <title>Meddelanden - 123Hansa</title>
+        <meta name="description" content="Hantera dina meddelanden och konversationer på 123Hansa" />
       </Helmet>
 
       <div className="h-screen overflow-hidden">

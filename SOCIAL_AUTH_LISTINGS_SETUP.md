@@ -321,14 +321,14 @@ REFRESH_TOKEN_TIMEOUT=2592000000 # 30 days in milliseconds
 4. Skapa OAuth 2.0 credentials
 5. Lägg till authorized redirect URIs:
    - `http://localhost:3000/auth/callback/google` (development)
-   - `https://tubba.se/auth/callback/google` (production)
+   - `https://123hansa.se/auth/callback/google` (production)
 
 #### LinkedIn OAuth Setup
 1. Gå till [LinkedIn Developer Portal](https://developer.linkedin.com/)
 2. Skapa ny app under ditt företagskonto
 3. Lägg till OAuth 2.0 redirect URLs:
    - `http://localhost:3000/auth/callback/linkedin`
-   - `https://tubba.se/auth/callback/linkedin`
+   - `https://123hansa.se/auth/callback/linkedin`
 4. Begär tillgång till r_liteprofile och r_emailaddress scopes
 
 #### Microsoft OAuth Setup
@@ -337,7 +337,7 @@ REFRESH_TOKEN_TIMEOUT=2592000000 # 30 days in milliseconds
 3. Skapa ny app registration
 4. Konfigurera redirect URIs för Web platform:
    - `http://localhost:3000/auth/callback/microsoft`
-   - `https://tubba.se/auth/callback/microsoft`
+   - `https://123hansa.se/auth/callback/microsoft`
 5. Lägg till Microsoft Graph permissions: User.Read
 
 ### 3. Database Schema Extensions
@@ -648,7 +648,7 @@ curl -X POST http://localhost:8000/api/listings/listing-1/contact \
 ```typescript
 // Meta tags för business listings
 <Helmet>
-  <title>Företag till salu - Tubba</title>
+  <title>Företag till salu - 123Hansa</title>
   <meta name="description" content="Hitta och köp företag i Sverige..." />
   <meta name="keywords" content="företag till salu, M&A, företagsförvärv" />
   

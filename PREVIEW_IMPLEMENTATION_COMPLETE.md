@@ -164,7 +164,7 @@ const [formData, setFormData] = useState({
 - **Smart routing** baserat på authentication status
 - **Professional design** som matchar befintlig branding
 - **Time estimates** för att visa hur snabbt det går
-- **Benefits highlighting** varför Tubba är bäst
+- **Benefits highlighting** varför 123Hansa är bäst
 - **Seamless flow** från preview till actual form creation
 
 ## 🏆 CONCLUSION

@@ -100,8 +100,8 @@ const ValuationPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Företagsvärdering - Tubba</title>
-        <meta name="description" content="Få en kostnadsfri värdering av ditt företag från Tubbas experter. Professionell analys på 24 timmar." />
+        <title>Företagsvärdering - 123Hansa</title>
+        <meta name="description" content="Få en kostnadsfri värdering av ditt företag från 123Hansas experter. Professionell analys på 24 timmar." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -369,7 +369,7 @@ const ValuationPage: React.FC = () => {
               {/* Why Choose Tubba */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                  Varför välja Tubba för din företagsförsäljning?
+                  Varför välja 123Hansa för din företagsförsäljning?
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

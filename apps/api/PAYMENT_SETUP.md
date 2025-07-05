@@ -1,7 +1,7 @@
-# Tubba Payment & Transaction System Setup Guide
+# 123Hansa Payment & Transaction System Setup Guide
 
 ## Översikt
-Komplett guide för att sätta upp Tubba's betalnings- och transaktionssystem (Session 7).
+Komplett guide för att sätta upp 123Hansas betalnings- och transaktionssystem (Session 7).
 
 ## Vad som implementerats
 

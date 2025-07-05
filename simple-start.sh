@@ -8,7 +8,7 @@ sleep 2
 
 # Starta demo servern
 echo "📦 Startar demo server på port 3002..."
-cd /home/willi/tubba-project
+cd /home/willi/123Hansa
 PORT=3002 node demo-server.js &
 SERVER_PID=$!
 echo $SERVER_PID > .server_pid

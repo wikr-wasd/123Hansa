@@ -115,7 +115,7 @@ const DiscoverCampaignsPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Upptäck Kampanjer - Tubba Crowdfunding</title>
+        <title>Upptäck Kampanjer - 123Hansa Crowdfunding</title>
         <meta name="description" content="Bläddra bland hundratals affärsidéer och hitta projekt att stötta. Filtrera efter kategori, finansieringsmål och progress." />
       </Helmet>
 

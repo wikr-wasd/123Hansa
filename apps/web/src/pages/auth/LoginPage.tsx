@@ -63,8 +63,8 @@ const LoginPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Logga in - Tubba</title>
-        <meta name="description" content="Logga in på ditt Tubba-konto för att hantera dina företagslistor och transaktioner." />
+        <title>Logga in - 123Hansa</title>
+        <meta name="description" content="Logga in på ditt 123Hansa-konto för att hantera dina företagslistor och transaktioner." />
       </Helmet>
       
       <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-nordic-gray-50">

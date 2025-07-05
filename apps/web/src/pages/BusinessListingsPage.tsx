@@ -109,8 +109,8 @@ const BusinessListingsPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Företag till salu - Tubba</title>
-        <meta name="description" content="Hitta och köp företag i Sverige. Från tech-startups till etablerade verksamheter - upptäck möjligheter för företagsförvärv på Tubba." />
+        <title>Företag till salu - 123Hansa</title>
+        <meta name="description" content="Hitta och köp företag i Sverige. Från tech-startups till etablerade verksamheter - upptäck möjligheter för företagsförvärv på 123Hansa." />
         <meta name="keywords" content="företag till salu, företagsförvärv, köp företag, M&A, företagsmäklare, Sweden" />
       </Helmet>
 

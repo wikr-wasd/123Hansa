@@ -6,7 +6,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   sv: {
     translation: {
-      welcome: 'Välkommen till Tubba',
+      welcome: 'Välkommen till 123Hansa',
       login: 'Logga in',
       register: 'Registrera',
       home: 'Hem',
@@ -15,7 +15,7 @@ const resources = {
   },
   en: {
     translation: {
-      welcome: 'Welcome to Tubba',
+      welcome: 'Welcome to 123Hansa',
       login: 'Login',
       register: 'Register',
       home: 'Home',
@@ -24,7 +24,7 @@ const resources = {
   },
   no: {
     translation: {
-      welcome: 'Velkommen til Tubba',
+      welcome: 'Velkommen til 123Hansa',
       login: 'Logg inn',
       register: 'Registrer',
       home: 'Hjem',
@@ -33,7 +33,7 @@ const resources = {
   },
   da: {
     translation: {
-      welcome: 'Velkommen til Tubba',
+      welcome: 'Velkommen til 123Hansa',
       login: 'Log ind',
       register: 'Registrer',
       home: 'Hjem',

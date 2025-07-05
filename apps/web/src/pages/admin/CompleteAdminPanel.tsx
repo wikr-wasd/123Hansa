@@ -1160,7 +1160,7 @@ const CompleteAdminPanel: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Support e-post</label>
-                    <input type="email" value="support@tubba.se" className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" />
+                    <input type="email" value="support@123hansa.se" className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" />
                   </div>
                 </div>
               </div>

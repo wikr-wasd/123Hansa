@@ -53,11 +53,11 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
         ${campaign.featured ? 'ring-2 ring-emerald-400 shadow-emerald-100' : ''}
       `}>
         {/* Campaign Image */}
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative h-64 overflow-hidden">
           <img 
             src={campaign.image} 
             alt={campaign.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
           />
           {campaign.featured && (
             <div className="absolute top-3 left-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1 rounded-full text-xs font-bold">

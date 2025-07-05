@@ -96,7 +96,7 @@
 
 ## 🏆 Status: PRODUCTION READY
 
-Din Tubba-plattform är nu:
+Din 123Hansa-plattform är nu:
 - ✅ **Komplett funktionell**
 - ✅ **Enhetligt konfigurerad** 
 - ✅ **Säker och skalbar**

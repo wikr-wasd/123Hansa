@@ -28,6 +28,7 @@ import {
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ContactSellerModal from '../../components/listings/ContactSellerModal';
 
 // Types
 interface Listing {
@@ -674,8 +675,6 @@ const ListingDetailPage: React.FC = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [bidAmount, setBidAmount] = useState('');
   const [bidComment, setBidComment] = useState('');
-  const [contactMessage, setContactMessage] = useState('');
-  const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Fetch listing details
@@ -900,69 +899,6 @@ const ListingDetailPage: React.FC = () => {
     }
   };
 
-  // Handle contact seller
-  const handleContact = async () => {
-    if (!listing || !contactMessage) return;
-    
-    // Validate form data
-    if (!contactMessage.trim()) {
-      toast.error('Meddelandet är obligatoriskt');
-      return;
-    }
-    
-    if (contactMessage.length < 10) {
-      toast.error('Meddelandet måste vara minst 10 tecken långt');
-      return;
-    }
-    
-    if (!contactInfo.name.trim()) {
-      toast.error('Ditt namn är obligatoriskt');
-      return;
-    }
-    
-    if (contactInfo.name.length < 2) {
-      toast.error('Namnet måste vara minst 2 tecken långt');
-      return;
-    }
-    
-    if (!contactInfo.email.trim()) {
-      toast.error('E-post är obligatorisk');
-      return;
-    }
-    
-    const emailValidation = validateEmail(contactInfo.email);
-    if (!emailValidation.valid) {
-      toast.error(emailValidation.error);
-      return;
-    }
-    
-    try {
-      const response = await fetch(`/api/listings/${listing.id}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: contactMessage,
-          contactInfo
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.data.message);
-        setShowContactModal(false);
-        setContactMessage('');
-        setContactInfo({ name: '', email: '', phone: '' });
-      } else {
-        toast.error('Kunde inte skicka meddelande');
-      }
-    } catch (err) {
-      toast.error('Ett fel inträffade');
-      console.error('Error contacting seller:', err);
-    }
-  };
 
   // Handle share listing
   const handleShare = async (platform?: string) => {
@@ -1076,7 +1012,7 @@ const ListingDetailPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{listing.title} - Tubba</title>
+        <title>{listing.title} - 123Hansa</title>
         <meta name="description" content={listing.description} />
         <meta property="og:title" content={listing.title} />
         <meta property="og:description" content={listing.description} />
@@ -1519,71 +1455,22 @@ const ListingDetailPage: React.FC = () => {
       )}
 
       {/* Contact Modal */}
-      {showContactModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Kontakta säljare</h3>
-            <p className="text-gray-600 mb-6">
-              Skicka ett meddelande till {listing?.seller.name} om {listing?.title}.
-            </p>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meddelande *
-                </label>
-                <textarea
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
-                  placeholder="Skriv ditt meddelande här..."
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={contactInfo.name}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ditt namn *"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <input
-                  type="email"
-                  value={contactInfo.email}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="E-post *"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <input
-                type="tel"
-                value={contactInfo.phone}
-                onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="Telefon (valfritt)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowContactModal(false)}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Avbryt
-              </button>
-              <button
-                onClick={handleContact}
-                disabled={!contactMessage || !contactInfo.name || !contactInfo.email}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Skicka meddelande
-              </button>
-            </div>
-          </div>
-        </div>
+      {listing && (
+        <ContactSellerModal
+          isOpen={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          listing={{
+            id: listing.id,
+            title: listing.title,
+            seller: {
+              name: listing.seller.name,
+              verified: listing.seller.verified,
+              rating: 4.8,
+              totalTransactions: 12
+            },
+            sellerId: `seller_${listing.id}`
+          }}
+        />
       )}
 
       {/* Share Modal */}
