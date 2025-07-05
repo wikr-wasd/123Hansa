@@ -31,7 +31,7 @@ const ContactPage: React.FC = () => {
     {
       icon: Building2,
       title: "Huvudkontor",
-      details: ["Tubba AB", "Stureplan 4A", "114 35 Stockholm"]
+      details: ["123Hansa AB", "Stureplan 4A", "114 35 Stockholm"]
     },
     {
       icon: Phone,
@@ -41,7 +41,7 @@ const ContactPage: React.FC = () => {
     {
       icon: Mail,
       title: "E-post",
-      details: ["info@tubba.se", "support@tubba.se"]
+      details: ["info@123hansa.se", "support@123hansa.se"]
     },
     {
       icon: Clock,
@@ -53,8 +53,8 @@ const ContactPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Kontakta oss - Tubba</title>
-        <meta name="description" content="Kontakta Tubba för hjälp med företagsköp, försäljningar eller allmänna frågor. Vi svarar inom 24 timmar." />
+        <title>Kontakta oss - 123Hansa</title>
+        <meta name="description" content="Kontakta 123Hansa för hjälp med företagsköp, försäljningar eller allmänna frågor. Vi svarar inom 24 timmar." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">

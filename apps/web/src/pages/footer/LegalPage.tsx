@@ -15,8 +15,8 @@ const LegalPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Juridiskt - Tubba</title>
-        <meta name="description" content="Läs våra användarvillkor, integritetspolicy och juridiska riktlinjer för Tubba." />
+        <title>Juridiskt - 123Hansa</title>
+        <meta name="description" content="Läs våra användarvillkor, integritetspolicy och juridiska riktlinjer för 123Hansa." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -66,8 +66,8 @@ const LegalPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">1. Allmänt</h3>
                     <p className="text-gray-700">
-                      Dessa användarvillkor ("Villkoren") reglerar din användning av Tubba.se ("Plattformen"), 
-                      som drivs av Tubba AB ("Tubba", "vi", "oss"). Genom att använda Plattformen accepterar 
+                      Dessa användarvillkor ("Villkoren") reglerar din användning av 123Hansa.se ("Plattformen"), 
+                      som drivs av 123Hansa AB ("123Hansa", "vi", "oss"). Genom att använda Plattformen accepterar 
                       du dessa Villkor i sin helhet.
                     </p>
                   </div>
@@ -75,7 +75,7 @@ const LegalPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">2. Beskrivning av tjänsten</h3>
                     <p className="text-gray-700">
-                      Tubba är en digital marknadsplats där användare kan köpa och sälja företag, digitala 
+                      123Hansa är en digital marknadsplats där användare kan köpa och sälja företag, digitala 
                       tillgångar och affärstjänster. Vi tillhandahåller plattformen men är inte part i 
                       transaktionerna mellan köpare och säljare.
                     </p>
@@ -102,7 +102,7 @@ const LegalPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">5. Avgifter</h3>
                     <p className="text-gray-700">
-                      Tubba tar en provision på 3% av det slutliga försäljningspriset vid genomförd transaktion. 
+                      123Hansa tar en provision på 3% av det slutliga försäljningspriset vid genomförd transaktion. 
                       Inga avgifter tas för att lista annonser eller visa intresse som köpare.
                     </p>
                   </div>
@@ -110,7 +110,7 @@ const LegalPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">6. Ansvarsbegränsning</h3>
                     <p className="text-gray-700">
-                      Tubba ansvarar inte för förluster som uppstår i samband med transaktioner mellan användare. 
+                      123Hansa ansvarar inte för förluster som uppstår i samband med transaktioner mellan användare. 
                       Vi rekommenderar starkt att använda juridisk rådgivning vid företagsförvärv.
                     </p>
                   </div>
@@ -158,7 +158,7 @@ const LegalPage: React.FC = () => {
                     <p className="text-gray-700">
                       Enligt GDPR har du rätt att begära tillgång till, rättelse eller radering av dina 
                       personuppgifter. Du kan också motsätta dig behandling eller begära dataportabilitet. 
-                      Kontakta oss på privacy@tubba.se för att utöva dessa rättigheter.
+                      Kontakta oss på privacy@123hansa.se för att utöva dessa rättigheter.
                     </p>
                   </div>
                 </div>
@@ -231,10 +231,10 @@ const LegalPage: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Databehandlingsansvarig</h3>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-gray-700">
-                        <strong>Tubba AB</strong><br />
+                        <strong>123Hansa AB</strong><br />
                         Stureplan 4A<br />
                         114 35 Stockholm<br />
-                        E-post: privacy@tubba.se
+                        E-post: privacy@123hansa.se
                       </p>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const LegalPage: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Kontakta vårt DPO</h3>
                     <p className="text-gray-700">
                       För frågor om databehandling eller för att utöva dina rättigheter, 
-                      kontakta vårt dataskyddsombud på: <strong>dpo@tubba.se</strong>
+                      kontakta vårt dataskyddsombud på: <strong>dpo@123hansa.se</strong>
                     </p>
                   </div>
                 </div>

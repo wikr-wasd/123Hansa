@@ -115,11 +115,18 @@ const ListingsPage: React.FC = () => {
           if (value) params.append(key, value);
         });
         
-        const API_URL = import.meta.env.VITE_API_URL || 'https://123hansa.vercel.app/api';
+        // Get the current domain and construct API URL
+        const baseUrl = window.location.origin;
+        const API_URL = import.meta.env.VITE_API_URL || `${baseUrl}/api`;
+        console.log('Current domain:', baseUrl);
+        console.log('API URL:', API_URL);
+        console.log('Fetching from:', `${API_URL}/listings?${params.toString()}`);
         const response = await fetch(`${API_URL}/listings?${params.toString()}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch listings');
+          const errorText = await response.text();
+          console.error('API Error:', response.status, errorText);
+          throw new Error(`API Error ${response.status}: ${errorText}`);
         }
         
         const data: SearchResponse = await response.json();

@@ -16,11 +16,11 @@ import {
 const HelpPage: React.FC = () => {
   const faqs = [
     {
-      question: "Hur säljer jag mitt företag på Tubba?",
+      question: "Hur säljer jag mitt företag på 123Hansa?",
       answer: "Det är enkelt! Skapa ett konto, klicka på 'Skapa annons' och fyll i information om ditt företag. Vi granskar din annons inom 24 timmar och publicerar den när den är godkänd."
     },
     {
-      question: "Vilka avgifter tar Tubba?",
+      question: "Vilka avgifter tar 123Hansa?",
       answer: "Vi tar 3% provision vid genomförd affär. Inga avgifter för att lista ditt företag eller för att visa intresse som köpare."
     },
     {
@@ -33,7 +33,7 @@ const HelpPage: React.FC = () => {
     },
     {
       question: "Hur länge tar en företagsförsäljning?",
-      answer: "I genomsnitt tar det 45 dagar från publicering till genomförd affär på Tubba. Detta beror på företagets storlek och komplexitet."
+      answer: "I genomsnitt tar det 45 dagar från publicering till genomförd affär på 123Hansa. Detta beror på företagets storlek och komplexitet."
     },
     {
       question: "Vilken support får jag som säljare?",
@@ -60,7 +60,7 @@ const HelpPage: React.FC = () => {
       icon: Mail,
       title: "E-post",
       description: "Skicka oss dina frågor",
-      action: "support@tubba.se",
+      action: "support@123hansa.se",
       available: "Svarar inom 4 timmar"
     }
   ];
@@ -68,8 +68,8 @@ const HelpPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Hjälp & Support - Tubba</title>
-        <meta name="description" content="Få hjälp med att köpa eller sälja företag på Tubba. FAQ, guides och direktsupport." />
+        <title>Hjälp & Support - 123Hansa</title>
+        <meta name="description" content="Få hjälp med att köpa eller sälja företag på 123Hansa. FAQ, guides och direktsupport." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
