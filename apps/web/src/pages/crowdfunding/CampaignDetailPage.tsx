@@ -15,7 +15,8 @@ import {
   Star,
   MessageCircle,
   Shield,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import ProgressBar from '../../components/crowdfunding/ProgressBar';
 import { demoCampaigns } from '../../data/crowdfundingData';
@@ -39,6 +40,9 @@ const CampaignDetailPage: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('swish');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'updates' | 'comments' | 'faq'>('updates');
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [likeCount, setLikeCount] = useState<number>(Math.floor(Math.random() * 50) + 20);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
   
   const campaign = demoCampaigns.find(c => c.id === id);
   
@@ -100,6 +104,48 @@ const CampaignDetailPage: React.FC = () => {
   const percentage = (campaign.currentAmount / campaign.fundingGoal) * 100;
   const isOverfunded = campaign.currentAmount > campaign.fundingGoal;
 
+  // Handle like functionality
+  const handleLike = () => {
+    setIsLiked(prev => {
+      const newLiked = !prev;
+      setLikeCount(prevCount => newLiked ? prevCount + 1 : prevCount - 1);
+      return newLiked;
+    });
+  };
+
+  // Handle share functionality
+  const handleShare = (platform?: string) => {
+    const url = window.location.href;
+    const text = `Kolla in denna crowdfunding-kampanj: ${campaign.title}`;
+    
+    if (platform === 'whatsapp') {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+      window.open(whatsappUrl, '_blank');
+    } else if (platform === 'facebook') {
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      window.open(facebookUrl, '_blank');
+    } else if (platform === 'twitter') {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, '_blank');
+    } else if (platform === 'linkedin') {
+      const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      window.open(linkedinUrl, '_blank');
+    } else if (platform === 'copy') {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Länk kopierad till urklipp!');
+        setShowShareModal(false);
+      });
+    }
+  };
+
+  // Handle location click - open Google Maps
+  const handleLocationClick = () => {
+    if (campaign.location) {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campaign.location)}`;
+      window.open(mapsUrl, '_blank');
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -147,10 +193,23 @@ const CampaignDetailPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-6">
                   <h1 className="text-3xl font-bold text-gray-900">{campaign.title}</h1>
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                      <Heart className="w-6 h-6" />
+                    <button 
+                      onClick={handleLike}
+                      className={`p-2 transition-colors flex items-center space-x-1 ${
+                        isLiked 
+                          ? 'text-red-500 hover:text-red-600' 
+                          : 'text-gray-400 hover:text-red-500'
+                      }`}
+                      title={isLiked ? 'Ta bort från favoriter' : 'Lägg till i favoriter'}
+                    >
+                      <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+                      <span className="text-sm font-medium">{likeCount}</span>
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                    <button 
+                      onClick={() => setShowShareModal(true)}
+                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                      title="Dela kampanj"
+                    >
                       <Share2 className="w-6 h-6" />
                     </button>
                   </div>
@@ -174,10 +233,14 @@ const CampaignDetailPage: React.FC = () => {
                   <div>
                     <p className="font-semibold text-gray-900">{campaign.creator.name}</p>
                     {campaign.location && (
-                      <div className="flex items-center text-gray-500 text-sm">
+                      <button
+                        onClick={handleLocationClick}
+                        className="flex items-center text-gray-500 text-sm hover:text-emerald-600 transition-colors cursor-pointer"
+                        title="Visa på Google Maps"
+                      >
                         <MapPin className="w-4 h-4 mr-1" />
-                        {campaign.location}
-                      </div>
+                        <span className="underline">{campaign.location}</span>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -756,6 +819,89 @@ const CampaignDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Share Modal */}
+        {showShareModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-900">Dela kampanj</h3>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Dela denna crowdfunding-kampanj med dina kontakter och hjälp projektet nå sitt mål!
+              </p>
+              
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <button
+                  onClick={() => {
+                    handleShare('whatsapp');
+                    setShowShareModal(false);
+                  }}
+                  className="flex items-center justify-center px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  WhatsApp
+                </button>
+                
+                <button
+                  onClick={() => {
+                    handleShare('facebook');
+                    setShowShareModal(false);
+                  }}
+                  className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <div className="w-5 h-5 mr-2 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
+                  Facebook
+                </button>
+                
+                <button
+                  onClick={() => {
+                    handleShare('twitter');
+                    setShowShareModal(false);
+                  }}
+                  className="flex items-center justify-center px-4 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
+                >
+                  <div className="w-5 h-5 mr-2 bg-white rounded text-sky-500 flex items-center justify-center text-xs font-bold">𝕏</div>
+                  Twitter
+                </button>
+                
+                <button
+                  onClick={() => {
+                    handleShare('linkedin');
+                    setShowShareModal(false);
+                  }}
+                  className="flex items-center justify-center px-4 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                >
+                  <div className="w-5 h-5 mr-2 bg-white rounded text-blue-700 flex items-center justify-center text-xs font-bold">in</div>
+                  LinkedIn
+                </button>
+              </div>
+              
+              <div className="border-t border-gray-200 pt-4">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    value={window.location.href}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
+                  />
+                  <button
+                    onClick={() => handleShare('copy')}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                  >
+                    Kopiera
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
