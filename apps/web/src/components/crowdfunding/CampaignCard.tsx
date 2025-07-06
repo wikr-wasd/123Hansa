@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, TrendingUp, MapPin, ImageIcon } from 'lucide-react';
+import { Calendar, Users, TrendingUp, MapPin, ImageIcon, Images } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 
 export interface Campaign {
@@ -13,6 +13,7 @@ export interface Campaign {
   backers: number;
   category: string;
   image: string;
+  images?: string[]; // Additional images for gallery
   creator: {
     name: string;
     avatar?: string;
@@ -87,8 +88,16 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
               FEATURED
             </div>
           )}
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium text-gray-700">
-            {campaign.category}
+          <div className="absolute top-3 right-3 flex flex-col gap-2">
+            <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium text-gray-700">
+              {campaign.category}
+            </div>
+            {campaign.images && campaign.images.length > 0 && (
+              <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium text-gray-700 flex items-center gap-1">
+                <Images className="w-3 h-3" />
+                {campaign.images.length + 1}
+              </div>
+            )}
           </div>
           {isOverfunded && (
             <div className="absolute bottom-3 left-3 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
