@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ClaudeChatWidget } from '../ai/ClaudeChatWidget';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 interface LayoutProps {
   children: ReactNode;
@@ -85,6 +86,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     >
                       Min Sida
                     </Link>
+                    <LanguageSwitcher variant="header" />
                     <button 
                       onClick={handleLogout}
                       className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
@@ -95,6 +97,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </>
               ) : (
                 <>
+                  <LanguageSwitcher variant="header" />
                   <Link 
                     to="/login" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"

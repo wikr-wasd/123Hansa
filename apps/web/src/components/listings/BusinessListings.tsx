@@ -28,7 +28,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-1',
     title: 'Lönsam Tech-startup inom AI & Automation',
-    description: 'Välestablerat tech-företag specialiserat på AI-lösningar för småföretag. Stark tillväxt de senaste 3 åren med återkommande intäkter från SaaS-produkter. Komplett team, moderna system och skalbar arkitektur.',
+    description: 'Exceptionell investeringsmöjlighet inom AI-teknik! Detta välestablerade tech-företag har revolutionerat hur småföretag automatiserar sina processer genom innovativa AI-lösningar. Med en imponerande tillväxtresa från 0 till 4,2 miljoner SEK i omsättning på bara 5 år, visar företaget enastående potential. Vår proprietära AI-plattform betjänar över 150 kunder med 98% kundnöjdhet och 85% årlig retention rate. Produktportföljen inkluderar 3 SaaS-produkter med MRR på 280,000 SEK/månad, alla med skalbar molnarkitektur byggd på AWS. Det 12-medlemmarna starka teamet består av seniora utvecklare, AI-specialister och erfarna säljare. Företaget har redan penetrerat den svenska marknaden och planerar expansion till Norge och Danmark. Patent pending på 2 kärnteknologier och etablerade partnerskap med Microsoft och Google Cloud. Detta är din chans att förvärva nästa generations AI-företag med bevisad affärsmodell och exponentiell tillväxtpotential!',
     sector: 'Technology',
     location: {
       city: 'Stockholm',
@@ -58,6 +58,8 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-1',
     seller: {
@@ -78,7 +80,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-2',
     title: 'Etablerad Restaurang i Göteborg Centrum',
-    description: 'Populär restaurang med 25 års historia i hjärtat av Göteborg. Fullt utrustat kök, 60 sittplatser, stark lokal kundkrets och utmärkt rykte. Perfekt för någon som vill ta över en lönsam verksamhet.',
+    description: 'En kulinarisk pärla i hjärtat av Göteborg väntar på sin nästa kapitel! Denna ikoniska restaurang har varit en hörnsten i Göteborgs matscen i över 25 år och har byggt upp en lojalitetskundbas som få kan matcha. Belägen på den prestigefyllda Avenyn erbjuder restaurangen 60 sittplatser fördelade över två våningar med unik atmosfär och charm. Det fullt utrustade professionella köket är värderat till över 800,000 SEK och inkluderar moderna ugnar, kyl-/fryssystem och ventilation som renoverades 2022. Med serveringstillstånd till 02:00 och etablerade leverantörsrelationer med lokala producenter har restaurangen en genomsnittlig omsättning på 2,8 miljoner SEK årligen. Kundbasen består av 40% stamgäster, 35% turistbesök och 25% företagsluncher. Det erfarna köks- och serviceteamet (8 personer) ingår i överlåtelsen, vilket säkerställer smidig transition. Restaurangen har konsekvent fått toppbetyg på TripAdvisor (4.6/5) och Google (4.8/5). Detta är en unik möjlighet att förvärva en etablerad, lönsam restaurang med bevisat koncept i ett av Göteborgs bästa lägen!',
     sector: 'Retail',
     location: {
       city: 'Göteborg',
@@ -108,6 +110,9 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1559329007-40df8ec8c533?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-2',
     seller: {
@@ -128,7 +133,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-3',
     title: 'Produktionsföretag inom Metallbearbetning',
-    description: 'Välkänt metallbearbetningsföretag med moderna maskiner och långa kundkontrakt. Specialiserat på precisionsdel för fordonsindustrin. Stark position på den svenska marknaden.',
+    description: 'Industriell excellens med decenniers expertis! Detta framstående metallbearbetningsföretag har etablerat sig som en ledande leverantör av precisionkomponenter till Skandinaviens fordonsindustri. Med 20 års specialiserad erfarenhet och moderna CNC-maskiner värda 8 miljoner SEK, levererar vi kritiska komponenter till Volvo, Scania och andra storkonern. Vår 2,500 kvm produktionsanläggning i Sandviken är fullt certifierad enligt ISO 9001:2015 och ISO/TS 16949 för fordonsindustrin. Portföljen inkluderar 15 olika produktlinjer med långsiktiga ramavtal (ø 3-5 år) som garanterar 78% av årsomsattningen. Det 25-medlemmarna starka teamet består av erfarna maskinoperatörer, kvalitetsingenjörer och produktionsledare med genomsnittligt 12 års branschexpertis. Senaste åren har företaget konsekvent levererat EBITDA-marginaler på 17-19% med stark kassaflödesgenerering. Vår strategiska position och etablerade kundrelationer gör detta till en ideal förvärvskanditat för industriella konglomererat eller private equity som söker stabila, kassagenererande tillgångar.',
     sector: 'Manufacturing',
     location: {
       city: 'Sandviken',
@@ -158,6 +163,8 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-3',
     seller: {
@@ -178,7 +185,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-4',
     title: 'Digital Marknadsföringsbyrå i Malmö',
-    description: 'Snabbväxande digital byrå med fokus på e-handel och B2B-marknadsföring. Välrenommerade kunder, återkommande uppdrag och stark online-närvaro. Fantastisk möjlighet för expansion.',
+    description: 'Digitaliseringens framtid börjar här! Denna snabbväxande digitala marknadsföringsbyrå har på bara 6 år blivit en av Skånes mest respekterade digitala partners. Specialiserade på e-handelsoptimering och B2B-leadgenerering betjänar vi 45+ kunder från startups till börsnoterade bolag. Vårt team på 9 specialister inkluderar certifierade Google Ads-experter, SEO-strategiska, content creators och dataanalytiker. Portföljen spänner över e-handelsprojekt som genererat 125+ miljoner SEK i extra försäljning för kunder senaste året. Med 78% återkommande kunder och genomsnittliga projektvärden på 35,000 SEK driver vi konsekvent 25% årlig tillväxt. Vårt moderna 200 kvm kontor i centrala Malmö är fullt utrustat med toppmodern teknik och kreativa studios. Certifieringar inkluderar Google Premier Partner, Meta Business Partner och HubSpot Platinum. Med stark pipeline (2,1 miljoner SEK i återstående projekt) och expanderande nordisk kundkrets är detta den perfekta tidpunkten för en strategisk förvärvare att accelerera vår tillväxtresa!',
     sector: 'Services',
     location: {
       city: 'Malmö',
@@ -208,6 +215,8 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-4',
     seller: {
@@ -228,7 +237,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-5',
     title: 'Tandvårdsklinik med Modern Utrustning',
-    description: 'Välskött tandvårdsklinik i växande förort. Modern utrustning, digital röntgen, etablerat patientregister med över 1200 aktiva patienter. Möjlighet för expansion med ytterligare behandlingsrum.',
+    description: 'En väletablerad tandvårdspraktik som representerar hälsovårdens framtid! Denna moderna klinik har under 12 år byggt upp en imponerande patientbas på 1,247 aktiva patienter i Uppsala snabbväxande förorter. Kliniken är fullt utrustad med toppmodern teknologi värd 1,8 miljoner SEK, inklusive digital röntgen, CAD/CAM-system för samma-dag-kronor, laserteknik och intraoral kameror. Våra 4 behandlingsrum genererar genomsnittligt 4,1 miljoner SEK årligen med 30% EBITDA-marginal tack vare effektiva processer och hög patientnoja (4.9/5 på 1177.se). Det erfarna teamet inkluderar leg. tandläkare Dr. Lisa Holm, 2 tandhygienister och 3 tandsköterskor med genomsnittligt 8 års klinisk erfarenhet. Klinikens 320 kvm lokaler är strategiskt placerade i hälsocenter med apotek och fysioterapi, vilket säkerställer hög fotstrom. Med väntlista på 3 månader och planerad expansion till ytterligare 2 behandlingsrum finns enorma tillväxtmöjligheter. Detta är en sunderbar möjlighet för tandläkare eller hälsovårdsinvesterare att förvärva en väletablerad, lönsam praktik med bevisad affärsmodell!',
     sector: 'Healthcare',
     location: {
       city: 'Uppsala',
@@ -258,6 +267,8 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1581056771107-24ca5f033842?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-5',
     seller: {
@@ -278,7 +289,7 @@ const mockListings: BusinessListing[] = [
   {
     id: 'listing-6',
     title: 'E-handelsföretag inom Heminredning',
-    description: 'Lönsamt e-handelsföretag specialiserat på skandinavisk heminredning. Välkänt varumärke, stark online-närvaro, automatiserade processer och goda relationer med leverantörer.',
+    description: 'E-handelns nästa storsuccé väntar på dig! Detta lönsamma e-handelsföretag har under 8 år utvecklat ett starkt varumärke inom skandinavisk heminredning med över 45,000 nöjda kunder. Vår kurerade produktportfölj med 850+ SKUs spänner från handgjorda textilier till designmöbler, alla med fokus på nordisk estetik och hållbarhet. Den fullt automatiserade e-handelsplattformen genererar 7,2 miljoner SEK årligen med imponerande 15% nettomarginaler. Vårt 800 kvm lager i Kungens Kurva är strategiskt placerat för effektiv distribution med genomsnittliga leveranstider på 1.2 dagar. Etablerade leverantörsrelationer med 25+ nordiska designers och producenter säkerställer exklusiva produkter och gynnsamma marginaler. Det läna teamet på 4 personer hanterar alla aspekter från inköp till kundservice med hjälp av modern automation. Online-närvaron inkluderar 18,000 Instagram-följare, 12,000 nyhetsbrevsprenumeranter och topprankningar för 200+ sökord. Med 68% återkommande kunder och genomsnittlig ordervärde på 1,450 SEK är detta en fantastisk möjlighet för e-handelsentusiaster eller lifestyle-investerare att förvärva ett väletablerat, skalbart företag!',
     sector: 'Retail',
     location: {
       city: 'Stockholm',
@@ -308,6 +319,8 @@ const mockListings: BusinessListing[] = [
       'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=600&fit=crop',
     ],
     sellerId: 'seller-6',
     seller: {

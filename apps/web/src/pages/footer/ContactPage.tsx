@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
   Mail,
-  Phone,
   MapPin,
   Clock,
   MessageSquare,
@@ -31,12 +30,7 @@ const ContactPage: React.FC = () => {
     {
       icon: Building2,
       title: "Huvudkontor",
-      details: ["123Hansa AB", "Stureplan 4A", "114 35 Stockholm"]
-    },
-    {
-      icon: Phone,
-      title: "Telefon",
-      details: ["+46 8 123 456 78", "Mån-Fre 08:00-17:00"]
+      details: ["123Hansa AB", "Alingsås"]
     },
     {
       icon: Mail,
