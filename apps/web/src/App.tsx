@@ -39,6 +39,7 @@ const CreateCampaignPage = lazy(() => import('./pages/crowdfunding/CreateCampaig
 // Auth pages
 const TestbedLogin = lazy(() => import('./pages/auth/TestbedLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
 
 function App() {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -70,6 +71,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<EmailVerificationPage />} />
             <Route path="/listings" element={<ListingsPage />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/professional-services" element={<ProfessionalServicesDemo />} />

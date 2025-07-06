@@ -13,6 +13,7 @@ import {
 } from '@/validators/auth';
 import { randomBytes } from 'crypto';
 import { User } from '@prisma/client';
+import { emailService } from './emailService';
 
 export class AuthService {
   /**
@@ -82,6 +83,15 @@ export class AuthService {
 
       // Store refresh token
       await this.storeRefreshToken(user.id, tokens.refreshToken);
+
+      // Send verification email
+      try {
+        await emailService.sendEmailVerification(user.email, user.firstName, verificationToken);
+        logger.info(`Verification email sent to: ${user.email}`);
+      } catch (emailError) {
+        logger.error('Failed to send verification email:', emailError);
+        // Don't fail registration if email fails, but log it
+      }
 
       logger.info(`User registered: ${user.email}`);
 
@@ -369,6 +379,74 @@ export class AuthService {
       return { message: 'Email verified successfully' };
     } catch (error) {
       logger.error('Email verification error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Resend email verification
+   */
+  static async resendEmailVerification(email: string) {
+    try {
+      // Find user by email
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          isEmailVerified: true,
+          isActive: true,
+        },
+      });
+
+      if (!user || !user.isActive) {
+        throw createError.notFound('User not found');
+      }
+
+      if (user.isEmailVerified) {
+        throw createError.badRequest('Email is already verified');
+      }
+
+      // Check if there's an existing verification token
+      const existingVerification = await prisma.emailVerification.findFirst({
+        where: {
+          userId: user.id,
+          usedAt: null,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      let verificationToken: string;
+
+      if (existingVerification) {
+        // Use existing token if it's still valid
+        verificationToken = existingVerification.token;
+      } else {
+        // Create new verification token
+        verificationToken = randomBytes(32).toString('hex');
+        await prisma.emailVerification.create({
+          data: {
+            userId: user.id,
+            token: verificationToken,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+          },
+        });
+      }
+
+      // Send verification email
+      await emailService.sendEmailVerification(user.email, user.firstName, verificationToken);
+
+      logger.info(`Verification email resent to: ${user.email}`);
+
+      return { message: 'Verification email sent successfully' };
+    } catch (error) {
+      logger.error('Resend verification error:', error);
       throw error;
     }
   }

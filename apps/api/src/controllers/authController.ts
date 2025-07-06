@@ -242,4 +242,25 @@ export class AuthController {
       message: 'Password reset successfully',
     });
   });
+
+  /**
+   * Resend email verification
+   * POST /api/auth/resend-verification
+   */
+  static resendEmailVerification = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw createError.badRequest('Email is required');
+    }
+
+    // Resend verification email
+    await AuthService.resendEmailVerification(email);
+
+    // Send response
+    res.status(200).json({
+      success: true,
+      message: 'Verification email sent successfully',
+    });
+  });
 }

@@ -98,6 +98,13 @@ router.post('/reset-password',
 // Email verification routes
 router.post('/verify-email', generalLimiter, AuthController.verifyEmail);
 router.get('/verify-email/:token', generalLimiter, AuthController.verifyEmailFromUrl);
+router.post('/resend-verification', 
+  authLimiter, 
+  csrfProtection, 
+  antiSpam,
+  validateEmail,
+  AuthController.resendEmailVerification
+);
 
 // Social authentication endpoints
 router.post('/social/google', socialAuthLimiter, authenticateWithGoogle);
