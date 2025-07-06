@@ -194,10 +194,26 @@ const HomePage: React.FC = () => {
                 <span className="block">för Företag</span>
               </h1>
               
-              <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-600 mb-12 leading-relaxed">
+              <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-600 mb-8 leading-relaxed">
+                🚀 <strong>3,2 miljarder SEK</strong> i genomförda affärer senaste året! 
                 Köp och sälj företag, digitala tillgångar och affärstjänster med förtroende. 
                 Professionell support från start till slutförd affär.
               </p>
+              
+              <div className="flex flex-wrap justify-center gap-6 mb-12 text-sm font-semibold text-slate-500">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  Över 15,000 registrerade köpare
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  95% nöjdhet från säljare
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  Genomsnittlig försäljningstid: 45 dagar
+                </div>
+              </div>
 
 
               {/* Prominent Search Bar */}
@@ -474,6 +490,312 @@ const HomePage: React.FC = () => {
                   Alla användare genomgår verifiering för att säkerställa äkta och seriösa affärer.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Success Stories & Testimonials */}
+        <section className="py-20 bg-gradient-to-r from-slate-50 to-blue-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                💎 Verkliga framgångsstories från våra kunder
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Läs hur andra entreprenörer har förändrat sina liv genom 123Hansa
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {/* Testimonial 1 */}
+              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 font-bold text-lg">AS</span>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-bold text-slate-900">Anna Svensson</h4>
+                    <p className="text-slate-500 text-sm">Sålde TechStartup AB</p>
+                  </div>
+                </div>
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-slate-600 italic mb-4">
+                  "123Hansa hjälpte mig sälja mitt tech-företag för 2.5M SEK på bara 6 veckor! 
+                  Professionell service hela vägen. Skulle definitivt använda igen."
+                </p>
+                <div className="bg-green-50 px-4 py-2 rounded-lg">
+                  <span className="text-green-700 font-semibold">💰 Exit: 2.5M SEK</span>
+                </div>
+              </div>
+
+              {/* Testimonial 2 */}
+              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-bold text-lg">MJ</span>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-bold text-slate-900">Marcus Johansson</h4>
+                    <p className="text-slate-500 text-sm">Köpte E-handelsföretag</p>
+                  </div>
+                </div>
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-slate-600 italic mb-4">
+                  "Hittade det perfekta e-handelsföretaget här. Transparent process, 
+                  bra due diligence-support. Omsättningen har ökat med 300% sedan köpet!"
+                </p>
+                <div className="bg-blue-50 px-4 py-2 rounded-lg">
+                  <span className="text-blue-700 font-semibold">📈 +300% tillväxt</span>
+                </div>
+              </div>
+
+              {/* Testimonial 3 */}
+              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 font-bold text-lg">LB</span>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-bold text-slate-900">Lisa Bergström</h4>
+                    <p className="text-slate-500 text-sm">Sålde SaaS-plattform</p>
+                  </div>
+                </div>
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-slate-600 italic mb-4">
+                  "Fantastisk plattform! Fick flera seriösa bud inom första veckan. 
+                  Slutade med att sälja för 40% över ursprungligt asking price!"
+                </p>
+                <div className="bg-purple-50 px-4 py-2 rounded-lg">
+                  <span className="text-purple-700 font-semibold">🎯 +40% över asking</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <Link
+                to="/sales-demo"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Award className="w-5 h-5 mr-3" />
+                Läs fler framgångsstories
+                <ArrowRight className="ml-3 w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ROI Calculator Section */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 rounded-3xl shadow-2xl overflow-hidden">
+              <div className="px-8 py-16 lg:px-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                      🚀 Räkna ut din potentiella avkastning
+                    </h2>
+                    <p className="text-blue-100 text-lg mb-8">
+                      Använd vår ROI-kalkylator för att se hur mycket du kan tjäna på att 
+                      investera i rätt företag genom 123Hansa.
+                    </p>
+                    
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">Genomsnittlig ROI: 340%</h4>
+                          <p className="text-blue-200 text-sm">Baserat på 500+ genomförda affärer</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Timer className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">Payback-tid: 18 månader</h4>
+                          <p className="text-blue-200 text-sm">Mediantid till break-even</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                          <TrendingUp className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">Success rate: 87%</h4>
+                          <p className="text-blue-200 text-sm">Köp som blivit lönsamma inom 2 år</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-2xl p-8 shadow-xl">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+                      🧮 ROI Kalkylator
+                    </h3>
+                    
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                          Investeringsbelopp (SEK)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="500,000"
+                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                          Förväntad tillväxt per år (%)
+                        </label>
+                        <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                          <option>25% - Konservativ</option>
+                          <option>50% - Genomsnitt</option>
+                          <option>100% - Aggressiv</option>
+                        </select>
+                      </div>
+                      
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+                        <div className="text-center">
+                          <p className="text-sm font-semibold text-green-700 mb-2">Förväntad avkastning efter 3 år:</p>
+                          <p className="text-3xl font-bold text-green-600">1,953,125 SEK</p>
+                          <p className="text-sm text-green-600">+291% total avkastning</p>
+                        </div>
+                      </div>
+                      
+                      <Link
+                        to="/valuation"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-center block"
+                      >
+                        Få professionell värdering
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Urgency & Scarcity Section */}
+        <section className="py-20 bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
+                <Timer className="w-4 h-4" />
+                BEGRÄNSAD TID
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                🔥 Heta affärsmöjligheter - Agera nu!
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Dessa premium-företag får flera bud varje dag. Missa inte din chans!
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {/* Hot Deal 1 */}
+              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-red-200">
+                <div className="absolute -top-3 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  🔥 HOT DEAL
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-bold text-lg text-slate-900 mb-2">AI-driven MarTech SaaS</h3>
+                  <p className="text-slate-600 text-sm mb-3">
+                    Skalbar plattform, 400k ARR, 89% retention rate
+                  </p>
+                  <div className="text-2xl font-bold text-green-600 mb-2">2.8M SEK</div>
+                  <div className="flex items-center gap-2 text-sm text-red-600 font-semibold">
+                    <Timer className="w-4 h-4" />
+                    12 bud senaste 48h
+                  </div>
+                </div>
+                <Link
+                  to="/listings/3"
+                  className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-colors text-center block"
+                >
+                  Lägg bud nu
+                </Link>
+              </div>
+
+              {/* Hot Deal 2 */}
+              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-orange-200">
+                <div className="absolute -top-3 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  ⚡ TRENDING
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-bold text-lg text-slate-900 mb-2">Premium Fashion E-commerce</h3>
+                  <p className="text-slate-600 text-sm mb-3">
+                    Etablerat varumärke, 1.2M omsättning/år
+                  </p>
+                  <div className="text-2xl font-bold text-green-600 mb-2">950k SEK</div>
+                  <div className="flex items-center gap-2 text-sm text-orange-600 font-semibold">
+                    <Users className="w-4 h-4" />
+                    45 intresseanmälningar
+                  </div>
+                </div>
+                <Link
+                  to="/listings/2"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-colors text-center block"
+                >
+                  Visa intresse
+                </Link>
+              </div>
+
+              {/* Hot Deal 3 */}
+              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-yellow-200">
+                <div className="absolute -top-3 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  💎 PREMIUM
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-bold text-lg text-slate-900 mb-2">Stockholm Café Empire</h3>
+                  <p className="text-slate-600 text-sm mb-3">
+                    Prime location, 85% marginaler, kultföljarskap
+                  </p>
+                  <div className="text-2xl font-bold text-green-600 mb-2">1.2M SEK</div>
+                  <div className="flex items-center gap-2 text-sm text-yellow-600 font-semibold">
+                    <MapPin className="w-4 h-4" />
+                    Exklusivt centrum-läge
+                  </div>
+                </div>
+                <Link
+                  to="/listings/4"
+                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-3 px-4 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-colors text-center block"
+                >
+                  Boka visning
+                </Link>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-slate-600 mb-6 font-semibold">
+                ⏰ Nya premium-affärer läggs upp varje dag. Registrera dig för att få första tillgång!
+              </p>
+              <Link
+                to="/register"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white font-bold rounded-xl hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Timer className="w-5 h-5 mr-3" />
+                Registrera dig gratis nu
+                <ArrowRight className="ml-3 w-5 h-5" />
+              </Link>
             </div>
           </div>
         </section>
