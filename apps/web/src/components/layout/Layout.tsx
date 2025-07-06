@@ -156,9 +156,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h4 className="font-semibold mb-4">Följ oss</h4>
               <ul className="space-y-2 text-sm text-nordic-gray-300">
-                <li><a href="#" className="hover:text-white">LinkedIn</a></li>
-                <li><a href="#" className="hover:text-white">Twitter</a></li>
-                <li><a href="#" className="hover:text-white">Facebook</a></li>
+                <li><a href="https://linkedin.com/company/123hansa" target="_blank" rel="noopener noreferrer" className="hover:text-white">LinkedIn</a></li>
+                <li><a href="https://twitter.com/123hansa" target="_blank" rel="noopener noreferrer" className="hover:text-white">Twitter</a></li>
+                <li><a href="https://facebook.com/123hansa" target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a></li>
               </ul>
             </div>
           </div>

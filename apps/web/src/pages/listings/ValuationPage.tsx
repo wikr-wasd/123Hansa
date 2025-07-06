@@ -12,9 +12,11 @@ import {
   Globe,
   Clock,
   Star,
-  Award
+  Award,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { validateEmail } from '../../utils/emailValidation';
 
 const ValuationPage: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -28,6 +30,8 @@ const ValuationPage: React.FC = () => {
     location: '',
     contact: { name: '', email: '', phone: '' }
   });
+  
+  const [emailError, setEmailError] = useState('');
 
   const [valuationResult, setValuationResult] = useState<{
     low: number;
@@ -83,6 +87,21 @@ const ValuationPage: React.FC = () => {
       return `${(price / 1000000).toFixed(1)}M SEK`;
     }
     return `${(price / 1000).toFixed(0)}k SEK`;
+  };
+
+  const handleEmailChange = (email: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      contact: { ...prev.contact, email }
+    }));
+    
+    // Validera e-post när användaren skriver
+    if (email.length > 0) {
+      const validation = validateEmail(email);
+      setEmailError(validation.error);
+    } else {
+      setEmailError('');
+    }
   };
 
   const nextStep = () => {
@@ -262,16 +281,38 @@ const ValuationPage: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">E-post</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          E-post <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="email"
+                          required
                           value={formData.contact.email}
-                          onChange={(e) => setFormData(prev => ({ 
-                            ...prev, 
-                            contact: { ...prev.contact, email: e.target.value }
-                          }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          onChange={(e) => handleEmailChange(e.target.value)}
+                          placeholder="din@email.se"
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
+                            emailError
+                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                              : formData.contact.email && !emailError
+                              ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
                         />
+                        {emailError && (
+                          <div className="mt-2 flex items-center space-x-2 text-red-600 text-sm">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>{emailError}</span>
+                          </div>
+                        )}
+                        {formData.contact.email && !emailError && formData.contact.email.includes('@') && (
+                          <div className="mt-2 flex items-center space-x-2 text-green-600 text-sm">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Giltig e-postadress</span>
+                          </div>
+                        )}
+                        <div className="mt-1 text-xs text-gray-500">
+                          Vi behöver en giltig e-postadress för att skicka din värderingsrapport
+                        </div>
                       </div>
                     </div>
 
@@ -304,7 +345,7 @@ const ValuationPage: React.FC = () => {
                     disabled={
                       (step === 1 && !formData.companyType) ||
                       (step === 2 && (!formData.industry || !formData.revenue)) ||
-                      (step === 3 && (!formData.contact.name || !formData.contact.email))
+                      (step === 3 && (!formData.contact.name || !formData.contact.email || emailError))
                     }
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >

@@ -4,13 +4,15 @@ import { Helmet } from 'react-helmet-async';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import SocialAuthButtons from '../../components/auth/SocialAuthButtons';
+import { EmailInput } from '../../components/forms/EmailInput';
+import { useEmailValidation } from '../../hooks/useEmailValidation';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading } = useAuthStore();
+  const { email, emailError, isEmailValid, setEmail } = useEmailValidation();
   
   const [formData, setFormData] = useState({
-    email: '',
     password: '',
     rememberMe: false,
   });
@@ -33,10 +35,13 @@ const LoginPage: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.email) {
-      newErrors.email = 'E-post är obligatorisk';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Ogiltigt e-postformat';
+    // Använd den nya striktare e-postvalideringen
+    if (!email) {
+      newErrors.email = 'E-postadress krävs';
+    } else if (!email.includes('@')) {
+      newErrors.email = 'E-postadressen måste innehålla @ symbol';
+    } else if (emailError) {
+      newErrors.email = emailError;
     }
 
     if (!formData.password) {
@@ -53,7 +58,7 @@ const LoginPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      await login(formData);
+      await login({ email, password: formData.password, rememberMe: formData.rememberMe });
       navigate('/dashboard');
     } catch (error) {
       // Error is handled by the auth store and toast
@@ -93,25 +98,15 @@ const LoginPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-nordic-gray-700 mb-2">
-                    E-postadress
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`form-input ${errors.email ? 'border-nordic-red-500 focus:border-nordic-red-500 focus:ring-nordic-red-500' : ''}`}
-                    placeholder="din@email.se"
-                  />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-nordic-red-600">{errors.email}</p>
-                  )}
-                </div>
+                <EmailInput
+                  value={email}
+                  onChange={setEmail}
+                  error={emailError || errors.email}
+                  label="E-postadress"
+                  placeholder="din@email.se"
+                  required
+                  autoComplete="email"
+                />
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-nordic-gray-700 mb-2">
