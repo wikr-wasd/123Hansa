@@ -38,6 +38,7 @@ const CreateCampaignPage = lazy(() => import('./pages/crowdfunding/CreateCampaig
 
 // Auth pages
 const TestbedLogin = lazy(() => import('./pages/auth/TestbedLogin'));
+const QuickTestRegister = lazy(() => import('./pages/auth/QuickTestRegister'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
 
@@ -90,6 +91,8 @@ function App() {
             
             {/* Auth routes */}
             <Route path="/testbed" element={<TestbedLogin />} />
+            <Route path="/testbed-login" element={<TestbedLogin />} />
+            <Route path="/quick-test-register" element={<QuickTestRegister />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             
             {/* Crowdfunding routes */}

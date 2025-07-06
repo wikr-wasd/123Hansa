@@ -18,7 +18,7 @@ const TestbedLogin: React.FC = () => {
       description: 'Full access to admin dashboard'
     },
     user: {
-      email: 'anna@example.com',
+      email: 'anna.karlsson@gmail.com',
       password: 'user123',
       name: 'Regular User',
       description: 'Standard user account'
@@ -159,7 +159,7 @@ const TestbedLogin: React.FC = () => {
                   <User className="w-6 h-6 text-green-600 mr-3" />
                   <div>
                     <div className="font-medium text-gray-900">Vanlig Användare</div>
-                    <div className="text-sm text-gray-500">anna@example.com</div>
+                    <div className="text-sm text-gray-500">anna.karlsson@gmail.com</div>
                     <div className="text-xs text-gray-400">Standard användarrättigheter</div>
                   </div>
                 </div>
