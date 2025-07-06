@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { User, Mail, Key, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuthStore } from '../../stores/authStore';
 
 const SimpleTestLogin: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { setUser } = useAuthStore();
 
   const testAccounts = [
     {
@@ -36,32 +38,33 @@ const SimpleTestLogin: React.FC = () => {
     setLoading(true);
     
     try {
-      // Skapa mock användarsession (endast frontend)
+      // Skapa mock användarsession med rätt format för auth store
       const mockUser = {
         id: account.id,
         firstName: account.name.split(' ')[0],
         lastName: account.name.split(' ')[1],
         email: account.email,
-        role: 'user',
-        verified: true,
+        role: 'USER' as const,
+        country: 'SE' as const,
+        language: 'sv' as const,
+        verificationLevel: 'EMAIL' as const,
+        isEmailVerified: true,
         createdAt: new Date().toISOString()
       };
 
-      // Spara i localStorage (simulerar inloggning)
-      localStorage.setItem('auth_token', `mock_token_${account.id}_${Date.now()}`);
+      // Använd rätt token-namn som auth service förväntar sig
+      const mockToken = `mock_token_${account.id}_${Date.now()}`;
+      localStorage.setItem('accessToken', mockToken);
+      localStorage.setItem('refreshToken', `refresh_${mockToken}`);
       localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('isAuthenticated', 'true');
 
-      // Uppdatera auth store manuellt
-      window.dispatchEvent(new Event('storage'));
-      
+      // Uppdatera auth store direkt
+      setUser(mockUser);
+
       toast.success(`Välkommen, ${mockUser.firstName}!`);
       
-      // Navigera till dashboard
-      setTimeout(() => {
-        navigate('/dashboard');
-        window.location.reload(); // Force reload för att uppdatera auth state
-      }, 500);
+      // Navigera direkt till dashboard
+      navigate('/dashboard');
       
     } catch (error) {
       toast.error('Något gick fel');

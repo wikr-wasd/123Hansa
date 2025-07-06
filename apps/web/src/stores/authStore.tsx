@@ -26,6 +26,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthStatus = async () => {
     try {
       if (authService.isAuthenticated()) {
+        const token = authService.getAccessToken();
+        
+        // Check if this is a mock token for testing
+        if (token?.startsWith('mock_token_')) {
+          // For mock tokens, get user data from localStorage
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        // For real tokens, call the API
         const userData = await authService.getCurrentUser();
         setUser(userData);
       }
@@ -34,6 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Clear invalid tokens
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +85,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
+      const token = authService.getAccessToken();
+      
+      // For mock tokens, just clear localStorage
+      if (token?.startsWith('mock_token_')) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        setUser(null);
+        toast.success('Du har loggats ut');
+        return;
+      }
+      
+      // For real tokens, call the API
       await authService.logout();
       setUser(null);
       toast.success('Du har loggats ut');
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear local state
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
       setUser(null);
     }
   };
