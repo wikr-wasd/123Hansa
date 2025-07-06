@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { ClaudeChatWidget } from '../ai/ClaudeChatWidget';
 
 interface LayoutProps {
   children: ReactNode;
@@ -167,6 +168,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Claude AI Chat Widget */}
+      <ClaudeChatWidget />
     </div>
   );
 };
