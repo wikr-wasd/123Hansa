@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, TrendingUp, MapPin, ImageIcon, Images } from 'lucide-react';
+import { Calendar, Users, TrendingUp, MapPin, ImageIcon } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 
 export interface Campaign {
@@ -94,7 +94,7 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
             </div>
             {campaign.images && campaign.images.length > 0 && (
               <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium text-gray-700 flex items-center gap-1">
-                <Images className="w-3 h-3" />
+                <ImageIcon className="w-3 h-3" />
                 {campaign.images.length + 1}
               </div>
             )}
