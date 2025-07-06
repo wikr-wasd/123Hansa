@@ -1,312 +1,457 @@
 import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { logger } from '@/utils/logger';
-import { prisma } from '@/config/database';
-import { config } from '@/config/app';
+import rateLimit from 'express-rate-limit';
+import slowDown from 'express-slow-down';
+import helmet from 'helmet';
+import { body, validationResult } from 'express-validator';
+import DOMPurify from 'isomorphic-dompurify';
+import validator from 'validator';
+import crypto from 'crypto';
+import { createHash } from 'crypto';
 
-// Enhanced security middleware for production
+// Rate limiting configurations
+export const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: 'För många förfrågningar från denna IP, försök igen senare',
+    retryAfter: 15 * 60 * 1000
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for trusted IPs (optional)
+    const trustedIPs = process.env.TRUSTED_IPS?.split(',') || [];
+    return trustedIPs.includes(req.ip);
+  }
+});
+
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: {
+    error: 'För många inloggningsförsök, försök igen om 15 minuter',
+    retryAfter: 15 * 60 * 1000
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
+});
+
+export const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // limit each IP to 3 registrations per hour
+  message: {
+    error: 'För många registreringsförsök, försök igen om 1 timme',
+    retryAfter: 60 * 60 * 1000
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+export const paymentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit each IP to 10 payment attempts per hour
+  message: {
+    error: 'För många betalningsförsök, försök igen om 1 timme',
+    retryAfter: 60 * 60 * 1000
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+export const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // limit each IP to 5 contact form submissions per hour
+  message: {
+    error: 'För många kontaktformulär inskickade, försök igen om 1 timme',
+    retryAfter: 60 * 60 * 1000
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Speed limiter for suspicious activity
+export const speedLimiter = slowDown({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  delayAfter: 50, // allow 50 requests per 15 minutes at full speed
+  delayMs: 500, // add 500ms delay per request after delayAfter
+  maxDelayMs: 10000, // maximum delay of 10 seconds
+  skip: (req) => {
+    const trustedIPs = process.env.TRUSTED_IPS?.split(',') || [];
+    return trustedIPs.includes(req.ip);
+  }
+});
+
+// Helmet security headers
+export const securityHeaders = helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://via.placeholder.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "https://api.swish.nu", "https://api.paypal.com"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+});
 
 // Input sanitization middleware
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
-  const sanitizeObject = (obj: any): any => {
-    if (obj === null || obj === undefined) return obj;
-    if (typeof obj === 'string') {
-      // Remove potential XSS patterns
-      return obj
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
-        .trim();
-    }
-    if (typeof obj === 'object') {
-      const sanitized: any = Array.isArray(obj) ? [] : {};
-      for (const key in obj) {
+  // Sanitize body
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+  
+  // Sanitize query parameters
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizeObject(req.query);
+  }
+  
+  // Sanitize params
+  if (req.params && typeof req.params === 'object') {
+    req.params = sanitizeObject(req.params);
+  }
+  
+  next();
+};
+
+// Recursive object sanitization
+function sanitizeObject(obj: any): any {
+  if (typeof obj === 'string') {
+    return DOMPurify.sanitize(obj.trim());
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item));
+  }
+  
+  if (obj !== null && typeof obj === 'object') {
+    const sanitized: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
         sanitized[key] = sanitizeObject(obj[key]);
       }
-      return sanitized;
     }
-    return obj;
-  };
-
-  if (req.body) req.body = sanitizeObject(req.body);
-  if (req.query) req.query = sanitizeObject(req.query);
-  if (req.params) req.params = sanitizeObject(req.params);
-
-  next();
-};
-
-// SQL injection protection
-export const validateDatabaseInput = (req: Request, res: Response, next: NextFunction) => {
-  const sqlInjectionPatterns = [
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/gi,
-    /(\b(OR|AND)\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?)/gi,
-    /(;|\|\||&&)/g,
-    /('|(\\'))/g,
-    /((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)/gi,
-  ];
-
-  const checkForSqlInjection = (obj: any): boolean => {
-    if (typeof obj === 'string') {
-      return sqlInjectionPatterns.some(pattern => pattern.test(obj));
-    }
-    if (typeof obj === 'object' && obj !== null) {
-      return Object.values(obj).some(checkForSqlInjection);
-    }
-    return false;
-  };
-
-  if (checkForSqlInjection(req.body) || checkForSqlInjection(req.query)) {
-    logger.warn('SQL injection attempt detected', {
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      url: req.originalUrl,
-      body: req.body,
-      query: req.query,
-    });
-
-    return res.status(400).json({
-      error: 'Invalid input detected',
-      code: 'INVALID_INPUT',
-    });
+    return sanitized;
   }
-
-  next();
-};
-
-// CSRF protection for state-changing operations
-export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
-  // Skip CSRF for GET, HEAD, OPTIONS
-  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-    return next();
-  }
-
-  const token = req.headers['x-csrf-token'] as string;
-  const sessionToken = req.session?.csrfToken;
-
-  if (!token || !sessionToken || token !== sessionToken) {
-    logger.warn('CSRF token mismatch', {
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      url: req.originalUrl,
-      providedToken: token ? 'present' : 'missing',
-      sessionToken: sessionToken ? 'present' : 'missing',
-    });
-
-    return res.status(403).json({
-      error: 'CSRF token required',
-      code: 'CSRF_TOKEN_REQUIRED',
-    });
-  }
-
-  next();
-};
-
-// IP-based security monitoring
-interface SecurityEvent {
-  ip: string;
-  userAgent: string;
-  endpoint: string;
-  eventType: 'SUSPICIOUS_REQUEST' | 'RATE_LIMIT_EXCEEDED' | 'INVALID_INPUT' | 'UNAUTHORIZED_ACCESS';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  details: any;
+  
+  return obj;
 }
 
-const suspiciousIPs = new Map<string, { count: number; lastSeen: Date }>();
-
-export const securityMonitoring = async (req: Request, res: Response, next: NextFunction) => {
-  const ip = req.ip || 'unknown';
-  const userAgent = req.get('User-Agent') || 'unknown';
-
-  // Check for suspicious patterns
-  const suspiciousPatterns = [
-    /\b(union|select|insert|delete|drop|create|alter|exec|script)\b/gi,
-    /<script|javascript:|data:text\/html/gi,
-    /\.\.\/|\.\.\\|\|\||&&|;/g,
-  ];
-
-  const requestString = JSON.stringify({
-    url: req.originalUrl,
-    body: req.body,
-    query: req.query,
-    headers: req.headers,
-  });
-
-  const isSuspicious = suspiciousPatterns.some(pattern => pattern.test(requestString));
-
-  if (isSuspicious) {
-    const record = suspiciousIPs.get(ip) || { count: 0, lastSeen: new Date() };
-    record.count++;
-    record.lastSeen = new Date();
-    suspiciousIPs.set(ip, record);
-
-    // Log security event
-    const event: SecurityEvent = {
-      ip,
-      userAgent,
-      endpoint: req.originalUrl,
-      eventType: 'SUSPICIOUS_REQUEST',
-      severity: record.count > 5 ? 'CRITICAL' : record.count > 3 ? 'HIGH' : 'MEDIUM',
-      details: {
-        method: req.method,
-        body: req.body,
-        query: req.query,
-        count: record.count,
-      },
-    };
-
-    await logSecurityEvent(event);
-
-    // Block if too many suspicious requests
-    if (record.count > 10) {
-      logger.error('Blocking suspicious IP', { ip, count: record.count });
-      return res.status(429).json({
-        error: 'Too many suspicious requests',
-        code: 'BLOCKED',
+// Email validation middleware
+export const validateEmail = [
+  body('email')
+    .isEmail()
+    .withMessage('Ogiltig e-postadress')
+    .normalizeEmail({
+      gmail_remove_dots: false,
+      gmail_remove_subaddress: false,
+      outlookdotcom_remove_subaddress: false,
+      yahoo_remove_subaddress: false,
+      icloud_remove_subaddress: false
+    })
+    .custom((value) => {
+      // Additional email validation
+      if (!validator.isEmail(value)) {
+        throw new Error('E-postadressen har ett ogiltigt format');
+      }
+      
+      // Check for suspicious patterns
+      if (value.includes('..') || value.includes('++') || value.includes('--')) {
+        throw new Error('E-postadressen innehåller ogiltiga tecken');
+      }
+      
+      // Check domain
+      const domain = value.split('@')[1];
+      if (!domain || domain.length < 2) {
+        throw new Error('Ogiltig e-postdomän');
+      }
+      
+      return true;
+    }),
+  
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ogiltig e-postadress',
+        errors: errors.array()
       });
     }
+    next();
   }
+];
 
+// CSRF protection
+export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  // Skip CSRF for GET requests
+  if (req.method === 'GET') {
+    return next();
+  }
+  
+  const token = req.headers['x-csrf-token'] || req.body._csrf;
+  const sessionToken = req.session?.csrfToken;
+  
+  if (!token || !sessionToken || token !== sessionToken) {
+    return res.status(403).json({
+      success: false,
+      message: 'Ogiltig CSRF-token'
+    });
+  }
+  
   next();
 };
 
-// Log security events to database
-async function logSecurityEvent(event: SecurityEvent) {
-  try {
-    await prisma.securityEvent.create({
-      data: {
-        eventType: event.eventType,
-        severity: event.severity,
-        description: `${event.eventType} from ${event.ip}`,
-        ipAddress: event.ip,
-        userAgent: event.userAgent,
-        metadata: JSON.stringify(event.details),
-        riskScore: calculateRiskScore(event),
-      },
+// Generate CSRF token
+export const generateCSRFToken = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session) {
+    return res.status(500).json({
+      success: false,
+      message: 'Session saknas'
     });
-  } catch (error) {
-    logger.error('Failed to log security event:', error);
   }
+  
+  const token = crypto.randomBytes(32).toString('hex');
+  req.session.csrfToken = token;
+  res.locals.csrfToken = token;
+  next();
+};
+
+// Anti-spam middleware
+export const antiSpam = (req: Request, res: Response, next: NextFunction) => {
+  const suspicious = checkSuspiciousActivity(req);
+  
+  if (suspicious.isSpam) {
+    return res.status(429).json({
+      success: false,
+      message: 'Misstänkt spamaktivitet upptäckt',
+      details: suspicious.reasons
+    });
+  }
+  
+  next();
+};
+
+// Check for suspicious activity
+function checkSuspiciousActivity(req: Request): { isSpam: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  
+  // Check for common spam patterns in text fields
+  if (req.body) {
+    for (const key in req.body) {
+      if (typeof req.body[key] === 'string') {
+        const text = req.body[key].toLowerCase();
+        
+        // Check for excessive links
+        const linkCount = (text.match(/https?:\/\//g) || []).length;
+        if (linkCount > 2) {
+          reasons.push('För många länkar');
+        }
+        
+        // Check for common spam keywords
+        const spamKeywords = [
+          'viagra', 'cialis', 'casino', 'lottery', 'winner', 'congratulations',
+          'free money', 'click here', 'act now', 'limited time', 'urgent',
+          'crypto', 'bitcoin', 'investment opportunity'
+        ];
+        
+        for (const keyword of spamKeywords) {
+          if (text.includes(keyword)) {
+            reasons.push(`Misstänkt nyckelord: ${keyword}`);
+          }
+        }
+        
+        // Check for excessive capitalization
+        const capsCount = (text.match(/[A-Z]/g) || []).length;
+        if (text.length > 0 && capsCount / text.length > 0.5) {
+          reasons.push('För mycket versaler');
+        }
+        
+        // Check for repeated characters
+        if (/(.)\1{4,}/.test(text)) {
+          reasons.push('Upprepade tecken');
+        }
+      }
+    }
+  }
+  
+  return {
+    isSpam: reasons.length > 0,
+    reasons
+  };
 }
 
-function calculateRiskScore(event: SecurityEvent): number {
-  let score = 0;
-
-  // Base score by event type
-  switch (event.eventType) {
-    case 'SUSPICIOUS_REQUEST': score += 30; break;
-    case 'RATE_LIMIT_EXCEEDED': score += 20; break;
-    case 'INVALID_INPUT': score += 25; break;
-    case 'UNAUTHORIZED_ACCESS': score += 40; break;
+// Password validation
+export const validatePassword = [
+  body('password')
+    .isLength({ min: 8, max: 128 })
+    .withMessage('Lösenordet måste vara mellan 8 och 128 tecken')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage('Lösenordet måste innehålla minst en liten bokstav, en stor bokstav, en siffra och ett specialtecken'),
+  
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ogiltigt lösenord',
+        errors: errors.array()
+      });
+    }
+    next();
   }
-
-  // Severity multiplier
-  switch (event.severity) {
-    case 'LOW': score *= 1; break;
-    case 'MEDIUM': score *= 1.5; break;
-    case 'HIGH': score *= 2; break;
-    case 'CRITICAL': score *= 3; break;
-  }
-
-  // Repeat offender bonus
-  const record = suspiciousIPs.get(event.ip);
-  if (record && record.count > 1) {
-    score += Math.min(record.count * 5, 50);
-  }
-
-  return Math.min(Math.round(score), 100);
-}
+];
 
 // File upload security
-export const fileUploadSecurity = (req: Request, res: Response, next: NextFunction) => {
+export const secureFileUpload = (req: Request, res: Response, next: NextFunction) => {
   if (!req.file && !req.files) {
     return next();
   }
-
-  const allowedMimeTypes = [
+  
+  const files = req.files || [req.file];
+  const allowedTypes = [
     'image/jpeg',
     'image/png',
     'image/gif',
     'image/webp',
     'application/pdf',
-    'text/plain',
     'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ];
-
-  const files = req.files ? (Array.isArray(req.files) ? req.files : [req.files]) : [req.file];
-
+  
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  
   for (const file of files) {
     if (!file) continue;
-
-    // Check MIME type
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    
+    if (!allowedTypes.includes(file.mimetype)) {
       return res.status(400).json({
-        error: 'File type not allowed',
-        code: 'INVALID_FILE_TYPE',
+        success: false,
+        message: 'Filtyp ej tillåten'
       });
     }
-
-    // Check file size
-    if (file.size > config.maxFileSize) {
+    
+    if (file.size > maxSize) {
       return res.status(400).json({
-        error: 'File too large',
-        code: 'FILE_TOO_LARGE',
+        success: false,
+        message: 'Filen är för stor (max 10MB)'
       });
     }
-
-    // Check for malicious file names
-    if (/[<>:"/\\|?*]/.test(file.originalname)) {
-      return res.status(400).json({
-        error: 'Invalid file name',
-        code: 'INVALID_FILE_NAME',
-      });
+    
+    // Check file content (basic magic number validation)
+    if (file.mimetype.startsWith('image/')) {
+      const isValidImage = validateImageFile(file.buffer);
+      if (!isValidImage) {
+        return res.status(400).json({
+          success: false,
+          message: 'Ogiltig bildfil'
+        });
+      }
     }
   }
-
+  
   next();
 };
 
-// API key validation for external integrations
-export const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  const apiKey = req.headers['x-api-key'] as string;
+// Validate image file content
+function validateImageFile(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 4) return false;
+  
+  const signatures = {
+    jpeg: [0xFF, 0xD8, 0xFF],
+    png: [0x89, 0x50, 0x4E, 0x47],
+    gif: [0x47, 0x49, 0x46],
+    webp: [0x52, 0x49, 0x46, 0x46]
+  };
+  
+  for (const [format, signature] of Object.entries(signatures)) {
+    if (signature.every((byte, index) => buffer[index] === byte)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 
-  if (!apiKey) {
-    return res.status(401).json({
-      error: 'API key required',
-      code: 'API_KEY_REQUIRED',
+// IP whitelist middleware
+export const ipWhitelist = (whitelist: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    
+    if (whitelist.length > 0 && !whitelist.includes(clientIP)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Åtkomst nekad'
+      });
+    }
+    
+    next();
+  };
+};
+
+// Honeypot middleware (for forms)
+export const honeypot = (req: Request, res: Response, next: NextFunction) => {
+  // Check for honeypot field that should be empty
+  if (req.body.website || req.body.url || req.body.homepage) {
+    return res.status(400).json({
+      success: false,
+      message: 'Ogiltig formulärinskickning'
     });
   }
-
-  // In production, validate against database
-  // For now, use environment variable
-  const validApiKeys = process.env.API_KEYS?.split(',') || [];
-
-  if (!validApiKeys.includes(apiKey)) {
-    logger.warn('Invalid API key used', {
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      providedKey: apiKey.substring(0, 8) + '...',
-    });
-
-    return res.status(401).json({
-      error: 'Invalid API key',
-      code: 'INVALID_API_KEY',
-    });
-  }
-
+  
   next();
 };
 
-// Combine all security middleware
-export const applySecurity = [
+// Request logging for security monitoring
+export const securityLogger = (req: Request, res: Response, next: NextFunction) => {
+  const logData = {
+    timestamp: new Date().toISOString(),
+    ip: req.ip,
+    method: req.method,
+    url: req.originalUrl,
+    userAgent: req.get('User-Agent'),
+    referer: req.get('Referer'),
+    contentLength: req.get('Content-Length'),
+    sessionId: req.session?.id
+  };
+  
+  // Log suspicious activity
+  if (req.method === 'POST' && req.body) {
+    const bodyString = JSON.stringify(req.body);
+    if (bodyString.length > 10000) {
+      console.warn('Large POST body detected:', logData);
+    }
+  }
+  
+  next();
+};
+
+export default {
+  generalLimiter,
+  authLimiter,
+  registrationLimiter,
+  paymentLimiter,
+  contactLimiter,
+  speedLimiter,
+  securityHeaders,
   sanitizeInput,
-  validateDatabaseInput,
-  securityMonitoring,
-  fileUploadSecurity,
-];
-
-export const applyStrictSecurity = [
-  ...applySecurity,
+  validateEmail,
   csrfProtection,
-  validateApiKey,
-];
+  generateCSRFToken,
+  antiSpam,
+  validatePassword,
+  secureFileUpload,
+  ipWhitelist,
+  honeypot,
+  securityLogger
+};

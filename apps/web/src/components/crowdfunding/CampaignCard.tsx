@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, TrendingUp, MapPin } from 'lucide-react';
+import { Calendar, Users, TrendingUp, MapPin, ImageIcon } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 
 export interface Campaign {
@@ -34,6 +34,10 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
   showProgress = true,
   className = ''
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+  
   const sizeClasses = {
     small: 'max-w-sm',
     medium: 'max-w-md',
@@ -53,12 +57,31 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
         ${campaign.featured ? 'ring-2 ring-emerald-400 shadow-emerald-100' : ''}
       `}>
         {/* Campaign Image */}
-        <div className="relative h-64 overflow-hidden">
-          <img 
-            src={campaign.image} 
-            alt={campaign.title}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-          />
+        <div className="relative h-64 overflow-hidden bg-gray-100">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse">
+              <ImageIcon className="w-16 h-16 text-gray-400" />
+            </div>
+          )}
+          
+          {imageError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+              <ImageIcon className="w-16 h-16 text-gray-400 mb-2" />
+              <span className="text-sm text-gray-500 font-medium">{campaign.category}</span>
+              <span className="text-xs text-gray-400 mt-1">Bild ej tillgänglig</span>
+            </div>
+          ) : (
+            <img 
+              src={campaign.image} 
+              alt={campaign.title}
+              className={`w-full h-full object-cover hover:scale-110 transition-transform duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+            />
+          )}
+          
           {campaign.featured && (
             <div className="absolute top-3 left-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1 rounded-full text-xs font-bold">
               FEATURED
@@ -88,11 +111,12 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
           {/* Creator */}
           <div className="flex items-center mb-4">
             <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
-              {campaign.creator.avatar ? (
+              {campaign.creator.avatar && !avatarError ? (
                 <img 
                   src={campaign.creator.avatar} 
                   alt={campaign.creator.name}
                   className="w-8 h-8 rounded-full object-cover"
+                  onError={() => setAvatarError(true)}
                 />
               ) : (
                 <span className="text-emerald-600 font-bold text-sm">

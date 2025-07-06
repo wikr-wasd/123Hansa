@@ -8,6 +8,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
@@ -21,6 +23,15 @@ import { initializeSocketService } from '@/services/socketService';
 import { performanceService } from '@/services/performanceService';
 import { cacheService } from '@/services/cacheService';
 import { applySecurity } from '@/middleware/security';
+import security, { 
+  generalLimiter,
+  speedLimiter,
+  securityHeaders,
+  sanitizeInput,
+  generateCSRFToken,
+  securityLogger
+} from '@/middleware/security';
+import { ddosProtectionMiddleware } from '@/middleware/ddosProtection';
 
 // Route imports
 import authRoutes from '@/routes/auth';
@@ -48,37 +59,68 @@ const io = new SocketIOServer(httpServer, {
   },
 });
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
+// Trust proxy (for accurate IP detection behind load balancers)
+app.set('trust proxy', 1);
 
-// Global middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.123hansa.se", "wss://api.123hansa.se"],
-    },
-  },
+// Session configuration
+app.use(session({
+  name: 'hansa.sid',
+  secret: config.jwtSecret,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: config.databaseUrl,
+    ttl: 24 * 60 * 60 // 24 hours
+  }),
+  cookie: {
+    secure: config.nodeEnv === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'strict'
+  }
 }));
-app.use(compression());
+
+// Security middleware (ORDER MATTERS!)
+app.use(securityLogger); // Log all requests
+app.use(ddosProtectionMiddleware); // DDoS protection first
+app.use(speedLimiter); // Speed limiting
+app.use(generalLimiter); // General rate limiting
+app.use(securityHeaders); // Security headers
+app.use(compression()); // Compression
 app.use(cors({
   origin: config.corsOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With']
 }));
-app.use(limiter);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+
+// Body parsing with size limits
+app.use(express.json({ 
+  limit: '2mb',
+  verify: (req, res, buf, encoding) => {
+    // Verify JSON payload isn't malicious
+    try {
+      JSON.parse(buf.toString());
+    } catch (e) {
+      throw new Error('Invalid JSON payload');
+    }
+  }
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '2mb',
+  parameterLimit: 50 // Limit number of parameters
+}));
+
+// Input sanitization
+app.use(sanitizeInput);
+
+// CSRF token generation
+app.use(generateCSRFToken);
+
+// Request logging and performance monitoring
 app.use(requestLogger);
 app.use(performanceService.middleware());
-app.use(applySecurity);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -87,8 +129,17 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     status: 'running',
     message: 'Welcome to 123hansa.se - Swedish Business Marketplace API',
+    security: {
+      ddosProtection: 'enabled',
+      rateLimiting: 'enabled',
+      csrfProtection: 'enabled',
+      inputSanitization: 'enabled',
+      securityHeaders: 'enabled'
+    },
     endpoints: {
       health: '/health',
+      security: '/security-status',
+      csrfToken: '/csrf-token',
       admin: '/api/admin',
       auth: '/api/auth',
       users: '/api/users',
@@ -104,6 +155,66 @@ app.get('/', (req, res) => {
     },
     timestamp: new Date().toISOString(),
   });
+});
+
+// CSRF Token endpoint
+app.get('/csrf-token', (req, res) => {
+  res.json({
+    csrfToken: res.locals.csrfToken,
+    message: 'CSRF token generated successfully'
+  });
+});
+
+// Security status endpoint
+app.get('/security-status', (req, res) => {
+  try {
+    const ddosStats = require('@/middleware/ddosProtection').getDDoSStats();
+    const bannedIPs = require('@/middleware/ddosProtection').getBannedIPs();
+    
+    res.json({
+      status: 'secure',
+      timestamp: new Date().toISOString(),
+      protections: {
+        ddosProtection: {
+          enabled: true,
+          stats: ddosStats,
+          bannedIPs: bannedIPs.length
+        },
+        rateLimiting: {
+          enabled: true,
+          generalLimit: '100 requests per 15 minutes',
+          authLimit: '5 attempts per 15 minutes',
+          paymentLimit: '10 attempts per hour'
+        },
+        csrfProtection: {
+          enabled: true,
+          tokenGenerated: !!res.locals.csrfToken
+        },
+        inputSanitization: {
+          enabled: true,
+          htmlStripping: true,
+          xssProtection: true
+        },
+        securityHeaders: {
+          enabled: true,
+          hsts: true,
+          csp: true,
+          frameOptions: true
+        },
+        sessionSecurity: {
+          enabled: true,
+          httpOnly: true,
+          secure: config.nodeEnv === 'production',
+          sameSite: 'strict'
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Could not retrieve security status'
+    });
+  }
 });
 
 // Health check endpoint

@@ -2,6 +2,15 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthController } from '@/controllers/authController';
 import { authenticateToken, optionalAuth } from '@/middleware/auth';
+import { 
+  authLimiter, 
+  registrationLimiter,
+  validateEmail,
+  validatePassword,
+  csrfProtection,
+  antiSpam,
+  honeypot
+} from '@/middleware/security';
 import {
   authenticateWithGoogle,
   authenticateWithLinkedIn,
@@ -16,18 +25,7 @@ import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
-// Rate limiting for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
-  message: {
-    error: 'Too many authentication attempts',
-    message: 'Please try again later',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
+// Additional rate limiters for specific endpoints
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // 20 requests per window
@@ -60,12 +58,42 @@ router.get('/health', (req, res) => {
   });
 });
 
-// Traditional auth routes
-router.post('/register', authLimiter, AuthController.register);
-router.post('/login', authLimiter, AuthController.login);
+// Traditional auth routes with comprehensive security
+router.post('/register', 
+  registrationLimiter, 
+  csrfProtection, 
+  antiSpam, 
+  honeypot,
+  validateEmail,
+  validatePassword,
+  AuthController.register
+);
+
+router.post('/login', 
+  authLimiter, 
+  csrfProtection, 
+  antiSpam,
+  validateEmail,
+  AuthController.login
+);
+
 router.post('/refresh', generalLimiter, AuthController.refreshToken);
-router.post('/forgot-password', authLimiter, AuthController.forgotPassword);
-router.post('/reset-password', authLimiter, AuthController.resetPassword);
+
+router.post('/forgot-password', 
+  authLimiter, 
+  csrfProtection, 
+  antiSpam,
+  validateEmail,
+  AuthController.forgotPassword
+);
+
+router.post('/reset-password', 
+  authLimiter, 
+  csrfProtection, 
+  antiSpam,
+  validatePassword,
+  AuthController.resetPassword
+);
 
 // Email verification routes
 router.post('/verify-email', generalLimiter, AuthController.verifyEmail);

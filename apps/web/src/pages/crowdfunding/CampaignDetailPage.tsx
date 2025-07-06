@@ -16,7 +16,8 @@ import {
   MessageCircle,
   Shield,
   Clock,
-  X
+  X,
+  ImageIcon
 } from 'lucide-react';
 import ProgressBar from '../../components/crowdfunding/ProgressBar';
 import { demoCampaigns } from '../../data/crowdfundingData';
@@ -43,6 +44,9 @@ const CampaignDetailPage: React.FC = () => {
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(Math.floor(Math.random() * 50) + 20);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<boolean>(false);
+  const [avatarError, setAvatarError] = useState<boolean>(false);
   
   const campaign = demoCampaigns.find(c => c.id === id);
   
@@ -172,12 +176,31 @@ const CampaignDetailPage: React.FC = () => {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Campaign Image */}
-              <div className="relative">
-                <img 
-                  src={campaign.image} 
-                  alt={campaign.title}
-                  className="w-full h-96 object-cover rounded-xl"
-                />
+              <div className="relative bg-gray-100 rounded-xl overflow-hidden">
+                {!imageLoaded && !imageError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse">
+                    <ImageIcon className="w-20 h-20 text-gray-400" />
+                  </div>
+                )}
+                
+                {imageError ? (
+                  <div className="w-full h-96 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <ImageIcon className="w-20 h-20 text-gray-400 mb-4" />
+                    <span className="text-lg text-gray-500 font-medium mb-2">{campaign.category}</span>
+                    <span className="text-sm text-gray-400">Bild ej tillgänglig</span>
+                  </div>
+                ) : (
+                  <img 
+                    src={campaign.image} 
+                    alt={campaign.title}
+                    className={`w-full h-96 object-cover rounded-xl transition-opacity duration-300 ${
+                      imageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    onLoad={() => setImageLoaded(true)}
+                    onError={() => setImageError(true)}
+                  />
+                )}
+                
                 {campaign.featured && (
                   <div className="absolute top-4 left-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-full text-sm font-bold">
                     FEATURED
@@ -218,11 +241,12 @@ const CampaignDetailPage: React.FC = () => {
                 {/* Creator Info */}
                 <div className="flex items-center mb-6 pb-6 border-b border-gray-100">
                   <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mr-4">
-                    {campaign.creator.avatar ? (
+                    {campaign.creator.avatar && !avatarError ? (
                       <img 
                         src={campaign.creator.avatar} 
                         alt={campaign.creator.name}
                         className="w-12 h-12 rounded-full object-cover"
+                        onError={() => setAvatarError(true)}
                       />
                     ) : (
                       <span className="text-emerald-600 font-bold text-lg">
