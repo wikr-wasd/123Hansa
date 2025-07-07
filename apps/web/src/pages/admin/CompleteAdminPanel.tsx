@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown, Flame, Crown, Zap, Target } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CompleteAdminPanel: React.FC = () => {
@@ -86,7 +86,8 @@ const CompleteAdminPanel: React.FC = () => {
       location: 'Stockholm',
       createdAt: '2024-06-25',
       featured: false,
-      riskScore: 15
+      riskScore: 15,
+      hotDealType: null
     },
     { 
       id: '2', 
@@ -102,7 +103,8 @@ const CompleteAdminPanel: React.FC = () => {
       location: 'Stockholm',
       createdAt: '2024-06-20',
       featured: true,
-      riskScore: 25
+      riskScore: 25,
+      hotDealType: 'hot-deal'
     },
     { 
       id: '3', 
@@ -118,7 +120,8 @@ const CompleteAdminPanel: React.FC = () => {
       location: 'Malmö',
       createdAt: '2024-06-24',
       featured: false,
-      riskScore: 35
+      riskScore: 35,
+      hotDealType: 'premium'
     }
   ]);
 
@@ -338,6 +341,22 @@ const CompleteAdminPanel: React.FC = () => {
     ));
     const listing = listings.find(l => l.id === listingId);
     toast.success(`Annons "${listing?.title}" har ${listing?.featured ? 'tagits bort från' : 'lagts till som'} utvald`);
+  };
+
+  const handleHotDealAssignment = (listingId: string, hotDealType: string | null) => {
+    setListings(prev => prev.map(l => 
+      l.id === listingId ? { ...l, hotDealType } : l
+    ));
+    const listing = listings.find(l => l.id === listingId);
+    const dealTypeName = {
+      'hot-deal': 'Heta Affären',
+      'premium': 'Premium',
+      'featured': 'Featured',
+      'trending': 'Trending',
+      'vip': 'VIP'
+    }[hotDealType as string] || 'Normal';
+    
+    toast.success(`Annons "${listing?.title}" har tilldelats status: ${hotDealType ? dealTypeName : 'Normal'}`);
   };
 
   // Support Functions
@@ -891,6 +910,67 @@ const CompleteAdminPanel: React.FC = () => {
                             >
                               <Star className="w-4 h-4" />
                             </button>
+                            <div className="relative group">
+                              <button
+                                className={`p-2 rounded hover:bg-opacity-80 ${
+                                  listing.hotDealType === 'hot-deal' ? 'bg-red-100 text-red-600' :
+                                  listing.hotDealType === 'premium' ? 'bg-purple-100 text-purple-600' :
+                                  listing.hotDealType === 'featured' ? 'bg-blue-100 text-blue-600' :
+                                  listing.hotDealType === 'trending' ? 'bg-green-100 text-green-600' :
+                                  listing.hotDealType === 'vip' ? 'bg-yellow-100 text-yellow-600' :
+                                  'bg-gray-100 text-gray-600'
+                                }`}
+                                title="Hot Deal Status"
+                              >
+                                {listing.hotDealType === 'hot-deal' ? <Flame className="w-4 h-4" /> :
+                                 listing.hotDealType === 'premium' ? <Crown className="w-4 h-4" /> :
+                                 listing.hotDealType === 'featured' ? <Star className="w-4 h-4" /> :
+                                 listing.hotDealType === 'trending' ? <TrendingUp className="w-4 h-4" /> :
+                                 listing.hotDealType === 'vip' ? <Zap className="w-4 h-4" /> :
+                                 <Target className="w-4 h-4" />}
+                              </button>
+                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 hidden group-hover:block z-10 min-w-[140px]">
+                                <div className="text-xs font-medium text-gray-700 mb-2">Hot Deal Status</div>
+                                <div className="space-y-1">
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, null)}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-100 ${!listing.hotDealType ? 'bg-gray-100' : ''}`}
+                                  >
+                                    Normal
+                                  </button>
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, 'hot-deal')}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-red-100 text-red-600 ${listing.hotDealType === 'hot-deal' ? 'bg-red-100' : ''}`}
+                                  >
+                                    🔥 Hot Deal
+                                  </button>
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, 'premium')}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-purple-100 text-purple-600 ${listing.hotDealType === 'premium' ? 'bg-purple-100' : ''}`}
+                                  >
+                                    👑 Premium
+                                  </button>
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, 'featured')}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-100 text-blue-600 ${listing.hotDealType === 'featured' ? 'bg-blue-100' : ''}`}
+                                  >
+                                    ⭐ Featured
+                                  </button>
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, 'trending')}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-green-100 text-green-600 ${listing.hotDealType === 'trending' ? 'bg-green-100' : ''}`}
+                                  >
+                                    📈 Trending
+                                  </button>
+                                  <button
+                                    onClick={() => handleHotDealAssignment(listing.id, 'vip')}
+                                    className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-yellow-100 text-yellow-600 ${listing.hotDealType === 'vip' ? 'bg-yellow-100' : ''}`}
+                                  >
+                                    ⚡ VIP
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                             <button
                               className="p-2 rounded bg-blue-100 text-blue-600 hover:bg-blue-200"
                               title="Visa detaljer"
