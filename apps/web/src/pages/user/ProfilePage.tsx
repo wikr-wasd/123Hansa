@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { User, Settings, Bell, Shield } from 'lucide-react';
+import { User, Settings, Bell, Shield, LayoutDashboard } from 'lucide-react';
+import DashboardPage from '../dashboard/DashboardPage';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuthStore();
@@ -41,6 +42,17 @@ const ProfilePage: React.FC = () => {
                 Profil
               </button>
               <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'dashboard'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4 inline mr-2" />
+                Dashboard
+              </button>
+              <button
                 onClick={() => setActiveTab('settings')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'settings'
@@ -53,6 +65,13 @@ const ProfilePage: React.FC = () => {
               </button>
             </nav>
           </div>
+
+          {/* Dashboard Tab Content */}
+          {activeTab === 'dashboard' && (
+            <div className="p-0">
+              <DashboardPage embedded={true} />
+            </div>
+          )}
 
           {/* Profile Tab Content */}
           {activeTab === 'profile' && (

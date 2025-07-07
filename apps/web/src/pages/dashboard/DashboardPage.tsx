@@ -36,7 +36,11 @@ import { toast } from 'react-hot-toast';
 import { MessageChatBubble } from '../../components/messaging/MessageChatBubble';
 import { HeartContract } from '../../components/heart/HeartContract';
 
-const DashboardPage: React.FC = () => {
+interface DashboardPageProps {
+  embedded?: boolean;
+}
+
+const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'settings'>('overview');
   const { user: authUser } = useAuthStore();
@@ -281,74 +285,8 @@ const DashboardPage: React.FC = () => {
     });
   };
 
-  return (
-    <>
-      <Helmet>
-        <title>Min Dashboard - 123hansa.se</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <User className="w-8 h-8 text-blue-600 mr-3" />
-                <h1 className="text-xl font-bold text-gray-900">Min Dashboard</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button className="relative p-2 text-gray-400 hover:text-gray-500">
-                  <Bell className="w-6 h-6" />
-                  {userStats.unreadMessages > 0 && (
-                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-                  )}
-                </button>
-                <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex space-x-8">
-              {[
-                { id: 'overview', name: 'Översikt', icon: TrendingUp },
-                { id: 'listings', name: 'Mina annonser', icon: Building2 },
-                { id: 'favorites', name: 'Favoriter', icon: Heart },
-                { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
-                { id: 'purchases', name: 'Köp', icon: ShoppingCart },
-                { id: 'heart', name: 'Heart Avtal', icon: Shield },
-                { id: 'settings', name: 'Inställningar', icon: Settings }
-              ].map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {tab.name}
-                    {tab.id === 'messages' && userStats.unreadMessages > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                        {userStats.unreadMessages}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  const dashboardContent = (
+    <div className={embedded ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'}>
           {activeTab === 'overview' && (
             <div className="space-y-8">
               {/* Welcome Section */}
@@ -378,13 +316,20 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex justify-center">
-                <button
-                  onClick={handleCreateListing}
+              <div className="flex justify-center space-x-4">
+                <Link
+                  to="/create-listing"
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Skapa ny annons
+                </Link>
+                <button
+                  onClick={() => setActiveTab('heart')}
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Shield className="w-5 h-5 mr-2" />
+                  Heart Avtal
                 </button>
               </div>
 
@@ -848,11 +793,133 @@ const DashboardPage: React.FC = () => {
               <HeartContract />
             </div>
           )}
-        </div>
-      </div>
+    </div>
+  );
 
-      {/* Message Chat Bubble */}
-      <MessageChatBubble />
+  if (embedded) {
+    return (
+      <div className="space-y-6">
+        {/* Navigation Tabs */}
+        <div className="bg-white border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {[
+              { id: 'overview', name: 'Översikt', icon: TrendingUp },
+              { id: 'listings', name: 'Mina annonser', icon: Building2 },
+              { id: 'favorites', name: 'Favoriter', icon: Heart },
+              { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
+              { id: 'purchases', name: 'Köp', icon: ShoppingCart },
+              { id: 'heart', name: 'Heart Avtal', icon: Shield },
+              { id: 'settings', name: 'Inställningar', icon: Settings }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {tab.name}
+                  {tab.id === 'messages' && userStats.unreadMessages > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                      {userStats.unreadMessages}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Content */}
+        <div className="px-6">
+          {dashboardContent}
+        </div>
+
+        {/* Message Chat Bubble */}
+        <MessageChatBubble />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Helmet>
+        <title>Min Dashboard - 123hansa.se</title>
+      </Helmet>
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <User className="w-8 h-8 text-blue-600 mr-3" />
+                <h1 className="text-xl font-bold text-gray-900">Min Dashboard</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button className="relative p-2 text-gray-400 hover:text-gray-500">
+                  <Bell className="w-6 h-6" />
+                  {userStats.unreadMessages > 0 && (
+                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                  )}
+                </button>
+                <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="flex space-x-8">
+              {[
+                { id: 'overview', name: 'Översikt', icon: TrendingUp },
+                { id: 'listings', name: 'Mina annonser', icon: Building2 },
+                { id: 'favorites', name: 'Favoriter', icon: Heart },
+                { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
+                { id: 'purchases', name: 'Köp', icon: ShoppingCart },
+                { id: 'heart', name: 'Heart Avtal', icon: Shield },
+                { id: 'settings', name: 'Inställningar', icon: Settings }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {tab.name}
+                    {tab.id === 'messages' && userStats.unreadMessages > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                        {userStats.unreadMessages}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {dashboardContent}
+        </div>
+
+        {/* Message Chat Bubble */}
+        <MessageChatBubble />
+      </div>
     </>
   );
 };

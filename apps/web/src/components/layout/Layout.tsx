@@ -52,18 +52,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   Lägg till annons
                 </Link>
               </div>
-
-              {/* Heart Section - Contracts & Security */}
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl opacity-30"></div>
-                <Link 
-                  to="/heart" 
-                  className="relative bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
-                >
-                  <span className="mr-2 text-lg">🛡️</span>
-                  Heart Avtal
-                </Link>
-              </div>
               
               {/* Crowdfunding Section - Separate & Unique */}
               <div className="relative">

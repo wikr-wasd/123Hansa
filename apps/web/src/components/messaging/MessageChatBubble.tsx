@@ -123,7 +123,7 @@ export const MessageChatBubble: React.FC = () => {
           {/* Messages List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length > 0 ? (
-              messages.slice(-10).reverse().map((message) => (
+              messages.slice(-20).map((message) => (
                 <div
                   key={message.id}
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
