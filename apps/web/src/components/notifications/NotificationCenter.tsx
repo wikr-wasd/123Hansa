@@ -450,3 +450,4 @@ const NotificationCenter: React.FC = () => {
 };
 
 export default NotificationCenter;
+export { NotificationCenter };
