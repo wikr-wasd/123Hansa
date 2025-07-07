@@ -37,6 +37,7 @@ import {
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
 import { HeartContract } from '../../components/heart/HeartContract';
+import { EnhancedHeartContract } from '../../components/heart/EnhancedHeartContract';
 import { VerificationModal } from '../../components/auth/VerificationModal';
 
 const DashboardPage: React.FC = () => {
@@ -649,7 +650,7 @@ const DashboardPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
+                <span className="text-sm text-gray-600">Hej, {user.name}!</span>
               </div>
             </div>
           </div>
@@ -1411,7 +1412,7 @@ const DashboardPage: React.FC = () => {
 
           {activeTab === 'heart' && (
             <div className="space-y-6">
-              <HeartContract />
+              <EnhancedHeartContract />
             </div>
           )}
 

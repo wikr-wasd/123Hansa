@@ -78,9 +78,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Min Sida
                   </Link>
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm text-nordic-gray-600">
-                      Hej, {user?.firstName}!
-                    </span>
                     <LanguageSwitcher variant="header" />
                     <button 
                       onClick={handleLogout}

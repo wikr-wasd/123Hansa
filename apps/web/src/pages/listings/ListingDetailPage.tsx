@@ -28,6 +28,7 @@ import {
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { PremiumEmblem, PremiumEmblemType } from '../../components/listings/PremiumEmblem';
 import ContactSellerModal from '../../components/listings/ContactSellerModal';
 import { useAuthStore } from '../../stores/authStore';
 

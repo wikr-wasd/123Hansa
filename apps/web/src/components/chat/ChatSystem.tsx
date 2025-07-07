@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, Paperclip, X, Users, Minimize, Maximize, User, Clock, Circle } from 'lucide-react';
+import { MessageSquare, Send, X, Minimize, Maximize, User, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface ChatMessage {
@@ -37,6 +37,8 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [newChatRecipient, setNewChatRecipient] = useState('');
+  const [newChatMessage, setNewChatMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Dynamisk konversations-data baserat på användare
@@ -62,7 +64,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
           id: 'conv_user_anna',
           participants: [currentUserId, 'user_anna'],
           participantNames: [currentUserName, 'Anna Karlsson'],
-          type: 'user_to_user' as const,
+          type: 'user_to_user' as 'user_to_user',
           title: 'Chat med Anna Karlsson',
           lastMessage: 'Tack för den snabba supporten!',
           lastMessageTime: '2024-06-26 15:20',
@@ -73,7 +75,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
           id: 'conv_user_erik',
           participants: [currentUserId, 'user_erik'],
           participantNames: [currentUserName, 'Erik Johansson'],
-          type: 'user_to_user' as const,
+          type: 'user_to_user' as 'user_to_user',
           title: 'Chat med Erik Johansson',
           lastMessage: 'Har du tid för ett möte imorgon?',
           lastMessageTime: '2024-06-26 14:15',
@@ -88,7 +90,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
           id: 'conv_user_erik',
           participants: [currentUserId, 'user_erik'],
           participantNames: [currentUserName, 'Erik Johansson'],
-          type: 'user_to_user' as const,
+          type: 'user_to_user' as 'user_to_user',
           title: 'Chat med Erik Johansson',
           lastMessage: 'Intressant företag du har till salu!',
           lastMessageTime: '2024-06-26 11:30',
@@ -100,7 +102,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
           id: 'conv_user_anna',
           participants: [currentUserId, 'user_anna'],
           participantNames: [currentUserName, 'Anna Karlsson'],
-          type: 'user_to_user' as const,
+          type: 'user_to_user' as 'user_to_user',
           title: 'Chat med Anna Karlsson',
           lastMessage: 'Tack för informationen!',
           lastMessageTime: '2024-06-26 12:45',
@@ -114,7 +116,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
             id: 'conv_demo_seller',
             participants: [currentUserId, 'demo_seller'],
             participantNames: [currentUserName, 'Företagssäljare'],
-            type: 'user_to_user' as const,
+            type: 'user_to_user' as 'user_to_user',
             title: 'Chat med Företagssäljare',
             lastMessage: 'Hej! Intresserad av mitt företag?',
             lastMessageTime: '2024-06-26 10:15',
@@ -125,7 +127,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
             id: 'conv_demo_buyer',
             participants: [currentUserId, 'demo_buyer'],
             participantNames: [currentUserName, 'Potentiell Köpare'],
-            type: 'user_to_user' as const,
+            type: 'user_to_user' as 'user_to_user',
             title: 'Chat med Potentiell Köpare',
             lastMessage: 'Kan vi diskutera priset?',
             lastMessageTime: '2024-06-25 18:20',
@@ -322,17 +324,27 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
-      >
-        <MessageSquare className="w-6 h-6" />
-        {totalUnreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
-            {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-          </span>
-        )}
-      </button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 group">
+          <button 
+            onClick={() => setIsOpen(true)}
+            className="p-4 rounded-full relative"
+          >
+            <MessageSquare className="w-6 h-6" />
+            {totalUnreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+              </span>
+            )}
+          </button>
+          <div 
+            onClick={() => setIsOpen(false)}
+            className="px-4 pb-2 text-xs text-center text-blue-100 hover:text-white transition-colors cursor-pointer"
+          >
+            meddelande
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -498,6 +510,135 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
             </div>
           )}
         </>
+      )}
+      
+      {/* New Chat Modal */}
+      {showNewChatModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Ny konversation</h3>
+              <button
+                onClick={() => {
+                  setShowNewChatModal(false);
+                  setNewChatRecipient('');
+                  setNewChatMessage('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mottagare
+                </label>
+                <select
+                  value={newChatRecipient}
+                  onChange={(e) => setNewChatRecipient(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Välj mottagare...</option>
+                  <option value="support">123Hansa Support</option>
+                  <option value="demo_seller">Företagssäljare</option>
+                  <option value="demo_buyer">Potentiell Köpare</option>
+                  {currentUserType === 'admin' && (
+                    <>
+                      <option value="user_anna">Anna Karlsson</option>
+                      <option value="user_erik">Erik Johansson</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meddelande
+                </label>
+                <textarea
+                  value={newChatMessage}
+                  onChange={(e) => setNewChatMessage(e.target.value)}
+                  rows={3}
+                  placeholder="Skriv ditt meddelande här..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowNewChatModal(false);
+                  setNewChatRecipient('');
+                  setNewChatMessage('');
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={() => {
+                  if (newChatRecipient && newChatMessage.trim()) {
+                    // Create new conversation
+                    const recipientNames = {
+                      support: '123Hansa Support',
+                      demo_seller: 'Företagssäljare',
+                      demo_buyer: 'Potentiell Köpare',
+                      user_anna: 'Anna Karlsson',
+                      user_erik: 'Erik Johansson'
+                    };
+                    
+                    const newConvId = `conv_new_${Date.now()}`;
+                    const recipientName = recipientNames[newChatRecipient as keyof typeof recipientNames] || 'Okänd användare';
+                    
+                    const newConversation: ChatConversation = {
+                      id: newConvId,
+                      participants: [currentUserId, newChatRecipient],
+                      participantNames: [currentUserName, recipientName],
+                      type: newChatRecipient === 'support' ? 'user_to_support' : 'user_to_user',
+                      title: `Chat med ${recipientName}`,
+                      lastMessage: newChatMessage.trim(),
+                      lastMessageTime: new Date().toLocaleString('sv-SE'),
+                      unreadCount: 0,
+                      online: true
+                    };
+                    
+                    const newMessage: ChatMessage = {
+                      id: `msg_${Date.now()}`,
+                      senderId: currentUserId,
+                      senderName: currentUserName,
+                      senderType: currentUserType,
+                      message: newChatMessage.trim(),
+                      timestamp: new Date().toLocaleString('sv-SE'),
+                      read: true
+                    };
+                    
+                    setConversations(prev => [newConversation, ...prev]);
+                    setMessages(prev => ({
+                      ...prev,
+                      [newConvId]: [newMessage]
+                    }));
+                    
+                    setActiveConversation(newConvId);
+                    setShowNewChatModal(false);
+                    setNewChatRecipient('');
+                    setNewChatMessage('');
+                    
+                    toast.success('Ny konversation skapad!');
+                  } else {
+                    toast.error('Välj mottagare och skriv ett meddelande');
+                  }
+                }}
+                disabled={!newChatRecipient || !newChatMessage.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Skapa konversation
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

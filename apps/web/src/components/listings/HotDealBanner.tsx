@@ -70,8 +70,15 @@ export const HotDealBanner: React.FC<HotDealBannerProps> = ({
         border-2 border-white/30
         backdrop-blur-sm
         flex items-center gap-1
+        hover:scale-110 transition-transform duration-200
+        relative overflow-hidden
       `}>
-        <IconComponent className={`w-4 h-4 ${config.iconColor}`} />
+        {/* Shine effect for hot deals */}
+        {type === 'hot-deal' && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-[shine_2s_infinite] opacity-60" />
+        )}
+        
+        <IconComponent className={`w-4 h-4 ${config.iconColor} ${config.pulse ? 'animate-bounce' : ''}`} />
         <span className="text-xs font-black tracking-wide drop-shadow-sm">
           {config.text}
         </span>

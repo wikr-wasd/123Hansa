@@ -25,6 +25,7 @@ import {
 import CategoryIcons from '../../components/search/CategoryIcons';
 import HotDealsSection from '../../components/listings/HotDealsSection';
 import { HotDealBanner } from '../../components/listings/HotDealBanner';
+import { PremiumEmblem, PremiumEmblemType } from '../../components/listings/PremiumEmblem';
 
 // Types
 interface Listing {
@@ -48,6 +49,7 @@ interface Listing {
   viewCount: number;
   interestedBuyers: number;
   hotDealType?: 'hot-deal' | 'premium' | 'featured' | 'trending' | 'vip';
+  premiumEmblems?: PremiumEmblemType[];
   [key: string]: any;
 }
 
@@ -147,10 +149,34 @@ const ListingsPage: React.FC = () => {
             joinedDate: listing.createdAt
           },
           viewCount: listing.viewCount || 0,
-          interestedBuyers: listing.interestedBuyers || 0
+          interestedBuyers: listing.interestedBuyers || 0,
+          // Preserve any existing hotDealType from the API
+          hotDealType: listing.hotDealType || undefined
         }));
+
+        // Enhanced sorting: Hot deals first, then by selected sort criteria
+        const sortedListings = transformedListings.sort((a, b) => {
+          // First priority: Hot deals at the top
+          if (a.hotDealType && !b.hotDealType) return -1;
+          if (!a.hotDealType && b.hotDealType) return 1;
+          
+          // If both or neither have hot deal types, sort by the selected criteria
+          switch (currentFilters.sortBy) {
+            case 'oldest':
+              return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            case 'price_low':
+              return a.askingPrice - b.askingPrice;
+            case 'price_high':
+              return b.askingPrice - a.askingPrice;
+            case 'popular':
+              return (b.viewCount + b.interestedBuyers) - (a.viewCount + a.interestedBuyers);
+            case 'newest':
+            default:
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+        });
         
-        setListings(transformedListings);
+        setListings(sortedListings);
         setStats(data.data.stats || {
           total: transformedListings.length,
           categories: {},
@@ -167,15 +193,15 @@ const ListingsPage: React.FC = () => {
         const fallbackListings = [
           {
             id: '1',
-            title: 'TechStartup AB',
-            category: 'Technology',
+            title: 'TechStartup AB - Premium AI Company',
+            category: 'companies',
             subcategory: '',
             askingPrice: 2500000,
             currency: 'SEK',
-            location: 'Sverige',
-            description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning.',
-            highlights: [],
-            images: [],
+            location: 'Stockholm',
+            description: 'Innovativt teknikföretag med stark tillväxt inom AI och maskininlärning. Etablerat kundregister och återkommande intäkter.',
+            highlights: ['AI & ML', 'Återkommande intäkter', 'Skalbar teknologi'],
+            images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'],
             seller: {
               name: 'Anna Karlsson',
               verified: true,
@@ -183,8 +209,78 @@ const ListingsPage: React.FC = () => {
             },
             status: 'ACTIVE' as const,
             createdAt: '2024-06-20',
-            viewCount: 0,
-            interestedBuyers: 0
+            viewCount: 127,
+            interestedBuyers: 8,
+            hotDealType: 'hot-deal' as const,
+            premiumEmblems: ['verified', 'premium'] as PremiumEmblemType[]
+          },
+          {
+            id: '2',
+            title: 'E-commerce Success Story',
+            category: 'ecommerce',
+            subcategory: '',
+            askingPrice: 1800000,
+            currency: 'SEK',
+            location: 'Göteborg',
+            description: 'Lönsam e-handelsverksamhet inom mode med stark varumärkesposition och lojalkundskara.',
+            highlights: ['Lönsam verksamhet', 'Stark varumärke', 'Lojalkundskara'],
+            images: ['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop'],
+            seller: {
+              name: 'Erik Svensson',
+              verified: true,
+              joinedDate: '2024-06-15'
+            },
+            status: 'ACTIVE' as const,
+            createdAt: '2024-06-15',
+            viewCount: 89,
+            interestedBuyers: 5,
+            hotDealType: 'premium' as const,
+            premiumEmblems: ['bestseller', 'trending'] as PremiumEmblemType[]
+          },
+          {
+            id: '3',
+            title: 'Digital Marketing Agency',
+            category: 'services',
+            subcategory: '',
+            askingPrice: 950000,
+            currency: 'SEK',
+            location: 'Malmö',
+            description: 'Välestablerad digital marknadsföringsbyrå med starka kundrelationer och bevisat track record.',
+            highlights: ['Etablerad kundbas', 'Digitala tjänster', 'Bevisat track record'],
+            images: ['https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=400&fit=crop'],
+            seller: {
+              name: 'Maria Lindqvist',
+              verified: true,
+              joinedDate: '2024-06-10'
+            },
+            status: 'ACTIVE' as const,
+            createdAt: '2024-06-10',
+            viewCount: 65,
+            interestedBuyers: 3,
+            hotDealType: 'featured' as const,
+            premiumEmblems: ['exclusive', 'vip'] as PremiumEmblemType[]
+          },
+          {
+            id: '4',
+            title: 'Konsultföretag inom IT',
+            category: 'services',
+            subcategory: '',
+            askingPrice: 1200000,
+            currency: 'SEK',
+            location: 'Uppsala',
+            description: 'IT-konsultföretag med specialisering inom systemintegration och molnlösningar.',
+            highlights: ['IT-konsulting', 'Molnlösningar', 'Systemintegration'],
+            images: [],
+            seller: {
+              name: 'Johan Andersson',
+              verified: true,
+              joinedDate: '2024-06-05'
+            },
+            status: 'ACTIVE' as const,
+            createdAt: '2024-06-05',
+            viewCount: 42,
+            interestedBuyers: 2,
+            premiumEmblems: ['new', 'diamond'] as PremiumEmblemType[]
           }
         ];
         setListings(fallbackListings);
@@ -257,7 +353,7 @@ const ListingsPage: React.FC = () => {
           <div className="flex">
             {/* Image */}
             {listing.images && listing.images.length > 0 && (
-              <div className="w-48 h-32 flex-shrink-0">
+              <div className="w-48 h-32 flex-shrink-0 relative overflow-hidden">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -267,6 +363,20 @@ const ListingsPage: React.FC = () => {
                     target.src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop';
                   }}
                 />
+                
+                {/* Premium Emblems for list view */}
+                {listing.premiumEmblems && listing.premiumEmblems.length > 0 && (
+                  <>
+                    {listing.premiumEmblems.slice(0, 1).map((emblem) => (
+                      <PremiumEmblem
+                        key={emblem}
+                        type={emblem}
+                        position="top-right"
+                        size="sm"
+                      />
+                    ))}
+                  </>
+                )}
               </div>
             )}
             
@@ -364,6 +474,20 @@ const ListingsPage: React.FC = () => {
               {STATUS_INFO[listing.status as keyof typeof STATUS_INFO]?.name}
             </span>
           </div>
+
+          {/* Premium Emblems */}
+          {listing.premiumEmblems && listing.premiumEmblems.length > 0 && (
+            <>
+              {listing.premiumEmblems.slice(0, 2).map((emblem, index) => (
+                <PremiumEmblem
+                  key={emblem}
+                  type={emblem}
+                  position={index === 0 ? 'bottom-right' : 'bottom-left'}
+                  size="sm"
+                />
+              ))}
+            </>
+          )}
         </div>
         
         <div className="p-6">

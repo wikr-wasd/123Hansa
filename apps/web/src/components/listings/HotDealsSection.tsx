@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Flame, 
   MapPin, 
@@ -12,6 +12,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { HotDealBanner } from './HotDealBanner';
+import { PremiumEmblem, PremiumEmblemType } from './PremiumEmblem';
 
 interface Listing {
   id: string;
@@ -34,6 +35,7 @@ interface Listing {
   viewCount: number;
   interestedBuyers: number;
   hotDealType?: 'hot-deal' | 'premium' | 'featured' | 'trending' | 'vip';
+  premiumEmblems?: PremiumEmblemType[];
   [key: string]: any;
 }
 
@@ -59,11 +61,41 @@ export const HotDealsSection: React.FC<HotDealsSectionProps> = ({
   listings, 
   className = '' 
 }) => {
-  // Get top 3 listings and assign hot deal types
-  const hotDeals = listings.slice(0, 3).map((listing, index) => ({
-    ...listing,
-    hotDealType: index === 0 ? 'hot-deal' : index === 1 ? 'premium' : 'featured'
-  }));
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Enhanced hot deal assignment logic
+  const getHotDeals = () => {
+    // First, separate listings that already have hot deal types from those that don't
+    const existingHotDeals = listings.filter(listing => listing.hotDealType);
+    const regularListings = listings.filter(listing => !listing.hotDealType);
+    
+    // If we already have enough manually assigned hot deals, use them
+    if (existingHotDeals.length >= 3) {
+      return existingHotDeals.slice(0, 3);
+    }
+    
+    // Otherwise, combine existing hot deals with top regular listings
+    const needed = 3 - existingHotDeals.length;
+    const topRegularListings = regularListings.slice(0, needed);
+    
+    // Assign hot deal types to regular listings based on their position
+    const autoAssignedListings = topRegularListings.map((listing, index) => {
+      const totalExisting = existingHotDeals.length;
+      const position = totalExisting + index;
+      
+      return {
+        ...listing,
+        hotDealType: position === 0 ? 'hot-deal' as const : 
+                    position === 1 ? 'premium' as const : 
+                    'featured' as const,
+        isAutoAssigned: true // Flag to track auto-assigned hot deals
+      };
+    });
+    
+    return [...existingHotDeals, ...autoAssignedListings];
+  };
+
+  const hotDeals = getHotDeals();
 
   if (hotDeals.length === 0) return null;
 
@@ -146,6 +178,20 @@ export const HotDealsSection: React.FC<HotDealsSectionProps> = ({
                       </span>
                     </div>
                   </div>
+
+                  {/* Premium Emblems */}
+                  {listing.premiumEmblems && listing.premiumEmblems.length > 0 && (
+                    <>
+                      {listing.premiumEmblems.slice(0, 2).map((emblem, emblemIndex) => (
+                        <PremiumEmblem
+                          key={emblem}
+                          type={emblem}
+                          position={emblemIndex === 0 ? 'bottom-left' : 'top-left'}
+                          size="md"
+                        />
+                      ))}
+                    </>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -236,13 +282,30 @@ export const HotDealsSection: React.FC<HotDealsSectionProps> = ({
 
         {/* Bottom CTA */}
         <div className="text-center mt-12">
-          <Link
-            to="/listings"
+          <button
+            onClick={() => {
+              // Check if we're already on the listings page
+              if (location.pathname === '/listings') {
+                // Scroll to the listings grid or filter section
+                const mainListings = document.querySelector('[class*="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"]') ||
+                                   document.querySelector('[class*="space-y-4"]') ||
+                                   document.querySelector('[class*="bg-white border-b border-gray-200"]');
+                if (mainListings) {
+                  mainListings.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                  // Fallback: scroll to a reasonable position
+                  window.scrollTo({ top: 800, behavior: 'smooth' });
+                }
+              } else {
+                // Navigate to listings page
+                navigate('/listings');
+              }
+            }}
             className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <Flame className="w-5 h-5 mr-2" />
             Se Alla Affärsmöjligheter
-          </Link>
+          </button>
         </div>
       </div>
     </section>

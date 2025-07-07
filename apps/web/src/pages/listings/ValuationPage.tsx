@@ -13,12 +13,17 @@ import {
   Clock,
   Star,
   Award,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  Target,
+  Shield
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { validateEmail } from '../../utils/emailValidation';
+import BusinessValuationTool from '../../components/analytics/BusinessValuationTool';
 
 const ValuationPage: React.FC = () => {
+  const [evaluationType, setEvaluationType] = useState<'quick' | 'detailed' | null>(null);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     companyType: '',
@@ -32,6 +37,11 @@ const ValuationPage: React.FC = () => {
   });
   
   const [emailError, setEmailError] = useState('');
+  const [quickEvaluationData, setQuickEvaluationData] = useState({
+    revenue: '',
+    industry: '',
+    employees: ''
+  });
 
   const [valuationResult, setValuationResult] = useState<{
     low: number;
@@ -50,6 +60,34 @@ const ValuationPage: React.FC = () => {
     'Teknologi & IT', 'E-handel', 'Konsulting', 'Tillverkning', 'Fastigheter',
     'Restaurang & Mat', 'Hälsa & Vård', 'Utbildning', 'Transport', 'Annat'
   ];
+
+  const calculateQuickValuation = () => {
+    const revenue = parseFloat(quickEvaluationData.revenue) || 0;
+    const employees = parseInt(quickEvaluationData.employees) || 1;
+    
+    // Simplified valuation algorithm
+    let multiplier = 2.5; // Base multiplier
+    
+    // Industry adjustments
+    if (quickEvaluationData.industry === 'Teknologi & IT') multiplier += 1.5;
+    if (quickEvaluationData.industry === 'E-handel') multiplier += 1.0;
+    if (quickEvaluationData.industry === 'Konsulting') multiplier += 0.5;
+    
+    // Size adjustments
+    if (employees > 50) multiplier += 0.5;
+    if (employees > 100) multiplier += 0.5;
+    
+    const estimate = revenue * multiplier;
+    const variance = estimate * 0.3; // 30% variance
+    
+    setValuationResult({
+      low: Math.max(0, estimate - variance),
+      high: estimate + variance,
+      estimate: estimate
+    });
+    
+    setStep(4);
+  };
 
   const calculateValuation = () => {
     const revenue = parseFloat(formData.revenue) || 0;
@@ -136,15 +174,143 @@ const ValuationPage: React.FC = () => {
                 Vad är ditt företag värt?
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Få en professionell värdering av ditt företag på bara några minuter. 
-                Vår AI-baserade verktyg ger dig en första uppskattning, följt av detaljerad analys från våra experter.
+                Välj mellan snabb utvärdering på 2 minuter eller detaljerad analys med vårt avancerade verktyg. 
+                Få professionell värdering från våra experter för exakt bedömning.
               </p>
             </div>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {step < 4 && (
+          {/* Evaluation Type Selection */}
+          {evaluationType === null && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Välj typ av utvärdering
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button
+                  onClick={() => setEvaluationType('quick')}
+                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                >
+                  <div className="flex items-center mb-4">
+                    <Zap className="w-8 h-8 text-blue-600 mr-3" />
+                    <h3 className="text-xl font-semibold text-gray-900">Snabb utvärdering</h3>
+                  </div>
+                  <p className="text-gray-600 mb-4">
+                    Få en snabb uppskattning av ditt företags värde på bara 2 minuter.
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    2 minuter
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => setEvaluationType('detailed')}
+                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all text-left"
+                >
+                  <div className="flex items-center mb-4">
+                    <Target className="w-8 h-8 text-green-600 mr-3" />
+                    <h3 className="text-xl font-semibold text-gray-900">Detaljerad utvärdering</h3>
+                  </div>
+                  <p className="text-gray-600 mb-4">
+                    Omfattande analys med professionell värdering från våra experter.
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    10-15 minuter
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Evaluation */}
+          {evaluationType === 'quick' && step < 4 && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Snabb utvärdering</h2>
+                <button
+                  onClick={() => setEvaluationType(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Årsomsättning (SEK) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={quickEvaluationData.revenue}
+                    onChange={(e) => setQuickEvaluationData(prev => ({ ...prev, revenue: e.target.value }))}
+                    placeholder="t.ex. 2500000"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bransch <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={quickEvaluationData.industry}
+                    onChange={(e) => setQuickEvaluationData(prev => ({ ...prev, industry: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Välj bransch</option>
+                    {industries.map((industry) => (
+                      <option key={industry} value={industry}>{industry}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Antal anställda <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={quickEvaluationData.employees}
+                    onChange={(e) => setQuickEvaluationData(prev => ({ ...prev, employees: e.target.value }))}
+                    placeholder="t.ex. 15"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <button
+                  onClick={calculateQuickValuation}
+                  disabled={!quickEvaluationData.revenue || !quickEvaluationData.industry || !quickEvaluationData.employees}
+                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Beräkna snabb värdering
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Detailed Evaluation */}
+          {evaluationType === 'detailed' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Detaljerad utvärdering</h2>
+                <button
+                  onClick={() => setEvaluationType(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <BusinessValuationTool />
+            </div>
+          )}
+
+          {evaluationType !== null && evaluationType !== 'detailed' && evaluationType !== 'quick' && step < 4 && (
             <>
               {/* Progress Bar */}
               <div className="mb-8">
@@ -392,14 +558,31 @@ const ValuationPage: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  {evaluationType === 'quick' && (
+                    <button
+                      onClick={() => {
+                        setEvaluationType('detailed');
+                        setStep(1);
+                        setValuationResult(null);
+                      }}
+                      className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Få detaljerad värdering
+                    </button>
+                  )}
                   <button
                     onClick={requestDetailedValuation}
                     className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Begär detaljerad värdering
+                    Begär professionell värdering
                   </button>
                   <button
-                    onClick={() => { setStep(1); setValuationResult(null); }}
+                    onClick={() => { 
+                      setStep(1); 
+                      setValuationResult(null); 
+                      setEvaluationType(null);
+                      setQuickEvaluationData({ revenue: '', industry: '', employees: '' });
+                    }}
                     className="px-8 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Ny värdering
