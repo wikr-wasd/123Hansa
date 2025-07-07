@@ -75,6 +75,8 @@ const DashboardPage: React.FC = () => {
   });
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [viewingListing, setViewingListing] = useState<any | null>(null);
 
   // Get real user data from auth store
   const user = {
@@ -102,6 +104,20 @@ const DashboardPage: React.FC = () => {
     loadUserData();
     loadNotifications();
   }, [authUser, activeTab]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.relative')) {
+        setOpenDropdown(null);
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const loadUserData = async () => {
     if (!authUser) return;
@@ -291,8 +307,14 @@ const DashboardPage: React.FC = () => {
 
   // Function for viewing listing details
   const handleViewListing = (listingId: string) => {
-    // In production, navigate to listing detail page
-    toast.success(`Öppnar annons: ${listingId}`);
+    const listing = allUserListings.find(l => l.id === listingId);
+    if (listing) {
+      setViewingListing(listing);
+    } else {
+      // Navigate to public listing page
+      window.open(`/listings/${listingId}`, '_blank');
+    }
+    setOpenDropdown(null);
   };
 
   // Function for editing listing
@@ -320,6 +342,7 @@ const DashboardPage: React.FC = () => {
       timeframe: listing.timeframe || '',
       negotiable: listing.negotiable !== false
     });
+    setOpenDropdown(null);
   };
 
   // Function to save edited listing
@@ -449,6 +472,7 @@ const DashboardPage: React.FC = () => {
     setUserListings(updatedListings);
     localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
     
+    setOpenDropdown(null);
     toast.success('Annons borttagen!');
   };
 
@@ -829,9 +853,42 @@ const DashboardPage: React.FC = () => {
                             }`}>
                               {listing.status === 'active' ? 'Aktiv' : 'Väntar'}
                             </span>
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </button>
+                            <div className="relative">
+                              <button 
+                                onClick={() => setOpenDropdown(openDropdown === `overview-${listing.id}` ? null : `overview-${listing.id}`)}
+                                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+                              
+                              {openDropdown === `overview-${listing.id}` && (
+                                <div className="absolute right-0 top-8 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                  <button
+                                    onClick={() => handleViewListing(listing.id)}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Visa annons
+                                  </button>
+                                  <button
+                                    onClick={() => handleEditListing(listing.id)}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Redigera
+                                  </button>
+                                  {!listing.id.startsWith('demo_') && (
+                                    <button
+                                      onClick={() => handleDeleteListing(listing.id)}
+                                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Ta bort
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -879,9 +936,42 @@ const DashboardPage: React.FC = () => {
                           }`}>
                             {listing.status === 'active' ? 'Aktiv' : 'Väntar'}
                           </span>
-                          <button className="text-gray-400 hover:text-gray-600">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={() => setOpenDropdown(openDropdown === `listing-${listing.id}` ? null : `listing-${listing.id}`)}
+                              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                            >
+                              <MoreHorizontal className="w-5 h-5" />
+                            </button>
+                            
+                            {openDropdown === `listing-${listing.id}` && (
+                              <div className="absolute right-0 top-8 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                <button
+                                  onClick={() => handleViewListing(listing.id)}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                >
+                                  <ExternalLink className="w-4 h-4 mr-2" />
+                                  Visa annons
+                                </button>
+                                <button
+                                  onClick={() => handleEditListing(listing.id)}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                >
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Redigera
+                                </button>
+                                {!listing.id.startsWith('demo_') && (
+                                  <button
+                                    onClick={() => handleDeleteListing(listing.id)}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Ta bort
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       
@@ -1478,6 +1568,108 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
 
+
+        {/* Listing Detail Modal */}
+        {viewingListing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">Annonsdetaljer</h2>
+                <button
+                  onClick={() => setViewingListing(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{viewingListing.title}</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Pris</label>
+                        <p className="text-3xl font-bold text-blue-600">{formatPrice(viewingListing.price)}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <p className="text-gray-900">{viewingListing.category}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          viewingListing.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {viewingListing.status === 'active' ? 'Aktiv' : 'Väntar'}
+                        </span>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
+                        <p className="text-gray-900 whitespace-pre-wrap">{viewingListing.description || 'Ingen beskrivning tillgänglig'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Statistik</h4>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Visningar:</span>
+                          <span className="font-medium">{viewingListing.views || 0}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Skapad:</span>
+                          <span className="font-medium">{formatDate(viewingListing.createdAt)}</span>
+                        </div>
+                        
+                        {viewingListing.featured && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Utvald:</span>
+                            <span className="flex items-center text-yellow-600">
+                              <Star className="w-4 h-4 mr-1" />
+                              Ja
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="mt-6 space-y-3">
+                        <button
+                          onClick={() => {
+                            window.open(`/listings/${viewingListing.id}`, '_blank');
+                          }}
+                          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Öppna publik vy
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            setViewingListing(null);
+                            handleEditListing(viewingListing.id);
+                          }}
+                          className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Redigera annons
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Verification Modal */}
         <VerificationModal
