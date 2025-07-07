@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { 
   User, 
   Building2, 
@@ -24,110 +25,139 @@ import {
   CreditCard,
   Award,
   Clock,
-  Check
+  Check,
+  ExternalLink,
+  MoreHorizontal,
+  Send
 } from 'lucide-react';
+import { useAuthStore } from '../../stores/authStore';
+import { toast } from 'react-hot-toast';
+import { ClaudeChatWidget } from '../../components/ai/ClaudeChatWidget';
 
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'settings'>('overview');
+  const { user: authUser } = useAuthStore();
+  const [userListings, setUserListings] = useState<any[]>([]);
+  const [userFavorites, setUserFavorites] = useState<any[]>([]);
+  const [userMessages, setUserMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Mock user data - in real app this would come from context/API
+  // Get real user data from auth store
   const user = {
-    name: 'Anna Karlsson',
-    email: 'anna@example.com',
+    name: authUser ? `${authUser.firstName} ${authUser.lastName}` : 'Användare',
+    email: authUser?.email || '',
     phone: '+46 70 123 4567',
     location: 'Stockholm',
-    verified: true,
-    memberSince: '2024-01-15',
-    avatar: 'AK'
+    verified: authUser?.isEmailVerified || false,
+    memberSince: authUser?.createdAt || '2024-01-15',
+    avatar: authUser ? `${authUser.firstName[0]}${authUser.lastName[0]}` : 'U'
+  };
+
+  // Load user data on component mount
+  useEffect(() => {
+    loadUserData();
+  }, [authUser]);
+
+  const loadUserData = async () => {
+    if (!authUser) return;
+    
+    setIsLoading(true);
+    try {
+      // Load user's listings from localStorage or API
+      const savedListings = JSON.parse(localStorage.getItem(`userListings_${authUser.id}`) || '[]');
+      const savedFavorites = JSON.parse(localStorage.getItem(`userFavorites_${authUser.id}`) || '[]');
+      const savedMessages = JSON.parse(localStorage.getItem(`userMessages_${authUser.id}`) || '[]');
+      
+      setUserListings(savedListings);
+      setUserFavorites(savedFavorites);
+      setUserMessages(savedMessages);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const userStats = {
-    activeListings: 2,
-    totalViews: 1247,
-    savedListings: 8,
+    activeListings: userListings.filter(l => l.status === 'active').length,
+    totalViews: userListings.reduce((sum, l) => sum + (l.views || 0), 0),
+    savedListings: userFavorites.length,
     completedPurchases: 3,
-    unreadMessages: 4,
+    unreadMessages: userMessages.filter(m => !m.read).length,
     totalSpent: 450000,
     rating: 4.8,
     reviewCount: 12
   };
 
-  const myListings = [
+  // Functions for managing favorites
+  const addToFavorites = (listing: any) => {
+    if (!authUser) return;
+    
+    const newFavorite = {
+      ...listing,
+      savedAt: new Date().toISOString(),
+      userId: authUser.id
+    };
+    
+    const updatedFavorites = [...userFavorites, newFavorite];
+    setUserFavorites(updatedFavorites);
+    localStorage.setItem(`userFavorites_${authUser.id}`, JSON.stringify(updatedFavorites));
+    toast.success('Tillagd i favoriter!');
+  };
+
+  const removeFromFavorites = (listingId: string) => {
+    if (!authUser) return;
+    
+    const updatedFavorites = userFavorites.filter(f => f.id !== listingId);
+    setUserFavorites(updatedFavorites);
+    localStorage.setItem(`userFavorites_${authUser.id}`, JSON.stringify(updatedFavorites));
+    toast.success('Borttagen från favoriter');
+  };
+
+  // Function for sending messages
+  const sendMessage = (recipientId: string, subject: string, content: string) => {
+    if (!authUser) return;
+    
+    const message = {
+      id: Date.now().toString(),
+      from: authUser.id,
+      fromName: `${authUser.firstName} ${authUser.lastName}`,
+      to: recipientId,
+      subject,
+      content,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    
+    // Save message for sender
+    const senderMessages = [...userMessages, { ...message, type: 'sent' }];
+    setUserMessages(senderMessages);
+    localStorage.setItem(`userMessages_${authUser.id}`, JSON.stringify(senderMessages));
+    
+    // Save message for recipient (notification)
+    const recipientMessages = JSON.parse(localStorage.getItem(`userMessages_${recipientId}`) || '[]');
+    recipientMessages.push({ ...message, type: 'received' });
+    localStorage.setItem(`userMessages_${recipientId}`, JSON.stringify(recipientMessages));
+    
+    toast.success('Meddelande skickat!');
+  };
+
+  // Create some demo listings if user has none
+  const demoDemoListings = userListings.length === 0 ? [
     {
-      id: '1',
-      title: 'TechStartup AB',
+      id: `demo_${authUser?.id}_1`,
+      title: 'Min Demo Annons',
       category: 'Technology',
-      price: 2500000,
-      views: 45,
+      price: 1000000,
+      views: 12,
       status: 'active',
-      createdAt: '2024-06-25',
-      featured: true
-    },
-    {
-      id: '2',
-      title: 'Konsultföretag Stockholm',
-      category: 'Consulting',
-      price: 850000,
-      views: 23,
-      status: 'pending',
-      createdAt: '2024-06-20',
-      featured: false
+      createdAt: new Date().toISOString(),
+      featured: false,
+      description: 'Detta är en demonstration av hur dina annonser kommer att visas.'
     }
-  ];
+  ] : [];
 
-  const favoriteListings = [
-    {
-      id: '3',
-      title: 'Restaurang Gamla Stan',
-      category: 'Restaurant',
-      price: 1200000,
-      location: 'Stockholm',
-      savedAt: '2024-06-26'
-    },
-    {
-      id: '4',
-      title: 'E-handel Fashion',
-      category: 'E-commerce',
-      price: 950000,
-      location: 'Göteborg',
-      savedAt: '2024-06-24'
-    },
-    {
-      id: '5',
-      title: 'Digital Marknadsföring AB',
-      category: 'Marketing',
-      price: 750000,
-      location: 'Malmö',
-      savedAt: '2024-06-22'
-    }
-  ];
-
-  const recentMessages = [
-    {
-      id: '1',
-      from: 'Erik Johansson',
-      subject: 'Intresse för TechStartup AB',
-      preview: 'Hej! Jag är intresserad av att veta mer om ert företag...',
-      time: '2024-06-26 14:30',
-      unread: true
-    },
-    {
-      id: '2',
-      from: 'Maria Svensson',
-      subject: 'Frågor om konsultföretaget',
-      preview: 'Kan ni berätta mer om kundbasen och intäkter?',
-      time: '2024-06-25 11:15',
-      unread: true
-    },
-    {
-      id: '3',
-      from: '123hansa Support',
-      subject: 'Din annons har godkänts',
-      preview: 'Grattis! Din annons "TechStartup AB" har nu godkänts...',
-      time: '2024-06-24 09:45',
-      unread: false
-    }
-  ];
+  const allUserListings = [...userListings, ...demoDemoListings];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('sv-SE', {
@@ -286,37 +316,57 @@ const DashboardPage: React.FC = () => {
               {/* Recent Activity */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Senaste meddelanden</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Senaste meddelanden</h3>
+                    <button 
+                      onClick={() => setActiveTab('messages')}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Visa alla →
+                    </button>
+                  </div>
                   <div className="space-y-3">
-                    {recentMessages.slice(0, 3).map((message) => (
-                      <div key={message.id} className={`p-3 rounded-lg border ${message.unread ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                    {userMessages.length > 0 ? userMessages.slice(0, 3).map((message) => (
+                      <div key={message.id} className={`p-3 rounded-lg border ${!message.read ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <p className="font-medium text-gray-900">{message.from}</p>
+                            <p className="font-medium text-gray-900">
+                              {message.type === 'received' ? message.fromName : `Till: ${message.to}`}
+                            </p>
                             <p className="text-sm text-gray-600">{message.subject}</p>
-                            <p className="text-xs text-gray-500 mt-1">{message.preview}</p>
+                            <p className="text-xs text-gray-500 mt-1">{message.content.substring(0, 60)}...</p>
                           </div>
-                          {message.unread && (
+                          {!message.read && (
                             <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                           )}
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-6 text-gray-500">
+                        <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm">Inga meddelanden än</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
                 <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Mina annonser</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Mina annonser</h3>
+                    <Link to="/create-listing" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      Skapa ny →
+                    </Link>
+                  </div>
                   <div className="space-y-3">
-                    {myListings.map((listing) => (
-                      <div key={listing.id} className="p-3 rounded-lg border border-gray-200">
+                    {allUserListings.length > 0 ? allUserListings.slice(0, 3).map((listing) => (
+                      <div key={listing.id} className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
                         <div className="flex justify-between items-start">
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium text-gray-900">{listing.title}</p>
                             <p className="text-sm text-gray-600">{formatPrice(listing.price)}</p>
                             <div className="flex items-center mt-1">
                               <Eye className="w-3 h-3 text-gray-400 mr-1" />
-                              <span className="text-xs text-gray-500">{listing.views} visningar</span>
+                              <span className="text-xs text-gray-500">{listing.views || 0} visningar</span>
                               {listing.featured && (
                                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                   <Star className="w-3 h-3 mr-1" />
@@ -325,17 +375,120 @@ const DashboardPage: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              listing.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {listing.status === 'active' ? 'Aktiv' : 'Väntar'}
+                            </span>
+                            <button className="text-gray-400 hover:text-gray-600">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p>Du har inga annonser än</p>
+                        <Link to="/create-listing" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                          Skapa din första annons →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'listings' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Mina annonser</h2>
+                <Link
+                  to="/create-listing"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Skapa ny annons
+                </Link>
+              </div>
+              
+              {allUserListings.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {allUserListings.map((listing) => (
+                    <div key={listing.id} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 text-lg">{listing.title}</h3>
+                          <p className="text-sm text-gray-600 mb-2">{listing.category}</p>
+                          <p className="text-2xl font-bold text-blue-600">{formatPrice(listing.price)}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-3 py-1 text-sm rounded-full ${
                             listing.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                           }`}>
                             {listing.status === 'active' ? 'Aktiv' : 'Väntar'}
                           </span>
+                          <button className="text-gray-400 hover:text-gray-600">
+                            <MoreHorizontal className="w-5 h-5" />
+                          </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div className="flex items-center">
+                          <Eye className="w-4 h-4 mr-1" />
+                          <span>{listing.views || 0} visningar</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          <span>Skapad {formatDate(listing.createdAt)}</span>
+                        </div>
+                      </div>
+                      
+                      {listing.description && (
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{listing.description}</p>
+                      )}
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex space-x-3">
+                          <Link
+                            to={`/listings/${listing.id}`}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                          >
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            Visa
+                          </Link>
+                          <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
+                            Redigera
+                          </button>
+                        </div>
+                        {listing.featured && (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <Star className="w-3 h-3 mr-1" />
+                            Utvald
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Inga annonser än</h3>
+                  <p className="text-gray-600 mb-6">Skapa din första annons för att börja sälja ditt företag eller dina tjänster.</p>
+                  <Link
+                    to="/create-listing"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Skapa din första annons
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -343,28 +496,55 @@ const DashboardPage: React.FC = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Mina favoriter</h2>
-                <span className="text-sm text-gray-500">{favoriteListings.length} sparade annonser</span>
+                <span className="text-sm text-gray-500">{userFavorites.length} sparade annonser</span>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {favoriteListings.map((listing) => (
-                  <div key={listing.id} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-semibold text-gray-900">{listing.title}</h3>
-                      <button className="text-pink-500 hover:text-pink-600">
-                        <Heart className="w-5 h-5 fill-current" />
-                      </button>
+              {userFavorites.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userFavorites.map((listing) => (
+                    <div key={listing.id} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-semibold text-gray-900">{listing.title}</h3>
+                        <button 
+                          onClick={() => removeFromFavorites(listing.id)}
+                          className="text-pink-500 hover:text-pink-600"
+                        >
+                          <Heart className="w-5 h-5 fill-current" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{listing.category}</p>
+                      <p className="text-lg font-bold text-blue-600 mb-2">{formatPrice(listing.price)}</p>
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {listing.location || 'Sverige'}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs text-gray-400">Sparad {formatDate(listing.savedAt)}</p>
+                        <Link 
+                          to={`/listings/${listing.id}`}
+                          className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Visa
+                        </Link>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{listing.category}</p>
-                    <p className="text-lg font-bold text-blue-600 mb-2">{formatPrice(listing.price)}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {listing.location}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-2">Sparad {formatDate(listing.savedAt)}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Inga favoriter än</h3>
+                  <p className="text-gray-600 mb-6">Spara annonser som intresserar dig genom att klicka på hjärtat på annonssidor.</p>
+                  <Link
+                    to="/listings"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Search className="w-5 h-5 mr-2" />
+                    Utforska annonser
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -377,33 +557,53 @@ const DashboardPage: React.FC = () => {
                 </span>
               </div>
               
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="divide-y divide-gray-200">
-                  {recentMessages.map((message) => (
-                    <div key={message.id} className={`p-4 hover:bg-gray-50 cursor-pointer ${message.unread ? 'bg-blue-50' : ''}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center">
-                            <p className={`font-medium ${message.unread ? 'text-gray-900' : 'text-gray-700'}`}>
-                              {message.from}
+              {userMessages.length > 0 ? (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="divide-y divide-gray-200">
+                    {userMessages.map((message) => (
+                      <div key={message.id} className={`p-4 hover:bg-gray-50 cursor-pointer ${!message.read ? 'bg-blue-50' : ''}`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center">
+                              <p className={`font-medium ${!message.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                {message.type === 'received' ? message.fromName : `Till: ${message.to}`}
+                              </p>
+                              {!message.read && (
+                                <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                              )}
+                              <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                                message.type === 'received' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {message.type === 'received' ? 'Mottaget' : 'Skickat'}
+                              </span>
+                            </div>
+                            <p className={`text-sm mt-1 ${!message.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                              {message.subject}
                             </p>
-                            {message.unread && (
-                              <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full"></span>
-                            )}
+                            <p className="text-sm text-gray-500 mt-1">{message.content.substring(0, 100)}...</p>
                           </div>
-                          <p className={`text-sm mt-1 ${message.unread ? 'text-gray-900' : 'text-gray-600'}`}>
-                            {message.subject}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">{message.preview}</p>
-                        </div>
-                        <div className="text-xs text-gray-400 ml-4">
-                          {formatDate(message.time)}
+                          <div className="text-xs text-gray-400 ml-4">
+                            {formatDate(message.timestamp)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-16">
+                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Inga meddelanden än</h3>
+                  <p className="text-gray-600 mb-6">När någon kontaktar dig om dina annonser kommer meddelandena att visas här.</p>
+                  <Link
+                    to="/listings"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Building2 className="w-5 h-5 mr-2" />
+                    Skapa annons
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -510,6 +710,9 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Claude Chat Widget */}
+      <ClaudeChatWidget />
     </>
   );
 };

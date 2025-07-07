@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import BusinessCard from './BusinessCard';
 import { BusinessListing, SearchFilters } from '../../types/business';
+import { useAuthStore } from '../../stores/authStore';
+import { toast } from 'react-hot-toast';
 
 // Mock data - in production this would come from API
 const mockListings: BusinessListing[] = [
@@ -341,6 +343,7 @@ const mockListings: BusinessListing[] = [
 ];
 
 const BusinessListings: React.FC = () => {
+  const { user: authUser } = useAuthStore();
   const [listings, setListings] = useState<BusinessListing[]>(mockListings);
   const [filteredListings, setFilteredListings] = useState<BusinessListing[]>(mockListings);
   const [searchQuery, setSearchQuery] = useState('');
@@ -348,6 +351,15 @@ const BusinessListings: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('newest');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Load user favorites from localStorage
+  useEffect(() => {
+    if (authUser) {
+      const savedFavorites = JSON.parse(localStorage.getItem(`userFavorites_${authUser.id}`) || '[]');
+      const favoriteIds = new Set(savedFavorites.map((fav: any) => fav.id));
+      setFavorites(favoriteIds);
+    }
+  }, [authUser]);
 
   // Filter states
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
@@ -446,23 +458,124 @@ const BusinessListings: React.FC = () => {
   };
 
   const handleContactSeller = (id: string) => {
-    console.log('Contact seller for listing:', id);
-    // In production, open contact modal
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att kontakta säljare');
+      return;
+    }
+
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
+    // Create a simple contact form in a modal (for now we'll use prompt)
+    const subject = prompt(`Kontakta säljare för: ${listing.title}\n\nÄmne:`);
+    if (!subject) return;
+
+    const message = prompt(`Meddelande till säljaren:`);
+    if (!message) return;
+
+    // Send message
+    const messageObj = {
+      id: Date.now().toString(),
+      from: authUser.id,
+      fromName: `${authUser.firstName} ${authUser.lastName}`,
+      to: listing.sellerId,
+      subject,
+      content: message,
+      listingId: id,
+      listingTitle: listing.title,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+
+    // Save message for sender
+    const senderMessages = JSON.parse(localStorage.getItem(`userMessages_${authUser.id}`) || '[]');
+    senderMessages.push({ ...messageObj, type: 'sent' });
+    localStorage.setItem(`userMessages_${authUser.id}`, JSON.stringify(senderMessages));
+
+    // Save message for recipient (notification)
+    const recipientMessages = JSON.parse(localStorage.getItem(`userMessages_${listing.sellerId}`) || '[]');
+    recipientMessages.push({ ...messageObj, type: 'received' });
+    localStorage.setItem(`userMessages_${listing.sellerId}`, JSON.stringify(recipientMessages));
+
+    toast.success('Meddelande skickat till säljaren!');
   };
 
   const handleMakeOffer = (id: string) => {
-    console.log('Make offer for listing:', id);
-    // In production, open offer modal
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att lägga bud');
+      return;
+    }
+
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
+    // Create offer form (for now we'll use prompts)
+    const offerAmount = prompt(`Lägg bud på: ${listing.title}\n\nBudpris (SEK):`);
+    if (!offerAmount || isNaN(Number(offerAmount))) return;
+
+    const offerMessage = prompt(`Meddelande till säljaren (valfritt):`);
+
+    // Create offer message
+    const messageObj = {
+      id: Date.now().toString(),
+      from: authUser.id,
+      fromName: `${authUser.firstName} ${authUser.lastName}`,
+      to: listing.sellerId,
+      subject: `Bud på ${listing.title}`,
+      content: `Jag lägger ett bud på ${Number(offerAmount).toLocaleString()} SEK för ditt företag "${listing.title}". ${offerMessage ? `\n\nMeddelande: ${offerMessage}` : ''}`,
+      listingId: id,
+      listingTitle: listing.title,
+      offerAmount: Number(offerAmount),
+      timestamp: new Date().toISOString(),
+      read: false,
+      type: 'offer'
+    };
+
+    // Save message for sender
+    const senderMessages = JSON.parse(localStorage.getItem(`userMessages_${authUser.id}`) || '[]');
+    senderMessages.push({ ...messageObj, type: 'sent' });
+    localStorage.setItem(`userMessages_${authUser.id}`, JSON.stringify(senderMessages));
+
+    // Save message for recipient (notification)
+    const recipientMessages = JSON.parse(localStorage.getItem(`userMessages_${listing.sellerId}`) || '[]');
+    recipientMessages.push({ ...messageObj, type: 'received' });
+    localStorage.setItem(`userMessages_${listing.sellerId}`, JSON.stringify(recipientMessages));
+
+    toast.success(`Bud på ${Number(offerAmount).toLocaleString()} SEK skickat!`);
   };
 
   const handleToggleFavorite = (id: string) => {
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att spara favoriter');
+      return;
+    }
+
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
     setFavorites(prev => {
       const newFavorites = new Set(prev);
+      const savedFavorites = JSON.parse(localStorage.getItem(`userFavorites_${authUser.id}`) || '[]');
+      
       if (newFavorites.has(id)) {
+        // Remove from favorites
         newFavorites.delete(id);
+        const updatedFavorites = savedFavorites.filter((fav: any) => fav.id !== id);
+        localStorage.setItem(`userFavorites_${authUser.id}`, JSON.stringify(updatedFavorites));
+        toast.success('Borttagen från favoriter');
       } else {
+        // Add to favorites
         newFavorites.add(id);
+        const newFavorite = {
+          ...listing,
+          savedAt: new Date().toISOString(),
+          userId: authUser.id
+        };
+        const updatedFavorites = [...savedFavorites, newFavorite];
+        localStorage.setItem(`userFavorites_${authUser.id}`, JSON.stringify(updatedFavorites));
+        toast.success('Tillagd i favoriter!');
       }
+      
       return newFavorites;
     });
   };
