@@ -63,32 +63,63 @@ export const HotDealsSection: React.FC<HotDealsSectionProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  // Enhanced hot deal assignment logic
+  // Enhanced hot deal assignment logic with premium service priority
   const getHotDeals = () => {
-    // First, separate listings that already have hot deal types from those that don't
+    // First, separate listings by type and payment status
     const existingHotDeals = listings.filter(listing => listing.hotDealType);
     const regularListings = listings.filter(listing => !listing.hotDealType);
+    
+    // Prioritize paid premium services
+    const paidPremiumListings = regularListings.filter(listing => 
+      listing.isPaidPremium || listing.featuredUntil || listing.sponsoredLevel
+    );
+    const standardListings = regularListings.filter(listing => 
+      !listing.isPaidPremium && !listing.featuredUntil && !listing.sponsoredLevel
+    );
     
     // If we already have enough manually assigned hot deals, use them
     if (existingHotDeals.length >= 3) {
       return existingHotDeals.slice(0, 3);
     }
     
-    // Otherwise, combine existing hot deals with top regular listings
+    // Combine existing hot deals with priority listings
     const needed = 3 - existingHotDeals.length;
-    const topRegularListings = regularListings.slice(0, needed);
+    let candidateListings = [];
     
-    // Assign hot deal types to regular listings based on their position
-    const autoAssignedListings = topRegularListings.map((listing, index) => {
+    // First priority: Paid premium services
+    if (paidPremiumListings.length > 0) {
+      candidateListings.push(...paidPremiumListings.slice(0, needed));
+    }
+    
+    // Second priority: Standard listings if we still need more
+    const stillNeeded = needed - candidateListings.length;
+    if (stillNeeded > 0) {
+      candidateListings.push(...standardListings.slice(0, stillNeeded));
+    }
+    
+    // Assign hot deal types with premium service logic
+    const autoAssignedListings = candidateListings.map((listing, index) => {
       const totalExisting = existingHotDeals.length;
       const position = totalExisting + index;
       
+      // Premium services get higher tier hot deal types
+      let hotDealType: 'hot-deal' | 'premium' | 'featured' | 'trending' | 'vip';
+      
+      if (listing.isPaidPremium || listing.sponsoredLevel === 'premium') {
+        hotDealType = position === 0 ? 'vip' : position === 1 ? 'premium' : 'hot-deal';
+      } else if (listing.featuredUntil) {
+        hotDealType = position === 0 ? 'premium' : position === 1 ? 'featured' : 'trending';
+      } else {
+        hotDealType = position === 0 ? 'hot-deal' : position === 1 ? 'featured' : 'trending';
+      }
+      
       return {
         ...listing,
-        hotDealType: position === 0 ? 'hot-deal' as const : 
-                    position === 1 ? 'premium' as const : 
-                    'featured' as const,
-        isAutoAssigned: true // Flag to track auto-assigned hot deals
+        hotDealType,
+        isAutoAssigned: true,
+        assignmentReason: listing.isPaidPremium ? 'paid-premium' : 
+                         listing.featuredUntil ? 'featured-service' :
+                         listing.sponsoredLevel ? 'sponsored' : 'standard'
       };
     });
     

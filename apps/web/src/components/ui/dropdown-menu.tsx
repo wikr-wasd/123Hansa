@@ -84,3 +84,31 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
     </div>
   );
 };
+
+interface DropdownMenuLabelProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const DropdownMenuLabel: React.FC<DropdownMenuLabelProps> = ({ 
+  children, 
+  className = '' 
+}) => {
+  return (
+    <div className={`px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+interface DropdownMenuSeparatorProps {
+  className?: string;
+}
+
+export const DropdownMenuSeparator: React.FC<DropdownMenuSeparatorProps> = ({ 
+  className = '' 
+}) => {
+  return (
+    <div className={`h-px bg-gray-200 my-1 ${className}`} />
+  );
+};
