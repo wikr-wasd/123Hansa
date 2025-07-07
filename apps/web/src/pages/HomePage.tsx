@@ -18,7 +18,6 @@ import {
   Award
 } from 'lucide-react';
 import CategoryIcons from '../components/search/CategoryIcons';
-import ChatSystem from '../components/chat/ChatSystem';
 
 // Enhanced asset category definitions with new digital categories
 const ASSET_CATEGORIES = [
@@ -834,12 +833,6 @@ const HomePage: React.FC = () => {
         </section>
       </div>
 
-      {/* Chat System - Tillgängligt för alla användare */}
-      <ChatSystem 
-        currentUserId="guest_user"
-        currentUserName="Guest User"
-        currentUserType="user"
-      />
     </>
   );
 };

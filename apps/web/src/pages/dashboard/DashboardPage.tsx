@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
-import { PremiumChatBubble } from '../../components/messaging/PremiumChatBubble';
 import { HeartContract } from '../../components/heart/HeartContract';
 import { VerificationModal } from '../../components/auth/VerificationModal';
 
@@ -1479,8 +1478,6 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Premium Chat Bubble */}
-        <PremiumChatBubble />
 
         {/* Verification Modal */}
         <VerificationModal

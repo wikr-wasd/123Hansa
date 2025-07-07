@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+import ChatSystem from '../chat/ChatSystem';
 
 interface LayoutProps {
   children: ReactNode;
@@ -165,6 +166,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Global Chat System - Available when logged in */}
+      {isAuthenticated && user && (
+        <ChatSystem 
+          currentUserId={user.id}
+          currentUserName={`${user.firstName} ${user.lastName}`}
+          currentUserType="user"
+        />
+      )}
 
     </div>
   );
