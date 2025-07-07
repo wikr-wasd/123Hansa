@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Building2, 
@@ -42,6 +42,7 @@ import { VerificationModal } from '../../components/auth/VerificationModal';
 
 const DashboardPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'profile' | 'settings'>('overview');
   const { user: authUser } = useAuthStore();
   const [userListings, setUserListings] = useState<any[]>([]);
@@ -576,7 +577,7 @@ const DashboardPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <button 
-                    onClick={() => setShowNotifications(!showNotifications)}
+                    onClick={() => navigate('/notifications')}
                     className="relative p-2 text-gray-400 hover:text-gray-500 transition-colors"
                   >
                     <Bell className="w-6 h-6" />
@@ -1667,6 +1668,187 @@ const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Listing Modal */}
+        {editingListing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-2xl font-bold text-gray-900">Redigera annons</h3>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Grundläggande information */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900">Grundläggande information</h4>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Titel</label>
+                      <input
+                        type="text"
+                        value={editFormData.title || ''}
+                        onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                      <select
+                        value={editFormData.category || ''}
+                        onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Välj kategori</option>
+                        <option value="companies">Företag & Bolag</option>
+                        <option value="ecommerce">E-handel & Webshops</option>
+                        <option value="domains">Domäner & Webbplatser</option>
+                        <option value="content">Content & Media</option>
+                        <option value="digital">Digitala Tillgångar</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Pris (SEK)</label>
+                      <input
+                        type="number"
+                        value={editFormData.askingPrice || ''}
+                        onChange={(e) => setEditFormData({...editFormData, askingPrice: parseInt(e.target.value)})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Kort beskrivning</label>
+                      <textarea
+                        value={editFormData.description || ''}
+                        onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Företagsinformation */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900">Företagsinformation</h4>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bransch</label>
+                      <input
+                        type="text"
+                        value={editFormData.industry || ''}
+                        onChange={(e) => setEditFormData({...editFormData, industry: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Antal anställda</label>
+                      <input
+                        type="number"
+                        value={editFormData.employees || ''}
+                        onChange={(e) => setEditFormData({...editFormData, employees: parseInt(e.target.value)})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Årlig omsättning (SEK)</label>
+                      <input
+                        type="number"
+                        value={editFormData.revenue || ''}
+                        onChange={(e) => setEditFormData({...editFormData, revenue: parseInt(e.target.value)})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Webbplats</label>
+                      <input
+                        type="url"
+                        value={editFormData.website || ''}
+                        onChange={(e) => setEditFormData({...editFormData, website: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Kontaktinformation */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Kontaktinformation</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Kontaktperson</label>
+                      <input
+                        type="text"
+                        value={editFormData.contactName || ''}
+                        onChange={(e) => setEditFormData({...editFormData, contactName: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">E-post</label>
+                      <input
+                        type="email"
+                        value={editFormData.contactEmail || ''}
+                        onChange={(e) => setEditFormData({...editFormData, contactEmail: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                      <input
+                        type="tel"
+                        value={editFormData.contactPhone || ''}
+                        onChange={(e) => setEditFormData({...editFormData, contactPhone: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Utförlig beskrivning */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Utförlig beskrivning</label>
+                  <textarea
+                    value={editFormData.longDescription || ''}
+                    onChange={(e) => setEditFormData({...editFormData, longDescription: e.target.value})}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Beskriv företaget i detalj..."
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Avbryt
+                </button>
+                <button
+                  onClick={handleSaveEditedListing}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                >
+                  Spara ändringar
+                </button>
               </div>
             </div>
           </div>

@@ -542,7 +542,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
                   <option value="">Välj mottagare...</option>
                   <option value="support">Support</option>
                   <option value="marketing">Marknadsföring</option>
-                  <option value="company">123Hansa</option>
+                  <option value="company">Kundjänst</option>
                   {currentUserType === 'admin' && (
                     <>
                       <option value="user_anna">Anna Karlsson</option>
@@ -584,7 +584,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
                     const recipientNames = {
                       support: 'Support',
                       marketing: 'Marknadsföring',
-                      company: '123Hansa',
+                      company: 'Kundjänst',
                       user_anna: 'Anna Karlsson',
                       user_erik: 'Erik Johansson'
                     };

@@ -19,6 +19,7 @@ const CreateListingPage = lazy(() => import('./pages/listings/CreateListingPage'
 const CreateListingPreview = lazy(() => import('./pages/listings/CreateListingPreview'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const ProfessionalServicesDemo = lazy(() => import('./pages/ProfessionalServicesDemo'));
 const SalesDemo = lazy(() => import('./pages/demos/SalesDemo'));
 const AdminPanel = lazy(() => import('./pages/admin/AuthenticatedAdminWrapper'));
@@ -127,6 +128,11 @@ function App() {
             <Route path="/messages" element={
               <ProtectedRoute>
                 <MessagesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             } />
             <Route path="/crowdfunding/create" element={
