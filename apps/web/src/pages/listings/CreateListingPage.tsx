@@ -21,9 +21,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import CommissionInfo from '../../components/business/CommissionInfo';
+import { useAuthStore } from '../../stores/authStore';
 
 const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuthStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -241,36 +243,75 @@ const CreateListingPage: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return;
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att skapa annonser');
+      navigate('/simple-test-login');
+      return;
+    }
 
     setIsSubmitting(true);
     
     try {
+      const listingId = `listing_${authUser.id}_${Date.now()}`;
       const submissionData = {
+        id: listingId,
         ...formData,
         highlights: formData.highlights.filter(h => h.trim() !== ''),
         coordinates: mapCoordinates,
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        userId: authUser.id,
+        status: 'active',
+        views: 0,
+        favoriteCount: 0,
+        inquiryCount: 0,
+        price: parseInt(formData.askingPrice) || 0,
+        sector: formData.industry || 'Annat',
+        location: {
+          city: formData.city || 'Sverige',
+          region: formData.city || 'Sverige', 
+          country: 'Sweden'
+        },
+        financials: {
+          revenue: parseInt(formData.yearlyRevenue) || 0,
+          ebitda: parseInt(formData.yearlyProfit) || 0,
+          employees: parseInt(formData.employees) || 1,
+          yearEstablished: parseInt(formData.foundedYear) || new Date().getFullYear()
+        },
+        seller: {
+          name: `${authUser.firstName} ${authUser.lastName}`,
+          verified: authUser.isEmailVerified,
+          rating: 4.5,
+          totalTransactions: 0
+        },
+        sellerId: authUser.id,
+        category: formData.category,
+        description: formData.description,
+        featured: false,
+        premium: false,
+        images: formData.images?.length > 0 ? formData.images : [
+          'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop'
+        ],
+        features: formData.highlights.filter(h => h.trim() !== '').slice(0, 6),
+        listedAt: new Date(),
+        updatedAt: new Date()
       };
 
-      const response = await fetch('/api/listings/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionData)
-      });
+      // Save to localStorage
+      const existingListings = JSON.parse(localStorage.getItem(`userListings_${authUser.id}`) || '[]');
+      const updatedListings = [...existingListings, submissionData];
+      localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
 
-      if (response.ok) {
-        const data = await response.json();
-        toast.success('Annons skickad för granskning!');
-        navigate('/profile', { 
-          state: { 
-            message: `Annons "${formData.title}" har skickats för granskning. ID: ${data.data.listingId}` 
-          }
-        });
-      } else {
-        throw new Error('Kunde inte skicka annons');
-      }
+      toast.success('Annons skapad!');
+      navigate('/dashboard', { 
+        state: { 
+          message: `Annons "${formData.title}" har skapats framgångsrikt!`,
+          activeTab: 'listings'
+        }
+      });
     } catch (error) {
-      toast.error('Kunde inte skicka annons. Försök igen.');
+      console.error('Error creating listing:', error);
+      toast.error('Kunde inte skapa annons. Försök igen.');
     } finally {
       setIsSubmitting(false);
     }

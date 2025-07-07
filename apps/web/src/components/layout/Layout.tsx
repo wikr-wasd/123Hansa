@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { ClaudeChatWidget } from '../ai/ClaudeChatWidget';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 interface LayoutProps {
@@ -51,6 +50,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   Lägg till annons
+                </Link>
+              </div>
+
+              {/* Heart Section - Contracts & Security */}
+              <div className="relative">
+                <div className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl opacity-30"></div>
+                <Link 
+                  to="/heart" 
+                  className="relative bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                >
+                  <span className="mr-2 text-lg">🛡️</span>
+                  Heart Avtal
                 </Link>
               </div>
               
@@ -172,8 +183,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </footer>
 
-      {/* Claude AI Chat Widget */}
-      <ClaudeChatWidget />
     </div>
   );
 };

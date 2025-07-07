@@ -43,6 +43,9 @@ const SimpleTestLogin = lazy(() => import('./pages/auth/SimpleTestLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
 
+// Heart pages
+const HeartPage = lazy(() => import('./pages/heart/HeartPage'));
+
 function App() {
   const { isAuthenticated, isLoading } = useAuthStore();
 
@@ -94,6 +97,7 @@ function App() {
             <Route path="/testbed" element={<TestbedLogin />} />
             <Route path="/testbed-login" element={<TestbedLogin />} />
             <Route path="/test-login" element={<SimpleTestLogin />} />
+            <Route path="/simple-test-login" element={<SimpleTestLogin />} />
             <Route path="/quick-test-register" element={<QuickTestRegister />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             
@@ -101,6 +105,9 @@ function App() {
             <Route path="/crowdfunding" element={<CrowdfundingHomePage />} />
             <Route path="/crowdfunding/discover" element={<DiscoverCampaignsPage />} />
             <Route path="/crowdfunding/campaigns/:id" element={<CampaignDetailPage />} />
+            
+            {/* Heart routes */}
+            <Route path="/heart" element={<HeartPage />} />
             
             {/* Protected routes */}
             <Route path="/profile" element={

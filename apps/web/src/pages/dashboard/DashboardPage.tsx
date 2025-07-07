@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   User, 
   Building2, 
@@ -28,14 +28,17 @@ import {
   Check,
   ExternalLink,
   MoreHorizontal,
-  Send
+  Send,
+  Shield
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
-import { ClaudeChatWidget } from '../../components/ai/ClaudeChatWidget';
+import { MessageChatBubble } from '../../components/messaging/MessageChatBubble';
+import { HeartContract } from '../../components/heart/HeartContract';
 
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'settings'>('overview');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'settings'>('overview');
   const { user: authUser } = useAuthStore();
   const [userListings, setUserListings] = useState<any[]>([]);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
@@ -53,10 +56,20 @@ const DashboardPage: React.FC = () => {
     avatar: authUser ? `${authUser.firstName[0]}${authUser.lastName[0]}` : 'U'
   };
 
-  // Load user data on component mount
+  // Handle navigation state from CreateListingPage
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+  }, [location.state]);
+
+  // Load user data on component mount and when active tab changes
   useEffect(() => {
     loadUserData();
-  }, [authUser]);
+  }, [authUser, activeTab]);
 
   const loadUserData = async () => {
     if (!authUser) return;
@@ -142,6 +155,99 @@ const DashboardPage: React.FC = () => {
     toast.success('Meddelande skickat!');
   };
 
+  // Function for viewing listing details
+  const handleViewListing = (listingId: string) => {
+    // In production, navigate to listing detail page
+    toast.success(`Öppnar annons: ${listingId}`);
+  };
+
+  // Function for editing listing
+  const handleEditListing = (listingId: string) => {
+    const listing = allUserListings.find(l => l.id === listingId);
+    if (!listing) return;
+    
+    // For now, show simple edit dialog
+    const newTitle = prompt('Redigera titel:', listing.title);
+    if (!newTitle) return;
+    
+    const newPrice = prompt('Redigera pris (SEK):', listing.price.toString());
+    if (!newPrice || isNaN(Number(newPrice))) return;
+    
+    // Update listing
+    const updatedListings = allUserListings.map(l => 
+      l.id === listingId ? { ...l, title: newTitle, price: Number(newPrice) } : l
+    );
+    
+    // Save to localStorage if it's a real user listing (not demo)
+    if (!listingId.startsWith('demo_')) {
+      const realListings = updatedListings.filter(l => !l.id.startsWith('demo_'));
+      setUserListings(realListings);
+      localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(realListings));
+    }
+    
+    toast.success('Annons uppdaterad!');
+    loadUserData(); // Reload data
+  };
+
+  // Function for deleting listing
+  const handleDeleteListing = (listingId: string) => {
+    if (!confirm('Är du säker på att du vill ta bort denna annons?')) return;
+    
+    const updatedListings = userListings.filter(l => l.id !== listingId);
+    setUserListings(updatedListings);
+    localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
+    
+    toast.success('Annons borttagen!');
+  };
+
+  // Function for creating new listing from dashboard
+  const handleCreateListing = () => {
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att skapa annonser');
+      return;
+    }
+    
+    const title = prompt('Ange titel för din annons:');
+    if (!title) return;
+    
+    const price = prompt('Ange pris (SEK):');
+    if (!price || isNaN(Number(price))) return;
+    
+    const category = prompt('Ange kategori (t.ex. Technology, Retail, Services):');
+    if (!category) return;
+    
+    const description = prompt('Ange beskrivning:');
+    if (!description) return;
+    
+    const newListing = {
+      id: `listing_${authUser.id}_${Date.now()}`,
+      title,
+      price: Number(price),
+      category,
+      description,
+      views: 0,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      featured: false,
+      userId: authUser.id
+    };
+    
+    const updatedListings = [...userListings, newListing];
+    setUserListings(updatedListings);
+    localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
+    
+    toast.success('Annons skapad!');
+  };
+
+  // Function for marking message as read
+  const handleMarkAsRead = (messageId: string) => {
+    const updatedMessages = userMessages.map(m => 
+      m.id === messageId ? { ...m, read: true } : m
+    );
+    setUserMessages(updatedMessages);
+    localStorage.setItem(`userMessages_${authUser?.id}`, JSON.stringify(updatedMessages));
+  };
+
   // Create some demo listings if user has none
   const demoDemoListings = userListings.length === 0 ? [
     {
@@ -213,6 +319,7 @@ const DashboardPage: React.FC = () => {
                 { id: 'favorites', name: 'Favoriter', icon: Heart },
                 { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
                 { id: 'purchases', name: 'Köp', icon: ShoppingCart },
+                { id: 'heart', name: 'Heart Avtal', icon: Shield },
                 { id: 'settings', name: 'Inställningar', icon: Settings }
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -268,6 +375,17 @@ const DashboardPage: React.FC = () => {
                     <div className="text-blue-100">Ditt betyg</div>
                   </div>
                 </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleCreateListing}
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Skapa ny annons
+                </button>
               </div>
 
               {/* Stats Grid */}
@@ -454,16 +572,28 @@ const DashboardPage: React.FC = () => {
                       
                       <div className="flex justify-between items-center">
                         <div className="flex space-x-3">
-                          <Link
-                            to={`/listings/${listing.id}`}
+                          <button
+                            onClick={() => handleViewListing(listing.id)}
                             className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
                           >
                             <ExternalLink className="w-4 h-4 mr-1" />
                             Visa
-                          </Link>
-                          <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
+                          </button>
+                          <button 
+                            onClick={() => handleEditListing(listing.id)}
+                            className="text-gray-600 hover:text-gray-700 text-sm font-medium flex items-center"
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
                             Redigera
                           </button>
+                          {!listing.id.startsWith('demo_') && (
+                            <button 
+                              onClick={() => handleDeleteListing(listing.id)}
+                              className="text-red-600 hover:text-red-700 text-sm font-medium"
+                            >
+                              Ta bort
+                            </button>
+                          )}
                         </div>
                         {listing.featured && (
                           <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -561,7 +691,11 @@ const DashboardPage: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="divide-y divide-gray-200">
                     {userMessages.map((message) => (
-                      <div key={message.id} className={`p-4 hover:bg-gray-50 cursor-pointer ${!message.read ? 'bg-blue-50' : ''}`}>
+                      <div 
+                        key={message.id} 
+                        className={`p-4 hover:bg-gray-50 cursor-pointer ${!message.read ? 'bg-blue-50' : ''}`}
+                        onClick={() => !message.read && handleMarkAsRead(message.id)}
+                      >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center">
@@ -708,11 +842,17 @@ const DashboardPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'heart' && (
+            <div className="space-y-6">
+              <HeartContract />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Claude Chat Widget */}
-      <ClaudeChatWidget />
+      {/* Message Chat Bubble */}
+      <MessageChatBubble />
     </>
   );
 };
