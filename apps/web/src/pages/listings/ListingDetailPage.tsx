@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ContactSellerModal from '../../components/listings/ContactSellerModal';
+import { useAuthStore } from '../../stores/authStore';
 
 // Types
 interface Listing {
@@ -665,6 +666,7 @@ const getMockListing = (id: string) => {
 
 const ListingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { user: authUser } = useAuthStore();
   const [listing, setListing] = useState<Listing | null>(null);
   const [recommendedListings, setRecommendedListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -679,6 +681,15 @@ const ListingDetailPage: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 20);
+
+  // Check if listing is favorited on component load
+  useEffect(() => {
+    if (listing && authUser) {
+      const existingFavorites = JSON.parse(localStorage.getItem(`userFavorites_${authUser.id}`) || '[]');
+      const isFavorited = existingFavorites.some((fav: any) => fav.id === listing.id);
+      setIsLiked(isFavorited);
+    }
+  }, [listing, authUser]);
 
   // Fetch listing details
   useEffect(() => {
@@ -833,9 +844,45 @@ Med vänliga hälsningar`,
 
   // Handle like functionality
   const handleLike = () => {
+    if (!listing) return;
+    
     setIsLiked(prev => {
       const newLiked = !prev;
       setLikeCount(prevCount => newLiked ? prevCount + 1 : prevCount - 1);
+      
+      // Save to or remove from favorites
+      if (newLiked) {
+        // Add to favorites
+        if (!authUser) {
+          toast.error('Du måste vara inloggad för att spara favoriter');
+          return false;
+        }
+        const currentUserId = authUser.id;
+        const favoriteData = {
+          ...listing,
+          savedAt: new Date().toISOString(),
+          userId: currentUserId
+        };
+        
+        const existingFavorites = JSON.parse(localStorage.getItem(`userFavorites_${currentUserId}`) || '[]');
+        const updatedFavorites = [...existingFavorites, favoriteData];
+        localStorage.setItem(`userFavorites_${currentUserId}`, JSON.stringify(updatedFavorites));
+        
+        toast.success(`${listing.title} tillagd i favoriter!`, {
+          icon: '❤️',
+          duration: 2000,
+        });
+      } else {
+        // Remove from favorites
+        if (!authUser) return false;
+        const currentUserId = authUser.id;
+        const existingFavorites = JSON.parse(localStorage.getItem(`userFavorites_${currentUserId}`) || '[]');
+        const updatedFavorites = existingFavorites.filter((fav: any) => fav.id !== listing.id);
+        localStorage.setItem(`userFavorites_${currentUserId}`, JSON.stringify(updatedFavorites));
+        
+        toast.success('Borttagen från favoriter');
+      }
+      
       return newLiked;
     });
   };

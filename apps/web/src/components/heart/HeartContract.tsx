@@ -30,6 +30,18 @@ interface Contract {
   dueDate?: string;
   documents: string[];
   listingId?: string;
+  listingDetails?: {
+    title: string;
+    description: string;
+    price: number;
+    category: string;
+    industry: string;
+    employees: number;
+    revenue: number;
+    city: string;
+    website?: string;
+  };
+  autoCreated?: boolean;
 }
 
 interface HeartContractProps {

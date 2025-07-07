@@ -47,8 +47,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
                 <Link 
                   to="/create-listing" 
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center whitespace-nowrap"
                 >
+                  <span className="mr-2 text-lg">📝</span>
                   Lägg till annons
                 </Link>
               </div>
@@ -73,18 +74,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to="/dashboard" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
                   >
-                    Dashboard
+                    Min Sida
                   </Link>
                   <div className="flex items-center space-x-4">
                     <span className="text-sm text-nordic-gray-600">
                       Hej, {user?.firstName}!
                     </span>
-                    <Link 
-                      to="/profile" 
-                      className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
-                    >
-                      Min Sida
-                    </Link>
                     <LanguageSwitcher variant="header" />
                     <button 
                       onClick={handleLogout}

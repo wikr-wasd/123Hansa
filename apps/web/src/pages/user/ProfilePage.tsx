@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { User, Settings, Bell, Shield, LayoutDashboard } from 'lucide-react';
-import DashboardPage from '../dashboard/DashboardPage';
+import { User, Settings, Bell, Shield } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuthStore();
@@ -42,17 +41,6 @@ const ProfilePage: React.FC = () => {
                 Profil
               </button>
               <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'dashboard'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4 inline mr-2" />
-                Dashboard
-              </button>
-              <button
                 onClick={() => setActiveTab('settings')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'settings'
@@ -65,13 +53,6 @@ const ProfilePage: React.FC = () => {
               </button>
             </nav>
           </div>
-
-          {/* Dashboard Tab Content */}
-          {activeTab === 'dashboard' && (
-            <div className="p-0">
-              <DashboardPage embedded={true} />
-            </div>
-          )}
 
           {/* Profile Tab Content */}
           {activeTab === 'profile' && (
@@ -112,7 +93,7 @@ const ProfilePage: React.FC = () => {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold mb-4">Snabbåtgärder</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               to="/create-listing"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
@@ -120,6 +101,15 @@ const ProfilePage: React.FC = () => {
               <div className="flex-1">
                 <h3 className="font-medium text-gray-900">Skapa annons</h3>
                 <p className="text-sm text-gray-500">Lägg till en ny annons</p>
+              </div>
+            </Link>
+            <Link
+              to="/dashboard"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+            >
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900">Dashboard</h3>
+                <p className="text-sm text-gray-500">Hantera dina annonser och aktiviteter</p>
               </div>
             </Link>
             <Link

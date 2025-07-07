@@ -47,7 +47,7 @@ const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationP
 const HeartPage = lazy(() => import('./pages/heart/HeartPage'));
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -91,7 +91,12 @@ function App() {
             <Route path="/gdpr" element={<LegalPage />} />
             <Route path="/valuation" element={<ValuationPage />} />
             <Route path="/test-submission" element={<TestListingSubmission />} />
-            <Route path="/create-listing" element={<CreateListingPreview />} />
+            <Route path="/create-listing" element={
+              <ProtectedRoute>
+                <CreateListingPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/create-listing-preview" element={<CreateListingPreview />} />
             
             {/* Auth routes */}
             <Route path="/testbed" element={<TestbedLogin />} />
@@ -118,11 +123,6 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/create-listing-form" element={
-              <ProtectedRoute>
-                <CreateListingPage />
               </ProtectedRoute>
             } />
             <Route path="/messages" element={

@@ -30,16 +30,16 @@ const CommissionInfo: React.FC<CommissionInfoProps> = ({ salePrice, className = 
       <div className="space-y-4">
         {/* Commission Breakdown */}
         <div className="bg-white rounded-lg p-4 border border-blue-100">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div>
+          <div className="space-y-4">
+            <div className="text-center">
               <div className="text-sm text-gray-600 mb-1">Försäljningspris</div>
               <div className="text-xl font-bold text-gray-900">{formatPrice(salePrice)}</div>
             </div>
-            <div>
+            <div className="text-center">
               <div className="text-sm text-gray-600 mb-1">Mäklararvode (3%)</div>
-              <div className="text-xl font-bold text-red-600">-{formatPrice(commission)}</div>
+              <div className="text-lg font-bold text-red-600">-{formatPrice(commission)}</div>
             </div>
-            <div>
+            <div className="text-center border-t pt-3">
               <div className="text-sm text-gray-600 mb-1">Du får</div>
               <div className="text-xl font-bold text-green-600">{formatPrice(sellerReceives)}</div>
             </div>
@@ -77,30 +77,30 @@ const CommissionInfo: React.FC<CommissionInfoProps> = ({ salePrice, className = 
             <Shield className="w-5 h-5 text-green-600 mr-2" />
             <h4 className="font-semibold text-green-900">Vad ingår i mäklartjänsten</h4>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-800">
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Professionell marknadsföring
+          <div className="space-y-2 text-sm text-green-800">
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Professionell marknadsföring</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Kvalificering av köpare
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Kvalificering av köpare</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Förhandlingshjälp
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Förhandlingshjälp</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Juridisk support
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Juridisk support</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Due diligence-assistance
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Due diligence-assistance</span>
             </div>
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-              Heart avtalsstöd
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+              <span>Heart avtalsstöd</span>
             </div>
           </div>
         </div>

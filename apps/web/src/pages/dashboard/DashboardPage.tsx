@@ -29,25 +29,33 @@ import {
   ExternalLink,
   MoreHorizontal,
   Send,
-  Shield
+  Shield,
+  Reply,
+  X,
+  Trash2
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
 import { MessageChatBubble } from '../../components/messaging/MessageChatBubble';
 import { HeartContract } from '../../components/heart/HeartContract';
 
-interface DashboardPageProps {
-  embedded?: boolean;
-}
-
-const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
+const DashboardPage: React.FC = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'profile' | 'settings'>('overview');
   const { user: authUser } = useAuthStore();
   const [userListings, setUserListings] = useState<any[]>([]);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
   const [userMessages, setUserMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingListing, setEditingListing] = useState<any | null>(null);
+  const [editFormData, setEditFormData] = useState<any>({});
+  const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
+  const [showMessageCompose, setShowMessageCompose] = useState(false);
+  const [replyFormData, setReplyFormData] = useState({
+    recipient: '',
+    subject: '',
+    content: ''
+  });
 
   // Get real user data from auth store
   const user = {
@@ -170,27 +178,145 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
     const listing = allUserListings.find(l => l.id === listingId);
     if (!listing) return;
     
-    // For now, show simple edit dialog
-    const newTitle = prompt('Redigera titel:', listing.title);
-    if (!newTitle) return;
+    // Set up edit modal with current listing data
+    setEditingListing(listing);
+    setEditFormData({
+      title: listing.title || '',
+      description: listing.description || '',
+      longDescription: listing.longDescription || '',
+      price: listing.price?.toString() || '',
+      category: listing.category || 'companies',
+      industry: listing.industry || listing.sector || '',
+      employees: listing.financials?.employees?.toString() || '',
+      revenue: listing.financials?.revenue?.toString() || '',
+      website: listing.website || '',
+      location: listing.location?.city || '',
+      contactName: listing.contactName || '',
+      contactEmail: listing.contactEmail || '',
+      contactPhone: listing.contactPhone || '',
+      reasonForSelling: listing.reasonForSelling || '',
+      timeframe: listing.timeframe || '',
+      negotiable: listing.negotiable !== false
+    });
+  };
+
+  // Function to save edited listing
+  const handleSaveEditedListing = () => {
+    if (!editingListing || !authUser) return;
     
-    const newPrice = prompt('Redigera pris (SEK):', listing.price.toString());
-    if (!newPrice || isNaN(Number(newPrice))) return;
+    const updatedListing = {
+      ...editingListing,
+      title: editFormData.title,
+      description: editFormData.description,
+      longDescription: editFormData.longDescription,
+      price: parseInt(editFormData.price) || 0,
+      category: editFormData.category,
+      industry: editFormData.industry,
+      website: editFormData.website,
+      contactName: editFormData.contactName,
+      contactEmail: editFormData.contactEmail,
+      contactPhone: editFormData.contactPhone,
+      reasonForSelling: editFormData.reasonForSelling,
+      timeframe: editFormData.timeframe,
+      negotiable: editFormData.negotiable,
+      financials: {
+        ...editingListing.financials,
+        employees: parseInt(editFormData.employees) || 0,
+        revenue: parseInt(editFormData.revenue) || 0
+      },
+      location: {
+        ...editingListing.location,
+        city: editFormData.location
+      },
+      updatedAt: new Date().toISOString()
+    };
     
-    // Update listing
-    const updatedListings = allUserListings.map(l => 
-      l.id === listingId ? { ...l, title: newTitle, price: Number(newPrice) } : l
+    // Update listings array
+    const updatedListings = userListings.map(l => 
+      l.id === editingListing.id ? updatedListing : l
     );
     
-    // Save to localStorage if it's a real user listing (not demo)
-    if (!listingId.startsWith('demo_')) {
-      const realListings = updatedListings.filter(l => !l.id.startsWith('demo_'));
-      setUserListings(realListings);
-      localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(realListings));
-    }
+    // Save to localStorage
+    setUserListings(updatedListings);
+    localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
     
-    toast.success('Annons uppdaterad!');
-    loadUserData(); // Reload data
+    // Close modal and show success
+    setEditingListing(null);
+    setEditFormData({});
+    toast.success('Annons uppdaterad framgångsrikt!');
+    loadUserData();
+  };
+
+  // Function to cancel editing
+  const handleCancelEdit = () => {
+    setEditingListing(null);
+    setEditFormData({});
+  };
+
+  // Function to handle message click
+  const handleMessageClick = (message: any) => {
+    setSelectedMessage(message);
+    // Mark as read if it's unread
+    if (!message.read && message.type === 'received') {
+      handleMarkAsRead(message.id);
+    }
+  };
+
+  // Function to start reply to message
+  const handleReplyToMessage = (message: any) => {
+    setReplyFormData({
+      recipient: message.type === 'received' ? message.from : message.to,
+      subject: message.subject.startsWith('Re: ') ? message.subject : `Re: ${message.subject}`,
+      content: ''
+    });
+    setShowMessageCompose(true);
+  };
+
+  // Function to start new message
+  const handleNewMessage = () => {
+    setReplyFormData({
+      recipient: '',
+      subject: '',
+      content: ''
+    });
+    setShowMessageCompose(true);
+  };
+
+  // Function to send reply/new message
+  const handleSendMessage = () => {
+    if (!authUser || !replyFormData.recipient || !replyFormData.subject || !replyFormData.content) {
+      toast.error('Fyll i alla fält');
+      return;
+    }
+
+    const newMessage = {
+      id: Date.now().toString(),
+      from: authUser.id,
+      fromName: `${authUser.firstName} ${authUser.lastName}`,
+      to: replyFormData.recipient,
+      subject: replyFormData.subject,
+      content: replyFormData.content,
+      timestamp: new Date().toISOString(),
+      read: false,
+      type: 'sent'
+    };
+
+    // Add to user's messages
+    const updatedMessages = [...userMessages, newMessage];
+    setUserMessages(updatedMessages);
+    localStorage.setItem(`userMessages_${authUser.id}`, JSON.stringify(updatedMessages));
+
+    // Simulate saving to recipient (in real app this would be sent to server)
+    const recipientMessages = JSON.parse(localStorage.getItem(`userMessages_${replyFormData.recipient}`) || '[]');
+    recipientMessages.push({ ...newMessage, type: 'received' });
+    localStorage.setItem(`userMessages_${replyFormData.recipient}`, JSON.stringify(recipientMessages));
+
+    // Close compose and reset form
+    setShowMessageCompose(false);
+    setReplyFormData({ recipient: '', subject: '', content: '' });
+    setSelectedMessage(null);
+    
+    toast.success('Meddelande skickat!');
   };
 
   // Function for deleting listing
@@ -285,8 +411,75 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
     });
   };
 
-  const dashboardContent = (
-    <div className={embedded ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'}>
+  return (
+    <>
+      <Helmet>
+        <title>Min Dashboard - 123hansa.se</title>
+      </Helmet>
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <User className="w-8 h-8 text-blue-600 mr-3" />
+                <h1 className="text-xl font-bold text-gray-900">Min Dashboard</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button className="relative p-2 text-gray-400 hover:text-gray-500">
+                  <Bell className="w-6 h-6" />
+                  {userStats.unreadMessages > 0 && (
+                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                  )}
+                </button>
+                <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="flex space-x-8">
+              {[
+                { id: 'overview', name: 'Översikt', icon: TrendingUp },
+                { id: 'listings', name: 'Mina annonser', icon: Building2 },
+                { id: 'favorites', name: 'Favoriter', icon: Heart },
+                { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
+                { id: 'purchases', name: 'Köp', icon: ShoppingCart },
+                { id: 'heart', name: 'Heart Avtal', icon: Shield },
+                { id: 'profile', name: 'Profil', icon: User },
+                { id: 'settings', name: 'Inställningar', icon: Settings }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {tab.name}
+                    {tab.id === 'messages' && userStats.unreadMessages > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                        {userStats.unreadMessages}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'overview' && (
             <div className="space-y-8">
               {/* Welcome Section */}
@@ -627,9 +820,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Meddelanden</h2>
-                <span className="bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">
-                  {userStats.unreadMessages} olästa
-                </span>
+                <div className="flex items-center space-x-3">
+                  <span className="bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">
+                    {userStats.unreadMessages} olästa
+                  </span>
+                  <button
+                    onClick={handleNewMessage}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nytt meddelande
+                  </button>
+                </div>
               </div>
               
               {userMessages.length > 0 ? (
@@ -638,8 +840,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
                     {userMessages.map((message) => (
                       <div 
                         key={message.id} 
-                        className={`p-4 hover:bg-gray-50 cursor-pointer ${!message.read ? 'bg-blue-50' : ''}`}
-                        onClick={() => !message.read && handleMarkAsRead(message.id)}
+                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!message.read ? 'bg-blue-50' : ''}`}
+                        onClick={() => handleMessageClick(message)}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -674,13 +876,150 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
                   <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Inga meddelanden än</h3>
                   <p className="text-gray-600 mb-6">När någon kontaktar dig om dina annonser kommer meddelandena att visas här.</p>
-                  <Link
-                    to="/listings"
+                  <button
+                    onClick={handleNewMessage}
                     className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <Building2 className="w-5 h-5 mr-2" />
-                    Skapa annons
-                  </Link>
+                    <Plus className="w-5 h-5 mr-2" />
+                    Skriv första meddelandet
+                  </button>
+                </div>
+              )}
+              
+              {/* Message Detail Modal */}
+              {selectedMessage && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full m-4 max-h-[90vh] overflow-hidden">
+                    <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">Meddelande</h3>
+                      <button 
+                        onClick={() => setSelectedMessage(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="p-6 overflow-y-auto max-h-96">
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">
+                              {selectedMessage.type === 'received' ? 'Från' : 'Till'}:
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {formatDate(selectedMessage.timestamp)}
+                            </span>
+                          </div>
+                          <p className="text-gray-900">
+                            {selectedMessage.type === 'received' ? selectedMessage.fromName : selectedMessage.to}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Ämne:</span>
+                          <p className="text-gray-900 mt-1">{selectedMessage.subject}</p>
+                        </div>
+                        
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Meddelande:</span>
+                          <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                            <p className="text-gray-900 whitespace-pre-wrap">{selectedMessage.content}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                      <button
+                        onClick={() => setSelectedMessage(null)}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Stäng
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleReplyToMessage(selectedMessage);
+                          setSelectedMessage(null);
+                        }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                      >
+                        <Reply className="w-4 h-4 mr-2" />
+                        Svara
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Message Compose Modal */}
+              {showMessageCompose && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full m-4">
+                    <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {replyFormData.subject.startsWith('Re: ') ? 'Svara på meddelande' : 'Nytt meddelande'}
+                      </h3>
+                      <button 
+                        onClick={() => setShowMessageCompose(false)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Till:</label>
+                        <input
+                          type="text"
+                          value={replyFormData.recipient}
+                          onChange={(e) => setReplyFormData({...replyFormData, recipient: e.target.value})}
+                          placeholder="Mottagarens användar-ID eller e-post"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Ämne:</label>
+                        <input
+                          type="text"
+                          value={replyFormData.subject}
+                          onChange={(e) => setReplyFormData({...replyFormData, subject: e.target.value})}
+                          placeholder="Ämne för meddelandet"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Meddelande:</label>
+                        <textarea
+                          value={replyFormData.content}
+                          onChange={(e) => setReplyFormData({...replyFormData, content: e.target.value})}
+                          placeholder="Skriv ditt meddelande här..."
+                          rows={6}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                      <button
+                        onClick={() => setShowMessageCompose(false)}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Avbryt
+                      </button>
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!replyFormData.recipient || !replyFormData.subject || !replyFormData.content}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Skicka
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -793,128 +1132,79 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ embedded = false }) => {
               <HeartContract />
             </div>
           )}
-    </div>
-  );
 
-  if (embedded) {
-    return (
-      <div className="space-y-6">
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            {[
-              { id: 'overview', name: 'Översikt', icon: TrendingUp },
-              { id: 'listings', name: 'Mina annonser', icon: Building2 },
-              { id: 'favorites', name: 'Favoriter', icon: Heart },
-              { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
-              { id: 'purchases', name: 'Köp', icon: ShoppingCart },
-              { id: 'heart', name: 'Heart Avtal', icon: Shield },
-              { id: 'settings', name: 'Inställningar', icon: Settings }
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 mr-2" />
-                  {tab.name}
-                  {tab.id === 'messages' && userStats.unreadMessages > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                      {userStats.unreadMessages}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Content */}
-        <div className="px-6">
-          {dashboardContent}
-        </div>
-
-        {/* Message Chat Bubble */}
-        <MessageChatBubble />
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <Helmet>
-        <title>Min Dashboard - 123hansa.se</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <User className="w-8 h-8 text-blue-600 mr-3" />
-                <h1 className="text-xl font-bold text-gray-900">Min Dashboard</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button className="relative p-2 text-gray-400 hover:text-gray-500">
-                  <Bell className="w-6 h-6" />
-                  {userStats.unreadMessages > 0 && (
-                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-                  )}
-                </button>
-                <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex space-x-8">
-              {[
-                { id: 'overview', name: 'Översikt', icon: TrendingUp },
-                { id: 'listings', name: 'Mina annonser', icon: Building2 },
-                { id: 'favorites', name: 'Favoriter', icon: Heart },
-                { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
-                { id: 'purchases', name: 'Köp', icon: ShoppingCart },
-                { id: 'heart', name: 'Heart Avtal', icon: Shield },
-                { id: 'settings', name: 'Inställningar', icon: Settings }
-              ].map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {tab.name}
-                    {tab.id === 'messages' && userStats.unreadMessages > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                        {userStats.unreadMessages}
+          {activeTab === 'profile' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900">Min Profil</h2>
+              
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Profilinformation</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Namn</label>
+                    <input
+                      type="text"
+                      value={user.name}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">E-post</label>
+                    <input
+                      type="email"
+                      value={user.email}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                    <input
+                      type="tel"
+                      value={user.phone}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Plats</label>
+                    <input
+                      type="text"
+                      value={user.location}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Medlem sedan</label>
+                    <input
+                      type="text"
+                      value={formatDate(user.memberSince)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                      readOnly
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {user.verified ? (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <Check className="w-4 h-4 mr-1" />
+                        Verifierad användare
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        <Clock className="w-4 h-4 mr-1" />
+                        Väntande verifiering
                       </span>
                     )}
+                  </div>
+                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                    Uppdatera profil
                   </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {dashboardContent}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Message Chat Bubble */}

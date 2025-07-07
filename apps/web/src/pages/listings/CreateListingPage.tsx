@@ -78,6 +78,58 @@ const CreateListingPage: React.FC = () => {
   const [showCommission, setShowCommission] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState<{lat: number; lng: number} | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
+
+  // Auto-save draft key for localStorage
+  const getDraftKey = () => authUser ? `listingDraft_${authUser.id}` : 'listingDraft_anonymous';
+
+  // Load draft on component mount
+  useEffect(() => {
+    if (!hasLoadedDraft) {
+      const draftKey = getDraftKey();
+      const savedDraft = localStorage.getItem(draftKey);
+      
+      if (savedDraft) {
+        try {
+          const parsedDraft = JSON.parse(savedDraft);
+          setFormData(parsedDraft.formData || formData);
+          setCurrentStep(parsedDraft.currentStep || 1);
+          setShowCommission(parsedDraft.showCommission || false);
+          toast.success('Tidigare utkast återställt!', { duration: 3000 });
+        } catch (error) {
+          console.error('Error loading draft:', error);
+        }
+      }
+      setHasLoadedDraft(true);
+    }
+  }, [authUser, hasLoadedDraft]);
+
+  // Auto-save draft whenever form data changes
+  useEffect(() => {
+    if (hasLoadedDraft) {
+      const draftKey = getDraftKey();
+      const draftData = {
+        formData,
+        currentStep,
+        showCommission,
+        savedAt: new Date().toISOString()
+      };
+      
+      // Only save if there's meaningful content
+      const hasContent = formData.title || formData.description || formData.askingPrice || 
+                        formData.category !== 'companies' || formData.industry;
+      
+      if (hasContent) {
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+      }
+    }
+  }, [formData, currentStep, showCommission, hasLoadedDraft]);
+
+  // Clear draft when successfully submitted
+  const clearDraft = () => {
+    const draftKey = getDraftKey();
+    localStorage.removeItem(draftKey);
+  };
 
   const categories = [
     { 
@@ -302,7 +354,54 @@ const CreateListingPage: React.FC = () => {
       const updatedListings = [...existingListings, submissionData];
       localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
 
-      toast.success('Annons skapad!');
+      // Automatically create Heart contract for this listing
+      const heartContract = {
+        id: `contract_${listingId}_${Date.now()}`,
+        title: `Försäljningsavtal - ${formData.title}`,
+        type: 'sale' as const,
+        status: 'draft' as const,
+        amount: parseInt(formData.askingPrice) || 0,
+        parties: {
+          buyer: {
+            name: '',
+            email: '',
+            id: '',
+            signed: false
+          },
+          seller: {
+            name: `${authUser.firstName} ${authUser.lastName}`,
+            email: authUser.email,
+            id: authUser.id,
+            signed: false
+          }
+        },
+        escrowStatus: 'none' as const,
+        createdAt: new Date().toISOString(),
+        documents: [],
+        listingId: listingId,
+        listingDetails: {
+          title: formData.title,
+          description: formData.description,
+          price: parseInt(formData.askingPrice) || 0,
+          category: formData.category,
+          industry: formData.industry,
+          employees: parseInt(formData.employees) || 0,
+          revenue: parseInt(formData.yearlyRevenue) || 0,
+          city: formData.city,
+          website: formData.website
+        },
+        autoCreated: true
+      };
+
+      // Save contract to localStorage
+      const existingContracts = JSON.parse(localStorage.getItem(`heartContracts_${authUser.id}`) || '[]');
+      const updatedContracts = [...existingContracts, heartContract];
+      localStorage.setItem(`heartContracts_${authUser.id}`, JSON.stringify(updatedContracts));
+
+      // Clear the draft since listing was successfully created
+      clearDraft();
+      
+      toast.success('Annons och avtalsstöd skapad!');
       navigate('/dashboard', { 
         state: { 
           message: `Annons "${formData.title}" har skapats framgångsrikt!`,
@@ -956,8 +1055,18 @@ const CreateListingPage: React.FC = () => {
               {showCommission && formData.askingPrice && (
                 <CommissionInfo 
                   salePrice={parseFloat(formData.askingPrice)} 
-                  className="sticky top-6"
+                  className="hidden lg:block fixed top-20 right-6 w-80 z-40 max-h-[calc(100vh-6rem)] overflow-y-auto"
                 />
+              )}
+              
+              {/* Mobile Commission Info - shows inline on smaller screens */}
+              {showCommission && formData.askingPrice && (
+                <div className="lg:hidden">
+                  <CommissionInfo 
+                    salePrice={parseFloat(formData.askingPrice)} 
+                    className=""
+                  />
+                </div>
               )}
 
               {/* Progress Info */}
