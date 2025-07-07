@@ -13,7 +13,6 @@ import { lazy } from 'react';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
-const ProfilePage = lazy(() => import('./pages/user/ProfilePage'));
 const ListingsPage = lazy(() => import('./pages/listings/ListingsPage'));
 const ListingDetailPage = lazy(() => import('./pages/listings/ListingDetailPage'));
 const CreateListingPage = lazy(() => import('./pages/listings/CreateListingPage'));
@@ -117,7 +116,7 @@ function App() {
             {/* Protected routes */}
             <Route path="/profile" element={
               <ProtectedRoute>
-                <ProfilePage />
+                <DashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/dashboard" element={

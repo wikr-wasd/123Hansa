@@ -30,7 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             </div>
             
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8 ml-12">
               {/* 123hansa.se Marketplace Section */}
               <div className="flex items-center space-x-6 border-r border-gray-200 pr-8">
                 <Link 

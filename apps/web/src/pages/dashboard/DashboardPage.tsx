@@ -36,8 +36,9 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
-import { MessageChatBubble } from '../../components/messaging/MessageChatBubble';
+import { PremiumChatBubble } from '../../components/messaging/PremiumChatBubble';
 import { HeartContract } from '../../components/heart/HeartContract';
+import { VerificationModal } from '../../components/auth/VerificationModal';
 
 const DashboardPage: React.FC = () => {
   const location = useLocation();
@@ -56,6 +57,25 @@ const DashboardPage: React.FC = () => {
     subject: '',
     content: ''
   });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({
+    firstName: authUser?.firstName || '',
+    lastName: authUser?.lastName || '',
+    email: authUser?.email || '',
+    phone: '+46 70 123 4567',
+    location: 'Stockholm'
+  });
+  const [verificationModal, setVerificationModal] = useState<{
+    isOpen: boolean;
+    type: 'email' | 'phone';
+    newValue: string;
+  }>({
+    isOpen: false,
+    type: 'email',
+    newValue: ''
+  });
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Get real user data from auth store
   const user = {
@@ -81,6 +101,7 @@ const DashboardPage: React.FC = () => {
   // Load user data on component mount and when active tab changes
   useEffect(() => {
     loadUserData();
+    loadNotifications();
   }, [authUser, activeTab]);
 
   const loadUserData = async () => {
@@ -103,12 +124,114 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  const handleProfileSave = () => {
+    const originalEmail = authUser?.email || '';
+    const originalPhone = '+46 70 123 4567'; // Get from user data
+    
+    // Check if email changed
+    if (profileFormData.email !== originalEmail) {
+      setVerificationModal({
+        isOpen: true,
+        type: 'email',
+        newValue: profileFormData.email
+      });
+      return;
+    }
+    
+    // Check if phone changed
+    if (profileFormData.phone !== originalPhone) {
+      setVerificationModal({
+        isOpen: true,
+        type: 'phone',
+        newValue: profileFormData.phone
+      });
+      return;
+    }
+    
+    // No verification needed, save directly
+    saveProfile();
+  };
+
+  const saveProfile = () => {
+    // Simulate saving profile
+    toast.success('Profil uppdaterad!');
+    setIsEditingProfile(false);
+  };
+
+  const handleVerificationComplete = (verified: boolean) => {
+    if (verified) {
+      saveProfile();
+    }
+    setVerificationModal({ isOpen: false, type: 'email', newValue: '' });
+  };
+
+  const loadNotifications = () => {
+    if (!authUser) return;
+    
+    // Load notifications from localStorage or create demo notifications
+    const savedNotifications = JSON.parse(localStorage.getItem(`notifications_${authUser.id}`) || '[]');
+    
+    // Add some demo notifications if none exist
+    if (savedNotifications.length === 0) {
+      const demoNotifications = [
+        {
+          id: 'notif_1',
+          type: 'message',
+          title: 'Nytt meddelande',
+          message: 'Du har fått ett nytt meddelande från Anna Karlsson',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min ago
+          read: false,
+          icon: '💬'
+        },
+        {
+          id: 'notif_2',
+          type: 'listing',
+          title: 'Annons visad',
+          message: 'Din annons "TechStartup AB" har visats 5 gånger idag',
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          read: false,
+          icon: '👁️'
+        },
+        {
+          id: 'notif_3',
+          type: 'heart',
+          title: 'Heart Avtal',
+          message: 'Du har ett nytt Heart avtal att granska',
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+          read: true,
+          icon: '❤️'
+        }
+      ];
+      
+      setNotifications(demoNotifications);
+      localStorage.setItem(`notifications_${authUser.id}`, JSON.stringify(demoNotifications));
+    } else {
+      setNotifications(savedNotifications);
+    }
+  };
+
+  const markNotificationAsRead = (notificationId: string) => {
+    const updatedNotifications = notifications.map(n =>
+      n.id === notificationId ? { ...n, read: true } : n
+    );
+    setNotifications(updatedNotifications);
+    localStorage.setItem(`notifications_${authUser?.id}`, JSON.stringify(updatedNotifications));
+  };
+
+  const clearAllNotifications = () => {
+    const clearedNotifications = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(clearedNotifications);
+    localStorage.setItem(`notifications_${authUser?.id}`, JSON.stringify(clearedNotifications));
+    toast.success('Alla notifikationer markerade som lästa');
+  };
+
   const userStats = {
     activeListings: userListings.filter(l => l.status === 'active').length,
     totalViews: userListings.reduce((sum, l) => sum + (l.views || 0), 0),
     savedListings: userFavorites.length,
     completedPurchases: 3,
     unreadMessages: userMessages.filter(m => !m.read).length,
+    unreadNotifications: notifications.filter(n => !n.read).length,
     totalSpent: 450000,
     rating: 4.8,
     reviewCount: 12
@@ -427,12 +550,82 @@ const DashboardPage: React.FC = () => {
                 <h1 className="text-xl font-bold text-gray-900">Min Dashboard</h1>
               </div>
               <div className="flex items-center space-x-4">
-                <button className="relative p-2 text-gray-400 hover:text-gray-500">
-                  <Bell className="w-6 h-6" />
-                  {userStats.unreadMessages > 0 && (
-                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-2 text-gray-400 hover:text-gray-500 transition-colors"
+                  >
+                    <Bell className="w-6 h-6" />
+                    {userStats.unreadNotifications > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
+                        {userStats.unreadNotifications}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {/* Notifications Dropdown */}
+                  {showNotifications && (
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+                      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900">Notifikationer</h3>
+                        <div className="flex items-center space-x-2">
+                          {userStats.unreadNotifications > 0 && (
+                            <button
+                              onClick={clearAllNotifications}
+                              className="text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              Markera alla som lästa
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setShowNotifications(false)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
+                                !notification.read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                              }`}
+                              onClick={() => markNotificationAsRead(notification.id)}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className="text-2xl">{notification.icon}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <p className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                      {notification.title}
+                                    </p>
+                                    {!notification.read && (
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                  <p className="text-xs text-gray-400 mt-2">
+                                    {formatDate(notification.timestamp)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center text-gray-500">
+                            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p className="text-sm font-medium">Inga notifikationer</p>
+                            <p className="text-xs text-gray-400 mt-1">Du kommer att få notifikationer här när något händer</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </button>
+                </div>
                 <span className="text-sm text-gray-600">Välkommen, {user.name}!</span>
               </div>
             </div>
@@ -1135,47 +1328,102 @@ const DashboardPage: React.FC = () => {
 
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Min Profil</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Min Profil</h2>
+                {!isEditingProfile && (
+                  <button
+                    onClick={() => setIsEditingProfile(true)}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Redigera profil
+                  </button>
+                )}
+              </div>
               
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Profilinformation</h3>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Namn</label>
-                    <input
-                      type="text"
-                      value={user.name}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      readOnly
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Förnamn</label>
+                      <input
+                        type="text"
+                        value={isEditingProfile ? profileFormData.firstName : (authUser?.firstName || '')}
+                        onChange={(e) => setProfileFormData({...profileFormData, firstName: e.target.value})}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          !isEditingProfile ? 'bg-gray-50' : ''
+                        }`}
+                        readOnly={!isEditingProfile}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Efternamn</label>
+                      <input
+                        type="text"
+                        value={isEditingProfile ? profileFormData.lastName : (authUser?.lastName || '')}
+                        onChange={(e) => setProfileFormData({...profileFormData, lastName: e.target.value})}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          !isEditingProfile ? 'bg-gray-50' : ''
+                        }`}
+                        readOnly={!isEditingProfile}
+                      />
+                    </div>
                   </div>
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">E-post</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      E-post
+                      {isEditingProfile && (
+                        <span className="text-xs text-amber-600 ml-2">
+                          (Kräver verifiering vid ändring)
+                        </span>
+                      )}
+                    </label>
                     <input
                       type="email"
-                      value={user.email}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      readOnly
+                      value={isEditingProfile ? profileFormData.email : user.email}
+                      onChange={(e) => setProfileFormData({...profileFormData, email: e.target.value})}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !isEditingProfile ? 'bg-gray-50' : ''
+                      }`}
+                      readOnly={!isEditingProfile}
                     />
                   </div>
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Telefon
+                      {isEditingProfile && (
+                        <span className="text-xs text-amber-600 ml-2">
+                          (Kräver verifiering vid ändring)
+                        </span>
+                      )}
+                    </label>
                     <input
                       type="tel"
-                      value={user.phone}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      readOnly
+                      value={isEditingProfile ? profileFormData.phone : user.phone}
+                      onChange={(e) => setProfileFormData({...profileFormData, phone: e.target.value})}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !isEditingProfile ? 'bg-gray-50' : ''
+                      }`}
+                      readOnly={!isEditingProfile}
                     />
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Plats</label>
                     <input
                       type="text"
-                      value={user.location}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      readOnly
+                      value={isEditingProfile ? profileFormData.location : user.location}
+                      onChange={(e) => setProfileFormData({...profileFormData, location: e.target.value})}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !isEditingProfile ? 'bg-gray-50' : ''
+                      }`}
+                      readOnly={!isEditingProfile}
                     />
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Medlem sedan</label>
                     <input
@@ -1185,6 +1433,7 @@ const DashboardPage: React.FC = () => {
                       readOnly
                     />
                   </div>
+                  
                   <div className="flex items-center space-x-2">
                     {user.verified ? (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -1198,17 +1447,49 @@ const DashboardPage: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                    Uppdatera profil
-                  </button>
+                  
+                  {isEditingProfile && (
+                    <div className="flex space-x-3 pt-4">
+                      <button
+                        onClick={handleProfileSave}
+                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Spara ändringar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingProfile(false);
+                          setProfileFormData({
+                            firstName: authUser?.firstName || '',
+                            lastName: authUser?.lastName || '',
+                            email: authUser?.email || '',
+                            phone: '+46 70 123 4567',
+                            location: 'Stockholm'
+                          });
+                        }}
+                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      >
+                        Avbryt
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Message Chat Bubble */}
-        <MessageChatBubble />
+        {/* Premium Chat Bubble */}
+        <PremiumChatBubble />
+
+        {/* Verification Modal */}
+        <VerificationModal
+          isOpen={verificationModal.isOpen}
+          onClose={() => setVerificationModal({ isOpen: false, type: 'email', newValue: '' })}
+          type={verificationModal.type}
+          newValue={verificationModal.newValue}
+          onVerificationComplete={handleVerificationComplete}
+        />
       </div>
     </>
   );

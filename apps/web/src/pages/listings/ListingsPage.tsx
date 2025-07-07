@@ -23,6 +23,8 @@ import {
   DollarSign
 } from 'lucide-react';
 import CategoryIcons from '../../components/search/CategoryIcons';
+import HotDealsSection from '../../components/listings/HotDealsSection';
+import { HotDealBanner } from '../../components/listings/HotDealBanner';
 
 // Types
 interface Listing {
@@ -45,6 +47,7 @@ interface Listing {
   createdAt: string;
   viewCount: number;
   interestedBuyers: number;
+  hotDealType?: 'hot-deal' | 'premium' | 'featured' | 'trending' | 'vip';
   [key: string]: any;
 }
 
@@ -344,12 +347,16 @@ const ListingsPage: React.FC = () => {
             </div>
           )}
           
-          {/* Category badge overlay */}
-          <div className="absolute top-3 left-3">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${getCategoryColorClasses(listing.category)}`}>
-              {categoryInfo?.name}
-            </span>
-          </div>
+          {/* Hot Deal Banner or Category badge overlay */}
+          {listing.hotDealType ? (
+            <HotDealBanner type={listing.hotDealType} />
+          ) : (
+            <div className="absolute top-3 left-3">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${getCategoryColorClasses(listing.category)}`}>
+                {categoryInfo?.name}
+              </span>
+            </div>
+          )}
           
           {/* Status badge overlay */}
           <div className="absolute top-3 right-3">
@@ -473,6 +480,11 @@ const ListingsPage: React.FC = () => {
             <CategoryIcons className="mb-8" />
           </div>
         </section>
+
+        {/* Hot Deals Section */}
+        {!loading && !error && listings.length > 0 && (
+          <HotDealsSection listings={listings} />
+        )}
 
         {/* Filters and Controls */}
         <div className="bg-white border-b border-gray-200">
