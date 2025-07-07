@@ -324,27 +324,17 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 group">
-          <button 
-            onClick={() => setIsOpen(true)}
-            className="p-4 rounded-full relative"
-          >
-            <MessageSquare className="w-6 h-6" />
-            {totalUnreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
-                {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-              </span>
-            )}
-          </button>
-          <div 
-            onClick={() => setIsOpen(false)}
-            className="px-4 pb-2 text-xs text-center text-blue-100 hover:text-white transition-colors cursor-pointer"
-          >
-            meddelande
-          </div>
-        </div>
-      </div>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
+      >
+        <MessageSquare className="w-6 h-6" />
+        {totalUnreadCount > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+            {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+          </span>
+        )}
+      </button>
     );
   }
 
@@ -353,7 +343,10 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
       isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
     }`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg">
+      <div 
+        className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg cursor-pointer"
+        onClick={() => setIsMinimized(!isMinimized)}
+      >
         <div className="flex items-center">
           <MessageSquare className="w-5 h-5 mr-2" />
           <h3 className="font-semibold">
@@ -370,13 +363,19 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
         </div>
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => setIsMinimized(!isMinimized)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMinimized(!isMinimized);
+            }}
             className="p-1 hover:bg-blue-700 rounded"
           >
             {isMinimized ? <Maximize className="w-4 h-4" /> : <Minimize className="w-4 h-4" />}
           </button>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(false);
+            }}
             className="p-1 hover:bg-blue-700 rounded"
           >
             <X className="w-4 h-4" />
@@ -541,9 +540,9 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Välj mottagare...</option>
-                  <option value="support">123Hansa Support</option>
-                  <option value="demo_seller">Företagssäljare</option>
-                  <option value="demo_buyer">Potentiell Köpare</option>
+                  <option value="support">Support</option>
+                  <option value="marketing">Marknadsföring</option>
+                  <option value="company">123Hansa</option>
                   {currentUserType === 'admin' && (
                     <>
                       <option value="user_anna">Anna Karlsson</option>
@@ -583,9 +582,9 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
                   if (newChatRecipient && newChatMessage.trim()) {
                     // Create new conversation
                     const recipientNames = {
-                      support: '123Hansa Support',
-                      demo_seller: 'Företagssäljare',
-                      demo_buyer: 'Potentiell Köpare',
+                      support: 'Support',
+                      marketing: 'Marknadsföring',
+                      company: '123Hansa',
                       user_anna: 'Anna Karlsson',
                       user_erik: 'Erik Johansson'
                     };
@@ -597,7 +596,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
                       id: newConvId,
                       participants: [currentUserId, newChatRecipient],
                       participantNames: [currentUserName, recipientName],
-                      type: newChatRecipient === 'support' ? 'user_to_support' : 'user_to_user',
+                      type: ['support', 'marketing', 'company'].includes(newChatRecipient) ? 'user_to_support' : 'user_to_user',
                       title: `Chat med ${recipientName}`,
                       lastMessage: newChatMessage.trim(),
                       lastMessageTime: new Date().toLocaleString('sv-SE'),
