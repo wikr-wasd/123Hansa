@@ -2164,8 +2164,8 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
 
             {/* Listing View Modal */}
