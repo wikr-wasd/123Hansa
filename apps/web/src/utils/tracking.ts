@@ -127,8 +127,8 @@ export const trackPageView = (path: string, title?: string) => {
   // Google Analytics
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('config', import.meta.env.VITE_GOOGLE_ANALYTICS_MEASUREMENT_ID, {
-      page_title: title || document.title,
-      page_location: window.location.href,
+      page_title: title || (typeof document !== 'undefined' ? document.title : ''),
+      page_location: typeof window !== 'undefined' ? window.location.href : '',
       page_path: path,
     });
   }
@@ -136,8 +136,8 @@ export const trackPageView = (path: string, title?: string) => {
   // Meta Pixel
   if (typeof window !== 'undefined' && (window as any).fbq) {
     (window as any).fbq('track', 'PageView', {
-      page_title: title || document.title,
-      page_location: window.location.href,
+      page_title: title || (typeof document !== 'undefined' ? document.title : ''),
+      page_location: typeof window !== 'undefined' ? window.location.href : '',
     });
   }
 
@@ -219,7 +219,7 @@ export const trackConversion = (conversionType: string, value?: number, currency
 // CRM Integration functions
 export const sendToCRM = async (contact: CRMContact, crmType: string = 'hubspot') => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+    const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : '');
     
     const response = await fetch(`${API_URL}/crm/contact`, {
       method: 'POST',
