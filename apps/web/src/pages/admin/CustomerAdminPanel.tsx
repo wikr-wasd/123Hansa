@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Building2, DollarSign, Eye, Calendar, TrendingUp, Package, MessageSquare, LogOut, User, Mail, Phone, MapPin, Star, Clock } from 'lucide-react';
+import { BarChart3, Building2, DollarSign, Eye, Calendar, TrendingUp, Package, MessageSquare, LogOut, User, Mail, Phone, MapPin, Star, Clock, Settings, CreditCard, FileText, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ChatSystem from '../../components/chat/ChatSystem';
 
@@ -183,6 +183,9 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
               { id: 'overview', label: 'Översikt', icon: BarChart3 },
               { id: 'listings', label: 'Mina Annonser', icon: Building2 },
               { id: 'messages', label: 'Meddelanden', icon: MessageSquare },
+              { id: 'finance', label: 'Ekonomi', icon: DollarSign },
+              { id: 'promotions', label: 'Marknadsföring', icon: Star },
+              { id: 'settings', label: 'Inställningar', icon: Settings },
               { id: 'profile', label: 'Min Profil', icon: User }
             ].map(tab => {
               const Icon = tab.icon;
@@ -411,6 +414,231 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                 <p className="mt-1 text-sm text-gray-500">Du har inte fått några meddelanden ännu.</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Finance Tab */}
+        {activeTab === 'finance' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Ekonomi</h2>
+              <div className="text-sm text-gray-600">
+                Hantera dina transaktioner och betalningar
+              </div>
+            </div>
+
+            {/* Transaction Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center">
+                  <DollarSign className="w-8 h-8 text-green-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total intäkt</p>
+                    <p className="text-2xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue)}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center">
+                  <CreditCard className="w-8 h-8 text-blue-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Pågående transaktioner</p>
+                    <p className="text-2xl font-bold text-gray-900">2</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center">
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Genomförda försäljningar</p>
+                    <p className="text-2xl font-bold text-gray-900">{customer.stats.completedSales}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Transactions */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Senaste transaktioner</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Betalning mottagen - TechStartup AB</p>
+                        <p className="text-xs text-gray-500">2024-06-25 14:30</p>
+                      </div>
+                    </div>
+                    <span className="text-green-600 font-medium">+{formatPrice(2500000)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 text-yellow-600 mr-3" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Pågående - E-handel Nisch</p>
+                        <p className="text-xs text-gray-500">2024-06-26 09:15</p>
+                      </div>
+                    </div>
+                    <span className="text-yellow-600 font-medium">Väntar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Promotions Tab */}
+        {activeTab === 'promotions' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Marknadsföring</h2>
+              <div className="text-sm text-gray-600">
+                Promota dina annonser för bättre synlighet
+              </div>
+            </div>
+
+            {/* Promotion Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-gray-200 hover:border-blue-500 transition-colors">
+                <div className="text-center">
+                  <Star className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Premium</h3>
+                  <p className="text-gray-600 mb-4">Få din annons att synas högre upp i sökresultaten</p>
+                  <div className="text-2xl font-bold text-gray-900 mb-4">1,500 SEK</div>
+                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Välj Premium
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-blue-500">
+                <div className="text-center">
+                  <TrendingUp className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Framhävd</h3>
+                  <p className="text-gray-600 mb-4">Visa din annons på startsidan och få extra uppmärksamhet</p>
+                  <div className="text-2xl font-bold text-gray-900 mb-4">2,500 SEK</div>
+                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Välj Framhävd
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-purple-500">
+                <div className="text-center">
+                  <Package className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">VIP Paket</h3>
+                  <p className="text-gray-600 mb-4">Premium + Framhävd + Personlig support</p>
+                  <div className="text-2xl font-bold text-gray-900 mb-4">3,500 SEK</div>
+                  <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                    Välj VIP
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Promotions */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Aktiva kampanjer</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                    <div className="flex items-center">
+                      <Star className="w-5 h-5 text-yellow-500 mr-3" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Premium - TechStartup AB</p>
+                        <p className="text-xs text-gray-500">Aktiv till 2024-07-15</p>
+                      </div>
+                    </div>
+                    <span className="text-green-600 font-medium">Aktiv</span>
+                  </div>
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Inga fler aktiva kampanjer</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Inställningar</h2>
+            
+            {/* Account Settings */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Kontoinställningar</h3>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900">E-postnotifieringar</h4>
+                    <p className="text-sm text-gray-500">Få notifieringar om nya meddelanden</p>
+                  </div>
+                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-blue-600">
+                    <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900">SMS-notifieringar</h4>
+                    <p className="text-sm text-gray-500">Få viktiga uppdateringar via SMS</p>
+                  </div>
+                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-gray-200">
+                    <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900">Visa kontaktuppgifter publikt</h4>
+                    <p className="text-sm text-gray-500">Låt andra användare se din e-post</p>
+                  </div>
+                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-gray-200">
+                    <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Privacy Settings */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Sekretess</h3>
+              </div>
+              <div className="p-6 space-y-4">
+                <button className="w-full text-left py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900">Ladda ner mina data</h4>
+                      <p className="text-sm text-gray-500">Få en kopia av all din data</p>
+                    </div>
+                    <FileText className="w-5 h-5 text-gray-400" />
+                  </div>
+                </button>
+                
+                <button className="w-full text-left py-3 px-4 border border-red-300 rounded-lg hover:bg-red-50 transition-colors text-red-600">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium">Radera mitt konto</h4>
+                      <p className="text-sm text-red-500">Permanent radering av kontot</p>
+                    </div>
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

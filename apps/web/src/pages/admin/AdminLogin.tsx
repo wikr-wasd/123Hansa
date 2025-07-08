@@ -11,6 +11,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [lockoutEndTime, setLockoutEndTime] = useState<number | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+
+  // Security settings
+  const MAX_ATTEMPTS = 3;
+  const LOCKOUT_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds
 
   // Mock customer data for demonstration
   const mockCustomers = [
@@ -19,8 +26,89 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
     { id: '3', username: 'maria.svensson', password: 'customer789', name: 'Maria Svensson' }
   ];
 
+  // Load security state from localStorage on component mount
+  React.useEffect(() => {
+    const savedAttempts = localStorage.getItem('loginAttempts');
+    const savedLockout = localStorage.getItem('lockoutEndTime');
+    
+    if (savedAttempts) {
+      setAttemptCount(parseInt(savedAttempts));
+    }
+    
+    if (savedLockout) {
+      const lockoutTime = parseInt(savedLockout);
+      if (lockoutTime > Date.now()) {
+        setLockoutEndTime(lockoutTime);
+      } else {
+        // Lockout expired, reset
+        localStorage.removeItem('lockoutEndTime');
+        localStorage.removeItem('loginAttempts');
+        setAttemptCount(0);
+      }
+    }
+  }, []);
+
+  // Timer for lockout countdown
+  React.useEffect(() => {
+    if (lockoutEndTime) {
+      const timer = setInterval(() => {
+        const remaining = Math.max(0, lockoutEndTime - Date.now());
+        setTimeRemaining(remaining);
+        
+        if (remaining <= 0) {
+          // Lockout expired
+          setLockoutEndTime(null);
+          setAttemptCount(0);
+          localStorage.removeItem('lockoutEndTime');
+          localStorage.removeItem('loginAttempts');
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [lockoutEndTime]);
+
+  const handleFailedLogin = () => {
+    const newAttemptCount = attemptCount + 1;
+    setAttemptCount(newAttemptCount);
+    localStorage.setItem('loginAttempts', newAttemptCount.toString());
+
+    if (newAttemptCount >= MAX_ATTEMPTS) {
+      const lockoutEnd = Date.now() + LOCKOUT_TIME;
+      setLockoutEndTime(lockoutEnd);
+      localStorage.setItem('lockoutEndTime', lockoutEnd.toString());
+      toast.error('För många misslyckade inloggningsförsök. Kontot låst i 30 minuter.');
+    } else {
+      const remainingAttempts = MAX_ATTEMPTS - newAttemptCount;
+      toast.error(`Felaktiga inloggningsuppgifter. ${remainingAttempts} försök kvar.`);
+    }
+  };
+
+  const resetLoginAttempts = () => {
+    setAttemptCount(0);
+    setLockoutEndTime(null);
+    localStorage.removeItem('loginAttempts');
+    localStorage.removeItem('lockoutEndTime');
+  };
+
+  const formatTime = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const isLockedOut = lockoutEndTime && lockoutEndTime > Date.now();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if account is locked out
+    if (isLockedOut) {
+      toast.error(`Kontot är låst. Försök igen om ${formatTime(timeRemaining)}.`);
+      return;
+    }
+    
     setIsLoading(true);
 
     // Simulate loading delay
@@ -29,6 +117,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
     // Check admin credentials
     if (username === 'Willi' && password === 'Rickilito00') {
       toast.success('Välkommen tillbaka, Willi!');
+      resetLoginAttempts(); // Reset attempts on successful login
       onLogin('admin');
       setIsLoading(false);
       return;
@@ -41,13 +130,14 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
     if (customer) {
       toast.success(`Välkommen ${customer.name}!`);
+      resetLoginAttempts(); // Reset attempts on successful login
       onLogin('customer', customer.id);
       setIsLoading(false);
       return;
     }
 
-    // Invalid credentials
-    toast.error('Felaktigt användarnamn eller lösenord');
+    // Invalid credentials - handle failed login
+    handleFailedLogin();
     setIsLoading(false);
   };
 
@@ -83,7 +173,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10"
+                  disabled={isLockedOut}
+                  className="relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Användarnamn"
                 />
               </div>
@@ -104,7 +195,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10"
+                  disabled={isLockedOut}
+                  className="relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Lösenord"
                 />
                 <button
@@ -122,10 +214,38 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </div>
           </div>
 
+          {/* Lockout Warning */}
+          {isLockedOut && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <Shield className="w-5 h-5 text-red-600 mr-2" />
+                <div className="text-sm text-red-800">
+                  <p className="font-medium">Kontot är tillfälligt låst</p>
+                  <p className="mt-1">För många misslyckade inloggningsförsök. Försök igen om {formatTime(timeRemaining)}.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Attempt Warning */}
+          {!isLockedOut && attemptCount > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <Shield className="w-5 h-5 text-yellow-600 mr-2" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium">Säkerhetsvarning</p>
+                  <p className="mt-1">
+                    {attemptCount} misslyckade försök. {MAX_ATTEMPTS - attemptCount} försök kvar innan kontot låses i 30 minuter.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isLockedOut}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {isLoading ? (
@@ -133,60 +253,22 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Loggar in...
                 </div>
+              ) : isLockedOut ? (
+                `Låst (${formatTime(timeRemaining)})`
               ) : (
                 'Logga in'
               )}
             </button>
           </div>
 
-          {/* Quick Test Login Section */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 text-center">Snabb inloggning</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={() => {
-                  setUsername('anna.karlsson');
-                  setPassword('customer123');
-                }}
-                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
-              >
-                <div className="font-medium text-sm text-gray-900">Anna Karlsson</div>
-                <div className="text-xs text-gray-500">Kund / Köpare</div>
-              </button>
-              <button
-                onClick={() => {
-                  setUsername('erik.johansson');
-                  setPassword('customer456');
-                }}
-                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
-              >
-                <div className="font-medium text-sm text-gray-900">Erik Johansson</div>
-                <div className="text-xs text-gray-500">Säljare / Företagare</div>
-              </button>
-              <button
-                onClick={() => {
-                  setUsername('maria.svensson');
-                  setPassword('customer789');
-                }}
-                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
-              >
-                <div className="font-medium text-sm text-gray-900">Maria Svensson</div>
-                <div className="text-xs text-gray-500">Investerare</div>
-              </button>
-              <button
-                onClick={() => {
-                  setUsername('Willi');
-                  setPassword('Rickilito00');
-                }}
-                className="p-3 text-left bg-blue-50 rounded border border-blue-200 hover:border-blue-300 hover:shadow-sm transition-all"
-              >
-                <div className="font-medium text-sm text-blue-900">Willi (Admin)</div>
-                <div className="text-xs text-blue-600">Fullständig admin-åtkomst</div>
-              </button>
+          <div className="text-center">
+            <div className="text-xs text-gray-500 space-y-1">
+              <p><strong>Demo accounts:</strong></p>
+              <p>Customer: anna.karlsson / customer123</p>
+              <p>Customer: erik.johansson / customer456</p>
+              <p>Customer: maria.svensson / customer789</p>
+              <p>Admin: Willi / Rickilito00</p>
             </div>
-            <p className="text-xs text-gray-500 text-center">
-              Klicka på ett konto för att fylla i inloggningsuppgifterna automatiskt
-            </p>
           </div>
         </form>
       </div>
