@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown, Plus, Save, StickyNote, CreditCard, Lock, Unlock, FileText } from 'lucide-react';
+import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown, Plus, Save, StickyNote, CreditCard, Lock, Unlock, FileText, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ChatSystem from '../../components/chat/ChatSystem';
 
