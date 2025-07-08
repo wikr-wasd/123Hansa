@@ -50,8 +50,13 @@ const AuthenticatedAdminWrapper: React.FC = () => {
       userId: null
     };
     setAuthState(newAuthState);
-    // Clear from localStorage on logout
+    // Clear all authentication data from localStorage on logout
     localStorage.removeItem('adminAuthState');
+    localStorage.removeItem('loginAttempts');
+    localStorage.removeItem('lockoutEndTime');
+    
+    // Show logout confirmation
+    console.log('User logged out successfully');
   };
 
   if (!authState.isAuthenticated) {

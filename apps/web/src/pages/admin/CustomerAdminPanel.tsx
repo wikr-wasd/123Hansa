@@ -10,6 +10,13 @@ interface CustomerAdminPanelProps {
 
 const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedListingForPromotion, setSelectedListingForPromotion] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    publicContact: false
+  });
 
   // Mock customer data based on customerId
   const getCustomerData = (id: string) => {
@@ -22,12 +29,12 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
         joinedDate: '2024-01-15',
         avatar: 'AK',
         stats: {
-          activeListings: 3,
-          totalViews: 145,
-          totalInquiries: 23,
-          completedSales: 1,
-          totalRevenue: 45000,
-          avgResponseTime: '2h 15m'
+          activeListings: 5,
+          totalViews: 734,
+          totalInquiries: 85,
+          completedSales: 2,
+          totalRevenue: 85000,
+          avgResponseTime: '1h 45m'
         },
         listings: [
           {
@@ -36,21 +43,21 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
             category: 'Technology',
             price: 2500000,
             status: 'ACTIVE',
-            views: 45,
-            inquiries: 8,
+            views: 245,
+            inquiries: 18,
             createdAt: '2024-06-20',
-            description: 'Innovativt teknikföretag med stark tillväxt'
+            description: 'Innovativt teknikföretag med stark tillväxt och AI-fokus'
           },
           {
             id: '4',
             title: 'Konsultföretag Stockholm',
             category: 'Consulting',
             price: 1800000,
-            status: 'PENDING',
-            views: 23,
-            inquiries: 3,
+            status: 'ACTIVE',
+            views: 89,
+            inquiries: 12,
             createdAt: '2024-06-22',
-            description: 'Etablerat konsultföretag inom IT'
+            description: 'Etablerat konsultföretag inom IT med 15 års erfarenhet'
           },
           {
             id: '7',
@@ -58,10 +65,32 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
             category: 'E-commerce',
             price: 950000,
             status: 'ACTIVE',
-            views: 77,
-            inquiries: 12,
+            views: 177,
+            inquiries: 25,
             createdAt: '2024-06-18',
-            description: 'Specialiserad e-handelsplattform'
+            description: 'Specialiserad e-handelsplattform inom hållbara produkter'
+          },
+          {
+            id: '11',
+            title: 'Digital Marknadsföringsbyrå',
+            category: 'Marketing',
+            price: 3200000,
+            status: 'ACTIVE',
+            views: 156,
+            inquiries: 22,
+            createdAt: '2024-06-15',
+            description: 'Fullservice digitalbyrå med stora kunder och stabila intäkter'
+          },
+          {
+            id: '15',
+            title: 'SaaS Plattform B2B',
+            category: 'Software',
+            price: 4500000,
+            status: 'PENDING',
+            views: 67,
+            inquiries: 8,
+            createdAt: '2024-06-25',
+            description: 'Prenumerationsbaserad mjukvarulösning för små företag'
           }
         ],
         messages: [
@@ -91,12 +120,12 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
         joinedDate: '2024-02-20',
         avatar: 'EJ',
         stats: {
-          activeListings: 1,
-          totalViews: 78,
-          totalInquiries: 12,
+          activeListings: 3,
+          totalViews: 234,
+          totalInquiries: 31,
           completedSales: 0,
           totalRevenue: 0,
-          avgResponseTime: '4h 30m'
+          avgResponseTime: '3h 15m'
         },
         listings: [
           {
@@ -105,10 +134,32 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
             category: 'Restaurant',
             price: 1200000,
             status: 'ACTIVE',
-            views: 78,
-            inquiries: 12,
+            views: 128,
+            inquiries: 19,
             createdAt: '2024-06-15',
-            description: 'Välbelägen restaurang i hjärtat av Gamla Stan'
+            description: 'Välbelägen restaurang i hjärtat av Gamla Stan med 30 sittplatser'
+          },
+          {
+            id: '8',
+            title: 'Café & Bageri Södermalm',
+            category: 'Food & Beverage',
+            price: 850000,
+            status: 'ACTIVE',
+            views: 67,
+            inquiries: 8,
+            createdAt: '2024-06-20',
+            description: 'Populärt café med egen bageriverksamhet'
+          },
+          {
+            id: '12',
+            title: 'Cateringföretag Premium',
+            category: 'Catering',
+            price: 2100000,
+            status: 'PENDING',
+            views: 39,
+            inquiries: 4,
+            createdAt: '2024-06-24',
+            description: 'Exklusiv cateringverksamhet för företagsevent'
           }
         ],
         messages: []
@@ -121,14 +172,37 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
         joinedDate: '2024-03-10',
         avatar: 'MS',
         stats: {
-          activeListings: 0,
-          totalViews: 0,
-          totalInquiries: 0,
-          completedSales: 0,
-          totalRevenue: 0,
-          avgResponseTime: '-'
+          activeListings: 2,
+          totalViews: 145,
+          totalInquiries: 18,
+          completedSales: 1,
+          totalRevenue: 65000,
+          avgResponseTime: '2h 30m'
         },
-        listings: [],
+        listings: [
+          {
+            id: '9',
+            title: 'Onlinebutik Kläder',
+            category: 'Fashion',
+            price: 650000,
+            status: 'ACTIVE',
+            views: 89,
+            inquiries: 12,
+            createdAt: '2024-06-12',
+            description: 'Etablerad online modebutik med starkt varumärke'
+          },
+          {
+            id: '13',
+            title: 'Skönhetssalong Premium',
+            category: 'Beauty',
+            price: 1150000,
+            status: 'ACTIVE',
+            views: 56,
+            inquiries: 6,
+            createdAt: '2024-06-19',
+            description: 'Exklusiv skönhetssalong med lojal kundkrets'
+          }
+        ],
         messages: []
       }
     };
@@ -136,6 +210,34 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
   };
 
   const customer = getCustomerData(customerId);
+
+  // Handler functions
+  const handleSettingToggle = (setting: keyof typeof settings) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting]
+    }));
+    toast.success(`${setting === 'emailNotifications' ? 'E-postnotifieringar' : 
+      setting === 'smsNotifications' ? 'SMS-notifieringar' : 'Offentlig kontakt'} ${
+      !settings[setting] ? 'aktiverade' : 'inaktiverade'}`);
+  };
+
+  const handlePackageSelection = (packageType: string, listingId: string) => {
+    setSelectedPackage(packageType);
+    setSelectedListingForPromotion(listingId);
+    
+    const packageNames = {
+      premium: 'Premium',
+      featured: 'Framhävd', 
+      vip: 'VIP'
+    };
+    
+    const listing = customer.listings.find(l => l.id === listingId);
+    toast.success(`${packageNames[packageType as keyof typeof packageNames]} valt för "${listing?.title}"`);
+    
+    // Här skulle man normalt göra ett API-anrop för att beställa paketet
+    console.log(`Ordering ${packageType} package for listing ${listingId}`);
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK' }).format(price);
@@ -495,52 +597,210 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
 
         {/* Promotions Tab */}
         {activeTab === 'promotions' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Marknadsföring</h2>
-              <div className="text-sm text-gray-600">
-                Promota dina annonser för bättre synlighet
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">🚀 Öka synligheten för dina annonser</h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Få fler visningar, kontakter och snabbare försäljning med våra professionella marknadsföringspaket. 
+                Över 85% av våra kunder som använder Premium-paket säljer sina företag 40% snabbare!
+              </p>
+            </div>
+
+            {/* Step 1: Select Listing */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Steg 1: Välj vilken annons du vill promota</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {customer.listings.map((listing) => (
+                  <div 
+                    key={listing.id}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedListingForPromotion === listing.id 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}
+                    onClick={() => setSelectedListingForPromotion(listing.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Building2 className="w-8 h-8 text-blue-600" />
+                        <div>
+                          <h4 className="font-medium text-gray-900">{listing.title}</h4>
+                          <p className="text-sm text-gray-600">{listing.description}</p>
+                          <div className="flex items-center space-x-4 mt-2">
+                            <span className="text-sm font-medium text-green-600">
+                              {formatPrice(listing.price)}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {listing.views} visningar
+                            </span>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(listing.status)}`}>
+                              {listing.status === 'ACTIVE' ? 'Aktiv' : listing.status === 'PENDING' ? 'Väntar' : listing.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {selectedListingForPromotion === listing.id && (
+                        <CheckCircle className="w-6 h-6 text-blue-600" />
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Promotion Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-gray-200 hover:border-blue-500 transition-colors">
-                <div className="text-center">
-                  <Star className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Premium</h3>
-                  <p className="text-gray-600 mb-4">Få din annons att synas högre upp i sökresultaten</p>
-                  <div className="text-2xl font-bold text-gray-900 mb-4">1,500 SEK</div>
-                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                    Välj Premium
-                  </button>
-                </div>
-              </div>
+            {/* Step 2: Select Package (only shown when listing is selected) */}
+            {selectedListingForPromotion && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Steg 2: Välj ditt marknadsföringspaket</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Premium Package */}
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-yellow-200 relative">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
+                        Populärast
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <Star className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                      <h4 className="text-2xl font-bold text-gray-900 mb-2">Premium</h4>
+                      <p className="text-gray-600 mb-4">Höj din annons i sökresultaten och få 3x fler visningar</p>
+                      <div className="text-4xl font-bold text-gray-900 mb-2">995 SEK</div>
+                      <p className="text-sm text-gray-500 mb-6">30 dagar aktivt</p>
+                      
+                      <div className="text-left space-y-3 mb-6">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Prioritering i sökresultat</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Orange "Premium" badge</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">3x fler visningar i snitt</span>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={() => handlePackageSelection('premium', selectedListingForPromotion)}
+                        className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-3 px-4 rounded-lg hover:from-yellow-700 hover:to-orange-700 transition-all duration-200 font-medium"
+                      >
+                        Välj Premium
+                      </button>
+                    </div>
+                  </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-blue-500">
-                <div className="text-center">
-                  <TrendingUp className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Framhävd</h3>
-                  <p className="text-gray-600 mb-4">Visa din annons på startsidan och få extra uppmärksamhet</p>
-                  <div className="text-2xl font-bold text-gray-900 mb-4">2,500 SEK</div>
-                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                    Välj Framhävd
-                  </button>
-                </div>
-              </div>
+                  {/* Featured Package */}
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-200 relative">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                        Rekommenderat
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <TrendingUp className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                      <h4 className="text-2xl font-bold text-gray-900 mb-2">Framhävd</h4>
+                      <p className="text-gray-600 mb-4">Visa på startsidan och få 5x fler kontakter</p>
+                      <div className="text-4xl font-bold text-gray-900 mb-2">1,995 SEK</div>
+                      <p className="text-sm text-gray-500 mb-6">30 dagar aktivt</p>
+                      
+                      <div className="text-left space-y-3 mb-6">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Allt i Premium +</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Visas på startsidan</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Blå "Framhävd" badge</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">5x fler kontakter i snitt</span>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={() => handlePackageSelection('featured', selectedListingForPromotion)}
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium"
+                      >
+                        Välj Framhävd
+                      </button>
+                    </div>
+                  </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-purple-500">
-                <div className="text-center">
-                  <Package className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">VIP Paket</h3>
-                  <p className="text-gray-600 mb-4">Premium + Framhävd + Personlig support</p>
-                  <div className="text-2xl font-bold text-gray-900 mb-4">3,500 SEK</div>
-                  <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
-                    Välj VIP
-                  </button>
+                  {/* VIP Package */}
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-purple-200 relative">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
+                        Maximal ROI
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <Package className="w-16 h-16 text-purple-500 mx-auto mb-4" />
+                      <h4 className="text-2xl font-bold text-gray-900 mb-2">VIP Paket</h4>
+                      <p className="text-gray-600 mb-4">Komplett paket med personlig support och premium-placering</p>
+                      <div className="text-4xl font-bold text-gray-900 mb-2">2,995 SEK</div>
+                      <p className="text-sm text-gray-500 mb-6">60 dagar aktivt</p>
+                      
+                      <div className="text-left space-y-3 mb-6">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Allt i Framhävd +</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Personlig rådgivare</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Guld "VIP" badge</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">10x fler kvalificerade leads</span>
+                        </div>
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                          <span className="text-sm">Prioriterat telefonsamtal</span>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={() => handlePackageSelection('vip', selectedListingForPromotion)}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium"
+                      >
+                        Välj VIP
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Success Statistics */}
+                <div className="bg-white rounded-lg border border-green-200 p-6 mt-8">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">🎯 Resultat från våra kunder</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div>
+                      <div className="text-3xl font-bold text-green-600">85%</div>
+                      <p className="text-sm text-gray-600">snabbare försäljning</p>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-blue-600">500%</div>
+                      <p className="text-sm text-gray-600">fler kontakter</p>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-purple-600">95%</div>
+                      <p className="text-sm text-gray-600">kundnöjdhet</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Active Promotions */}
             <div className="bg-white rounded-lg shadow-sm">
@@ -554,14 +814,35 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                       <Star className="w-5 h-5 text-yellow-500 mr-3" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">Premium - TechStartup AB</p>
-                        <p className="text-xs text-gray-500">Aktiv till 2024-07-15</p>
+                        <p className="text-xs text-gray-500">Aktiv till 2024-07-15 • 12 dagar kvar</p>
                       </div>
                     </div>
-                    <span className="text-green-600 font-medium">Aktiv</span>
+                    <div className="text-right">
+                      <span className="text-green-600 font-medium text-sm">Aktiv</span>
+                      <p className="text-xs text-gray-500">+245% visningar</p>
+                    </div>
                   </div>
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Inga fler aktiva kampanjer</p>
+                  
+                  {customer.listings.length > 1 && (
+                    <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                      <div className="flex items-center">
+                        <TrendingUp className="w-5 h-5 text-blue-500 mr-3" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Framhävd - {customer.listings[1]?.title}</p>
+                          <p className="text-xs text-gray-500">Aktiv till 2024-08-05 • 25 dagar kvar</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-green-600 font-medium text-sm">Aktiv</span>
+                        <p className="text-xs text-gray-500">+520% kontakter</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="text-center py-6 text-gray-500">
+                    <Package className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Vill du starta fler kampanjer?</p>
+                    <p className="text-xs mt-1">Välj en annons ovan för att börja!</p>
                   </div>
                 </div>
               </div>
@@ -585,8 +866,15 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                     <h4 className="text-sm font-medium text-gray-900">E-postnotifieringar</h4>
                     <p className="text-sm text-gray-500">Få notifieringar om nya meddelanden</p>
                   </div>
-                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-blue-600">
-                    <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  <button 
+                    onClick={() => handleSettingToggle('emailNotifications')}
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      settings.emailNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span className={`${
+                      settings.emailNotifications ? 'translate-x-5' : 'translate-x-0'
+                    } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}></span>
                   </button>
                 </div>
                 
@@ -595,8 +883,15 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                     <h4 className="text-sm font-medium text-gray-900">SMS-notifieringar</h4>
                     <p className="text-sm text-gray-500">Få viktiga uppdateringar via SMS</p>
                   </div>
-                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-gray-200">
-                    <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  <button 
+                    onClick={() => handleSettingToggle('smsNotifications')}
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      settings.smsNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span className={`${
+                      settings.smsNotifications ? 'translate-x-5' : 'translate-x-0'
+                    } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}></span>
                   </button>
                 </div>
 
@@ -605,8 +900,15 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                     <h4 className="text-sm font-medium text-gray-900">Visa kontaktuppgifter publikt</h4>
                     <p className="text-sm text-gray-500">Låt andra användare se din e-post</p>
                   </div>
-                  <button className="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 bg-gray-200">
-                    <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                  <button 
+                    onClick={() => handleSettingToggle('publicContact')}
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      settings.publicContact ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span className={`${
+                      settings.publicContact ? 'translate-x-5' : 'translate-x-0'
+                    } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}></span>
                   </button>
                 </div>
               </div>

@@ -732,11 +732,11 @@ const HomePage: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div>
                     <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                      🚀 Räkna ut din potentiella avkastning
+                      💰 Beräkna värdet på ditt företag
                     </h2>
                     <p className="text-blue-100 text-lg mb-8">
-                      Använd vår ROI-kalkylator för att se hur mycket du kan tjäna på att 
-                      investera i rätt företag genom 123Hansa.
+                      Använd vår professionella värderingsverktyg för att få en uppskattning 
+                      av ditt företags marknadsvärde helt gratis.
                     </p>
                     
                     <div className="space-y-6">
@@ -745,8 +745,8 @@ const HomePage: React.FC = () => {
                           <CheckCircle className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="text-white font-semibold">Genomsnittlig ROI: 340%</h4>
-                          <p className="text-blue-200 text-sm">Baserat på 500+ genomförda affärer</p>
+                          <h4 className="text-white font-semibold">Professionell värdering</h4>
+                          <p className="text-blue-200 text-sm">Baserat på branschstandard och marknadsdata</p>
                         </div>
                       </div>
                       
@@ -755,8 +755,8 @@ const HomePage: React.FC = () => {
                           <Timer className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="text-white font-semibold">Payback-tid: 18 månader</h4>
-                          <p className="text-blue-200 text-sm">Mediantid till break-even</p>
+                          <h4 className="text-white font-semibold">Snabb bedömning</h4>
+                          <p className="text-blue-200 text-sm">Få din uppskattning på bara 2 minuter</p>
                         </div>
                       </div>
                       
@@ -765,8 +765,8 @@ const HomePage: React.FC = () => {
                           <TrendingUp className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="text-white font-semibold">Success rate: 87%</h4>
-                          <p className="text-blue-200 text-sm">Köp som blivit lönsamma inom 2 år</p>
+                          <h4 className="text-white font-semibold">Marknadsanpassad</h4>
+                          <p className="text-blue-200 text-sm">Uppdaterad med aktuella marknadsförhållanden</p>
                         </div>
                       </div>
                     </div>
@@ -774,13 +774,37 @@ const HomePage: React.FC = () => {
                   
                   <div className="bg-white rounded-2xl p-8 shadow-xl">
                     <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-                      🧮 ROI Kalkylator
+                      💰 Företagsvärdering
                     </h3>
                     
                     <div className="space-y-6">
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2">
-                          Investeringsbelopp (SEK)
+                          Årsomsättning (SEK)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="2,500,000"
+                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                          Bransch
+                        </label>
+                        <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                          <option>Teknik/IT - Hög multipel</option>
+                          <option>E-handel - Medelhög multipel</option>
+                          <option>Konsulting - Medel multipel</option>
+                          <option>Restaurang - Låg multipel</option>
+                          <option>Tillverkning - Medel multipel</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                          Nettovinst (SEK)
                         </label>
                         <input
                           type="number"
@@ -789,22 +813,11 @@ const HomePage: React.FC = () => {
                         />
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">
-                          Förväntad tillväxt per år (%)
-                        </label>
-                        <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                          <option>25% - Konservativ</option>
-                          <option>50% - Genomsnitt</option>
-                          <option>100% - Aggressiv</option>
-                        </select>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
                         <div className="text-center">
-                          <p className="text-sm font-semibold text-green-700 mb-2">Förväntad avkastning efter 3 år:</p>
-                          <p className="text-3xl font-bold text-green-600">1,953,125 SEK</p>
-                          <p className="text-sm text-green-600">+291% total avkastning</p>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">Uppskattat företagsvärde:</p>
+                          <p className="text-3xl font-bold text-blue-600">3,750,000 SEK</p>
+                          <p className="text-sm text-blue-600">Baserat på 7.5x vinst-multipel</p>
                         </div>
                       </div>
                       
