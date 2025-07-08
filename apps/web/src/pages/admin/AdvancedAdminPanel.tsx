@@ -214,7 +214,9 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       location: 'Stockholm',
       createdAt: '2024-06-25',
       featured: false,
-      riskScore: 15
+      riskScore: 15,
+      starred: false,
+      promotionStatus: 'normal'
     },
     { 
       id: '2', 
@@ -230,7 +232,9 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       location: 'Stockholm',
       createdAt: '2024-06-20',
       featured: true,
-      riskScore: 25
+      riskScore: 25,
+      starred: true,
+      promotionStatus: 'premium'
     },
     { 
       id: '3', 
@@ -246,7 +250,9 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       location: 'Malmö',
       createdAt: '2024-06-24',
       featured: false,
-      riskScore: 35
+      riskScore: 35,
+      starred: false,
+      promotionStatus: 'hot_sale'
     }
   ]);
 
@@ -2384,11 +2390,170 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
               )}
             </div>
 
+            {/* All Listings Management */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Alla Annonser - Marknadsföring</h3>
+                <p className="text-sm text-gray-600">Hantera promotion och marknadsföringsstatus för alla annonser</p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Annons</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marknadsföring</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statistik</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Åtgärder</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {listings.map((listing) => (
+                      <tr key={listing.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                              <Building2 className="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{listing.title}</div>
+                              <div className="text-sm text-gray-500">{listing.category}</div>
+                              <div className="text-xs text-gray-400">{listing.location}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="space-y-1">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              listing.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                              listing.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {listing.status}
+                            </span>
+                            <div className="text-xs text-gray-500">
+                              {new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK' }).format(listing.price)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="space-y-1">
+                            {listing.starred && (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full mr-1">
+                                <Star className="w-3 h-3 mr-1" />
+                                Stjärnmarkerad
+                              </span>
+                            )}
+                            {listing.promotionStatus && listing.promotionStatus !== 'normal' && (
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                listing.promotionStatus === 'hot_sale' ? 'bg-red-100 text-red-800' :
+                                listing.promotionStatus === 'premium' ? 'bg-yellow-100 text-yellow-800' :
+                                listing.promotionStatus === 'featured' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {listing.promotionStatus === 'hot_sale' ? '🔥 Hot Sale' :
+                                 listing.promotionStatus === 'premium' ? '⭐ Premium' :
+                                 listing.promotionStatus === 'featured' ? '⚡ Framhävd' :
+                                 listing.promotionStatus}
+                              </span>
+                            )}
+                            {listing.featured && (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                                Utvald
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="space-y-1">
+                            <div>{listing.views} visningar</div>
+                            <div className="text-xs text-gray-500">Risk: {listing.riskScore}%</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleStarListing(listing.id)}
+                              className={`p-2 rounded ${listing.starred ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-600'} hover:bg-opacity-80`}
+                              title={listing.starred ? 'Ta bort stjärnmarkering' : 'Stjärnmarkera'}
+                            >
+                              <Star className="w-4 h-4" />
+                            </button>
+                            
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenDropdown(openDropdown === `promo-${listing.id}` ? null : `promo-${listing.id}`)}
+                                className="p-2 rounded bg-purple-100 text-purple-600 hover:bg-purple-200"
+                                title="Marknadsföringsstatus"
+                              >
+                                <Award className="w-4 h-4" />
+                              </button>
+                              {openDropdown === `promo-${listing.id}` && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                                  <div className="py-1">
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'hot_sale');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50"
+                                    >
+                                      🔥 Hot Sale
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'premium');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
+                                    >
+                                      ⭐ Premium
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'featured');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50"
+                                    >
+                                      ⚡ Framhävd
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'normal');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                      ❌ Ta bort status
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={() => handleViewListing(listing)}
+                              className="p-2 rounded bg-blue-100 text-blue-600 hover:bg-blue-200"
+                              title="Visa detaljer"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             {/* URL-based Listing Promotion */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Snabb Annonsbefordran</h3>
-                <p className="text-sm text-gray-600">Klistra in en annons-URL för att tilldela badges och marknadsföringsstatus</p>
+                <h3 className="text-lg font-medium text-gray-900">Snabb Annonsbefordran via URL</h3>
+                <p className="text-sm text-gray-600">Klistra in en annons-URL för att snabbt tilldela badges och marknadsföringsstatus</p>
               </div>
               
               <div className="p-6">

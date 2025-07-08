@@ -583,7 +583,7 @@ const DashboardPage: React.FC = () => {
                   >
                     <Bell className="w-6 h-6" />
                     {userStats.unreadNotifications > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
+                      <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
                         {userStats.unreadNotifications}
                       </span>
                     )}
@@ -607,7 +607,7 @@ const DashboardPage: React.FC = () => {
                               <Bell className="w-6 h-6 mr-3" />
                               <h2 className="text-2xl font-bold">Notifikationer</h2>
                               {userStats.unreadNotifications > 0 && (
-                                <span className="ml-3 bg-red-500 text-white text-sm rounded-full px-3 py-1">
+                                <span className="ml-3 bg-pink-500 text-white text-sm rounded-full px-3 py-1">
                                   {userStats.unreadNotifications} nya
                                 </span>
                               )}
@@ -759,7 +759,7 @@ const DashboardPage: React.FC = () => {
                     <Icon className="w-4 h-4 mr-2" />
                     {tab.name}
                     {tab.id === 'messages' && userStats.unreadMessages > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                      <span className="ml-2 bg-pink-500 text-white text-xs rounded-full px-2 py-0.5">
                         {userStats.unreadMessages}
                       </span>
                     )}
@@ -804,7 +804,7 @@ const DashboardPage: React.FC = () => {
               <div className="flex justify-center space-x-4">
                 <Link
                   to="/create-listing"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Skapa ny annons
@@ -956,7 +956,7 @@ const DashboardPage: React.FC = () => {
                                   {!listing.id.startsWith('demo_') && (
                                     <button
                                       onClick={() => handleDeleteListing(listing.id)}
-                                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                      className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center"
                                     >
                                       <Trash2 className="w-4 h-4 mr-2" />
                                       Ta bort
@@ -989,7 +989,7 @@ const DashboardPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Mina annonser</h2>
                 <Link
                   to="/create-listing"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Skapa ny annons
@@ -1039,7 +1039,7 @@ const DashboardPage: React.FC = () => {
                                 {!listing.id.startsWith('demo_') && (
                                   <button
                                     onClick={() => handleDeleteListing(listing.id)}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                                    className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center"
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" />
                                     Ta bort
@@ -1085,7 +1085,7 @@ const DashboardPage: React.FC = () => {
                           {!listing.id.startsWith('demo_') && (
                             <button 
                               onClick={() => handleDeleteListing(listing.id)}
-                              className="text-red-600 hover:text-red-700 text-sm font-medium"
+                              className="text-rose-600 hover:text-rose-700 text-sm font-medium"
                             >
                               Ta bort
                             </button>
@@ -1108,7 +1108,7 @@ const DashboardPage: React.FC = () => {
                   <p className="text-gray-600 mb-6">Skapa din första annons för att börja sälja ditt företag eller dina tjänster.</p>
                   <Link
                     to="/create-listing"
-                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
                   >
                     <Plus className="w-5 h-5 mr-2" />
                     Skapa din första annons
@@ -1179,7 +1179,7 @@ const DashboardPage: React.FC = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Meddelanden</h2>
                 <div className="flex items-center space-x-3">
-                  <span className="bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">
+                  <span className="bg-rose-100 text-rose-800 text-sm px-3 py-1 rounded-full">
                     {userStats.unreadMessages} olästa
                   </span>
                   <button

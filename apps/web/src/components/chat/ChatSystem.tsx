@@ -1,29 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, X, Minimize, Maximize, User, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useMessageStore, type Message, type Conversation } from '../../stores/messageStore';
 
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderType: 'user' | 'support' | 'admin';
-  message: string;
-  timestamp: string;
-  read: boolean;
-  attachments?: string[];
-}
-
-interface ChatConversation {
-  id: string;
-  participants: string[];
-  participantNames: string[];
-  type: 'user_to_user' | 'user_to_support' | 'group';
-  title: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-  online: boolean;
-}
+// Remove duplicate interfaces since we're importing from store
 
 interface ChatSystemProps {
   currentUserId: string;
@@ -41,113 +21,34 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
   const [newChatMessage, setNewChatMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Dynamisk konversations-data baserat på användare
-  const initializeConversations = () => {
-    const baseConversations = [
-      {
-        id: 'conv_support',
-        participants: [currentUserId, 'support'],
-        participantNames: [currentUserName, '123Hansa Support'],
-        type: 'user_to_support' as const,
-        title: 'Support Chat',
-        lastMessage: 'Hej! Hur kan vi hjälpa dig idag?',
-        lastMessageTime: '2024-06-26 10:30',
-        unreadCount: 1,
-        online: true
-      }
-    ];
+  // Message store
+  const {
+    conversations,
+    addMessage,
+    markConversationAsRead,
+    getUnreadCount,
+    getConversationMessages,
+    getUserConversations,
+    initializeDefaultData,
+  } = useMessageStore();
 
-    // Lägg till specifika konversationer baserat på användartyp och ID
-    if (currentUserType === 'admin') {
-      baseConversations.push(
-        {
-          id: 'conv_user_anna',
-          participants: [currentUserId, 'user_anna'],
-          participantNames: [currentUserName, 'Anna Karlsson'],
-          type: 'user_to_user' as 'user_to_user',
-          title: 'Chat med Anna Karlsson',
-          lastMessage: 'Tack för den snabba supporten!',
-          lastMessageTime: '2024-06-26 15:20',
-          unreadCount: 1,
-          online: true
-        },
-        {
-          id: 'conv_user_erik',
-          participants: [currentUserId, 'user_erik'],
-          participantNames: [currentUserName, 'Erik Johansson'],
-          type: 'user_to_user' as 'user_to_user',
-          title: 'Chat med Erik Johansson',
-          lastMessage: 'Har du tid för ett möte imorgon?',
-          lastMessageTime: '2024-06-26 14:15',
-          unreadCount: 0,
-          online: false
-        }
-      );
-    } else {
-      // För vanliga användare - lägg till andra användare de kan chatta med
-      if (currentUserName.includes('Anna')) {
-        baseConversations.push({
-          id: 'conv_user_erik',
-          participants: [currentUserId, 'user_erik'],
-          participantNames: [currentUserName, 'Erik Johansson'],
-          type: 'user_to_user' as 'user_to_user',
-          title: 'Chat med Erik Johansson',
-          lastMessage: 'Intressant företag du har till salu!',
-          lastMessageTime: '2024-06-26 11:30',
-          unreadCount: 2,
-          online: true
-        });
-      } else if (currentUserName.includes('Erik')) {
-        baseConversations.push({
-          id: 'conv_user_anna',
-          participants: [currentUserId, 'user_anna'],
-          participantNames: [currentUserName, 'Anna Karlsson'],
-          type: 'user_to_user' as 'user_to_user',
-          title: 'Chat med Anna Karlsson',
-          lastMessage: 'Tack för informationen!',
-          lastMessageTime: '2024-06-26 12:45',
-          unreadCount: 0,
-          online: true
-        });
-      } else {
-        // För andra användare - lägg till demo-konversationer
-        baseConversations.push(
-          {
-            id: 'conv_demo_seller',
-            participants: [currentUserId, 'demo_seller'],
-            participantNames: [currentUserName, 'Företagssäljare'],
-            type: 'user_to_user' as 'user_to_user',
-            title: 'Chat med Företagssäljare',
-            lastMessage: 'Hej! Intresserad av mitt företag?',
-            lastMessageTime: '2024-06-26 10:15',
-            unreadCount: 1,
-            online: true
-          },
-          {
-            id: 'conv_demo_buyer',
-            participants: [currentUserId, 'demo_buyer'],
-            participantNames: [currentUserName, 'Potentiell Köpare'],
-            type: 'user_to_user' as 'user_to_user',
-            title: 'Chat med Potentiell Köpare',
-            lastMessage: 'Kan vi diskutera priset?',
-            lastMessageTime: '2024-06-25 18:20',
-            unreadCount: 0,
-            online: false
-          }
-        );
-      }
+  // Initialize user conversations from store
+  const userConversations = getUserConversations(currentUserId);
+  
+  // Initialize default data if no conversations exist
+  useEffect(() => {
+    if (userConversations.length === 0) {
+      initializeDefaultData(currentUserId, currentUserName, currentUserType);
     }
+  }, [currentUserId, currentUserName, currentUserType, userConversations.length, initializeDefaultData]);
 
-    return baseConversations;
-  };
+  // Get total unread count for chat bubble
+  const totalUnreadCount = getUnreadCount(currentUserId);
 
-  const [conversations, setConversations] = useState<ChatConversation[]>(() => initializeConversations());
-
-  const initializeMessages = () => {
-    const baseMessages: { [conversationId: string]: ChatMessage[] } = {
-      conv_support: [
-        {
-          id: 'msg_support_1',
+  // Get messages for active conversation
+  const activeConversationMessages = activeConversation 
+    ? getConversationMessages(activeConversation) 
+    : [];
           senderId: 'support',
           senderName: '123Hansa Support',
           senderType: 'support',
