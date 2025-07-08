@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import ChatSystem from '../chat/ChatSystem';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, isAuthenticated, logout, isLoading } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
@@ -38,20 +40,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   to="/" 
                   className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
                 >
-                  Hem
+                  {t('home')}
                 </Link>
                 <Link 
                   to="/listings" 
                   className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
                 >
-                  Marknadsplats
+                  {t('marketplace')}
                 </Link>
                 <Link 
                   to="/create-listing" 
                   className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center whitespace-nowrap"
                 >
                   <span className="mr-2 text-lg">📝</span>
-                  Lägg till annons
+                  {t('create-listing')}
                 </Link>
               </div>
               
@@ -63,7 +65,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   className="relative bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
                 >
                   <span className="mr-2 text-lg">🚀</span>
-                  Crowdfunding
+                  {t('crowdfunding')}
                 </Link>
               </div>
               
@@ -75,7 +77,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to="/dashboard" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
                   >
-                    Min Sida
+                    {t('dashboard')}
                   </Link>
                   <div className="flex items-center space-x-4">
                     <LanguageSwitcher variant="header" />
@@ -83,7 +85,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={handleLogout}
                       className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
                     >
-                      Logga ut
+                      {t('logout')}
                     </button>
                   </div>
                 </>
@@ -94,13 +96,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to="/login" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium"
                   >
-                    Logga in
+                    {t('login')}
                   </Link>
                   <Link 
                     to="/register" 
                     className="btn btn-primary text-sm"
                   >
-                    Registrera
+                    {t('register')}
                   </Link>
                 </>
               )}
@@ -130,27 +132,27 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="col-span-1">
               <h3 className="text-xl font-bold mb-4">123hansa.se</h3>
               <p className="text-nordic-gray-300 text-sm">
-                Nordens ledande marknadsplats för företag och digitala tillgångar.
+                {t('footer.description')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Företag</h4>
+              <h4 className="font-semibold mb-4">{t('footer.businesses')}</h4>
               <ul className="space-y-2 text-sm text-nordic-gray-300">
-                <li><Link to="/listings" className="hover:text-white">Köp företag</Link></li>
-                <li><Link to="/create-listing" className="hover:text-white">Sälj företag</Link></li>
-                <li><Link to="/valuation" className="hover:text-white">Värdering</Link></li>
+                <li><Link to="/listings" className="hover:text-white">{t('footer.buy-businesses')}</Link></li>
+                <li><Link to="/create-listing" className="hover:text-white">{t('footer.sell-businesses')}</Link></li>
+                <li><Link to="/valuation" className="hover:text-white">{t('footer.valuation')}</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-4">{t('footer.support')}</h4>
               <ul className="space-y-2 text-sm text-nordic-gray-300">
-                <li><Link to="/help" className="hover:text-white">Hjälp</Link></li>
-                <li><Link to="/contact" className="hover:text-white">Kontakt</Link></li>
-                <li><Link to="/legal" className="hover:text-white">Juridiskt</Link></li>
+                <li><Link to="/help" className="hover:text-white">{t('footer.help')}</Link></li>
+                <li><Link to="/contact" className="hover:text-white">{t('footer.contact')}</Link></li>
+                <li><Link to="/legal" className="hover:text-white">{t('footer.legal')}</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Följ oss</h4>
+              <h4 className="font-semibold mb-4">{t('footer.follow-us')}</h4>
               <ul className="space-y-2 text-sm text-nordic-gray-300">
                 <li><a href="https://linkedin.com/company/123hansa" target="_blank" rel="noopener noreferrer" className="hover:text-white">LinkedIn</a></li>
                 <li><a href="https://twitter.com/123hansa" target="_blank" rel="noopener noreferrer" className="hover:text-white">Twitter</a></li>
@@ -159,7 +161,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
           <div className="border-t border-nordic-gray-700 mt-8 pt-8 text-center text-sm text-nordic-gray-400">
-            <p>&copy; 2024 123hansa.se. Alla rättigheter förbehållna.</p>
+            <p>&copy; 2024 123hansa.se. {t('footer.copyright')}</p>
           </div>
         </div>
       </footer>

@@ -32,7 +32,8 @@ import {
   Shield,
   Reply,
   X,
-  Trash2
+  Trash2,
+  ArrowRight
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
@@ -577,7 +578,7 @@ const DashboardPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <button 
-                    onClick={() => navigate('/notifications')}
+                    onClick={() => setShowNotifications(!showNotifications)}
                     className="relative p-2 text-gray-400 hover:text-gray-500 transition-colors"
                   >
                     <Bell className="w-6 h-6" />
@@ -588,67 +589,140 @@ const DashboardPage: React.FC = () => {
                     )}
                   </button>
                   
-                  {/* Notifications Dropdown */}
+                  {/* Large Notifications Modal */}
                   {showNotifications && (
-                    <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
-                      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900">Notifikationer</h3>
-                        <div className="flex items-center space-x-2">
-                          {userStats.unreadNotifications > 0 && (
-                            <button
-                              onClick={clearAllNotifications}
-                              className="text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              Markera alla som lästa
-                            </button>
-                          )}
-                          <button
-                            onClick={() => setShowNotifications(false)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-5 h-5" />
-                          </button>
+                    <>
+                      {/* Background overlay */}
+                      <div 
+                        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                        onClick={() => setShowNotifications(false)}
+                      ></div>
+                      
+                      {/* Large notifications panel */}
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                          {/* Header */}
+                          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                            <div className="flex items-center">
+                              <Bell className="w-6 h-6 mr-3" />
+                              <h2 className="text-2xl font-bold">Notifikationer</h2>
+                              {userStats.unreadNotifications > 0 && (
+                                <span className="ml-3 bg-red-500 text-white text-sm rounded-full px-3 py-1">
+                                  {userStats.unreadNotifications} nya
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              {userStats.unreadNotifications > 0 && (
+                                <button
+                                  onClick={clearAllNotifications}
+                                  className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg text-sm font-medium transition-colors"
+                                >
+                                  Markera alla som lästa
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setShowNotifications(false)}
+                                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                              >
+                                <X className="w-6 h-6" />
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="overflow-y-auto max-h-[calc(90vh-100px)]">
+                            {notifications.length > 0 ? (
+                              <div className="divide-y divide-gray-100">
+                                {notifications.map((notification) => (
+                                  <div
+                                    key={notification.id}
+                                    className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
+                                      !notification.read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                                    }`}
+                                    onClick={() => {
+                                      markNotificationAsRead(notification.id);
+                                      // Navigate based on notification type
+                                      if (notification.type === 'heart') {
+                                        setActiveTab('heart');
+                                        setShowNotifications(false);
+                                      } else if (notification.type === 'message') {
+                                        setActiveTab('messages');
+                                        setShowNotifications(false);
+                                      } else if (notification.type === 'listing') {
+                                        setActiveTab('listings');
+                                        setShowNotifications(false);
+                                      }
+                                    }}
+                                  >
+                                    <div className="flex items-start space-x-4">
+                                      <div className="text-3xl flex-shrink-0">{notification.icon}</div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <h3 className={`text-lg font-semibold ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                            {notification.title}
+                                          </h3>
+                                          <div className="flex items-center space-x-2">
+                                            {!notification.read && (
+                                              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                                            )}
+                                            <span className="text-sm text-gray-500">
+                                              {formatDate(notification.timestamp)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <p className="text-gray-600 mb-3 leading-relaxed">{notification.message}</p>
+                                        
+                                        {/* Notification type badge */}
+                                        <div className="flex items-center justify-between">
+                                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                            notification.type === 'heart' ? 'bg-pink-100 text-pink-800' :
+                                            notification.type === 'message' ? 'bg-blue-100 text-blue-800' :
+                                            notification.type === 'listing' ? 'bg-green-100 text-green-800' :
+                                            'bg-gray-100 text-gray-800'
+                                          }`}>
+                                            {notification.type === 'heart' ? 'Heart Avtal' :
+                                             notification.type === 'message' ? 'Meddelande' :
+                                             notification.type === 'listing' ? 'Annons' :
+                                             'Allmän'}
+                                          </span>
+                                          
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              // Navigate to specific notification
+                                              if (notification.type === 'heart') {
+                                                setActiveTab('heart');
+                                                setShowNotifications(false);
+                                              } else if (notification.type === 'message') {
+                                                setActiveTab('messages');
+                                                setShowNotifications(false);
+                                              } else if (notification.type === 'listing') {
+                                                setActiveTab('listings');
+                                                setShowNotifications(false);
+                                              }
+                                            }}
+                                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                                          >
+                                            Visa <ArrowRight className="w-4 h-4 ml-1" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-12 text-center text-gray-500">
+                                <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">Inga notifikationer</h3>
+                                <p className="text-gray-600">Du kommer att få notifikationer här när något händer med dina annonser, meddelanden eller Heart-avtal.</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="max-h-80 overflow-y-auto">
-                        {notifications.length > 0 ? (
-                          notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
-                                !notification.read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                              }`}
-                              onClick={() => markNotificationAsRead(notification.id)}
-                            >
-                              <div className="flex items-start space-x-3">
-                                <div className="text-2xl">{notification.icon}</div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between">
-                                    <p className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
-                                      {notification.title}
-                                    </p>
-                                    {!notification.read && (
-                                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    )}
-                                  </div>
-                                  <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                                  <p className="text-xs text-gray-400 mt-2">
-                                    {formatDate(notification.timestamp)}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-8 text-center text-gray-500">
-                            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-sm font-medium">Inga notifikationer</p>
-                            <p className="text-xs text-gray-400 mt-1">Du kommer att få notifikationer här när något händer</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    </>
                   )}
                 </div>
                 <span className="text-sm text-gray-600">Hej, {user.name}!</span>
@@ -737,7 +811,7 @@ const DashboardPage: React.FC = () => {
                 </Link>
                 <button
                   onClick={() => setActiveTab('heart')}
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-medium rounded-lg hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Shield className="w-5 h-5 mr-2" />
                   Heart Avtal

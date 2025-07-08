@@ -501,7 +501,7 @@ export const EnhancedHeartContract: React.FC<EnhancedHeartContractProps> = ({
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2"
+          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
         >
           <Plus className="w-5 h-5" />
           Skapa Heart Avtal
@@ -517,7 +517,7 @@ export const EnhancedHeartContract: React.FC<EnhancedHeartContractProps> = ({
             <p className="text-gray-600 mb-6">Skapa ditt första Heart Avtal för säkra transaktioner</p>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold"
+              className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               Skapa ditt första avtal
             </button>
@@ -553,7 +553,7 @@ export const EnhancedHeartContract: React.FC<EnhancedHeartContractProps> = ({
               {/* Progress Indicator */}
               <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                 <div 
-                  className="bg-red-500 h-2 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500"
                   style={{ 
                     width: `${
                       contract.status === 'completed' ? 100 :

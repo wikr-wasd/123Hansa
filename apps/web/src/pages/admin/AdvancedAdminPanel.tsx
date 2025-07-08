@@ -15,8 +15,13 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [ticketResponse, setTicketResponse] = useState('');
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [viewingUser, setViewingUser] = useState<any>(null);
   const [newNote, setNewNote] = useState('');
   const [editingNote, setEditingNote] = useState<any>(null);
+  const [listingUrl, setListingUrl] = useState('');
+  const [selectedPromotionListing, setSelectedPromotionListing] = useState<any>(null);
+  const [viewingListing, setViewingListing] = useState<any>(null);
+  const [editingListing, setEditingListing] = useState<any>(null);
   
   // Promotion requests system
   const [promotionRequests, setPromotionRequests] = useState([
@@ -456,6 +461,100 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
   const handleCancelEdit = () => {
     setEditingUser(null);
     setEditingNote(null);
+    setViewingListing(null);
+    setEditingListing(null);
+  };
+
+  // User Details Functions
+  const handleViewUser = (user: any) => {
+    setViewingUser(user);
+  };
+
+  const handleCloseUserDetails = () => {
+    setViewingUser(null);
+  };
+
+  // Listing Functions
+  const handleStarListing = (listingId: string) => {
+    setListings(prev => prev.map(l => 
+      l.id === listingId ? { ...l, starred: !l.starred } : l
+    ));
+    const listing = listings.find(l => l.id === listingId);
+    toast.success(`Annons "${listing?.title}" har ${listing?.starred ? 'tagits bort från' : 'lagts till som'} stjärnmarkerad`);
+  };
+
+  const handleSetListingStatus = (listingId: string, status: string) => {
+    setListings(prev => prev.map(l => 
+      l.id === listingId ? { ...l, promotionStatus: status } : l
+    ));
+    const listing = listings.find(l => l.id === listingId);
+    const statusText = status === 'hot_sale' ? 'Hot Sale' : status === 'premium' ? 'Premium' : status === 'featured' ? 'Utvald' : 'Normal';
+    toast.success(`Annons "${listing?.title}" har markerats som ${statusText}`);
+  };
+
+  const handleViewListing = (listing: any) => {
+    setViewingListing(listing);
+  };
+
+  const handleEditListing = (listing: any) => {
+    setEditingListing({ ...listing });
+  };
+
+  const handleSaveListing = () => {
+    if (!editingListing) return;
+    
+    setListings(prev => prev.map(listing => 
+      listing.id === editingListing.id ? editingListing : listing
+    ));
+    setEditingListing(null);
+    toast.success(`Annons "${editingListing.title}" uppdaterad`);
+  };
+
+  // URL-based promotion functions
+  const handleProcessListingUrl = () => {
+    if (!listingUrl.trim()) {
+      toast.error('Vänligen ange en annons-URL');
+      return;
+    }
+
+    // Extract listing ID from URL (assuming format like /listing/123)
+    const urlMatch = listingUrl.match(/\/listing\/(\d+)/);
+    if (!urlMatch) {
+      toast.error('Ogiltig annons-URL format');
+      return;
+    }
+
+    const listingId = urlMatch[1];
+    const listing = listings.find(l => l.id === listingId);
+    
+    if (!listing) {
+      toast.error('Annons hittades inte');
+      return;
+    }
+
+    setSelectedPromotionListing(listing);
+    toast.success(`Annons "${listing.title}" laddad för marknadsföring`);
+  };
+
+  const handleApplyPromotion = (promotionType: string) => {
+    if (!selectedPromotionListing) return;
+
+    setListings(prev => prev.map(l => 
+      l.id === selectedPromotionListing.id 
+        ? { ...l, promotionStatus: promotionType, featured: promotionType === 'featured' || promotionType === 'premium' }
+        : l
+    ));
+
+    const statusText = {
+      'hot_sale': 'Hot Sale',
+      'premium': 'Premium',
+      'featured': 'Framhävd',
+      'normal': 'Normal'
+    }[promotionType] || promotionType;
+
+    toast.success(`Annons "${selectedPromotionListing.title}" har markerats som ${statusText}`);
+    setSelectedPromotionListing(null);
+    setListingUrl('');
   };
 
   // Escrow Functions
@@ -1031,6 +1130,149 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
               </div>
             )}
 
+            {/* User Details Modal */}
+            {viewingUser && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Användardetaljer: {viewingUser.name}</h3>
+                    <button
+                      onClick={handleCloseUserDetails}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Grundläggande Information */}
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Grundläggande Information</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <User className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Namn:</span>
+                            <span className="ml-2">{viewingUser.name}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Mail className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Email:</span>
+                            <span className="ml-2">{viewingUser.email}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Phone className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Telefon:</span>
+                            <span className="ml-2">{viewingUser.phone}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Plats:</span>
+                            <span className="ml-2">{viewingUser.location}</span>
+                          </div>
+                          {viewingUser.company && (
+                            <div className="flex items-center">
+                              <Building2 className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="font-medium">Företag:</span>
+                              <span className="ml-2">{viewingUser.company}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Status & Verifiering</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <span className="font-medium">Status:</span>
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                              viewingUser.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {viewingUser.status === 'ACTIVE' ? 'Aktiv' : 'Suspenderad'}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium">Verifierad:</span>
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                              viewingUser.verified ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {viewingUser.verified ? 'Ja' : 'Nej'}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium">BankID:</span>
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                              viewingUser.bankIdVerified ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {viewingUser.bankIdVerified ? 'Verifierad' : 'Ej verifierad'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Aktivitet & Statistik */}
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Aktivitet</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Registrerad:</span>
+                            <span className="ml-2">{viewingUser.joinedDate}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Senast inloggad:</span>
+                            <span className="ml-2">{viewingUser.lastLogin}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Statistik</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Building2 className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Annonser:</span>
+                            <span className="ml-2">{viewingUser.listingsCount}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <DollarSign className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="font-medium">Totalt spenderat:</span>
+                            <span className="ml-2">{viewingUser.totalSpent} SEK</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Adress</h4>
+                        <p className="text-gray-700">{viewingUser.address || 'Ingen adress angiven'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-3 mt-8">
+                    <button
+                      onClick={() => {
+                        handleCloseUserDetails();
+                        handleEditUser(viewingUser);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Redigera användare
+                    </button>
+                    <button
+                      onClick={handleCloseUserDetails}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Stäng
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -1123,6 +1365,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                               {user.status === 'SUSPENDED' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                             </button>
                             <button
+                              onClick={() => handleViewUser(user)}
                               className="p-2 rounded bg-blue-100 text-blue-600 hover:bg-blue-200"
                               title="Visa detaljer"
                             >
@@ -1293,19 +1536,72 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                               </>
                             )}
                             <button
-                              onClick={() => handleFeatureListing(listing.id)}
-                              className={`p-2 rounded ${listing.featured ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'} hover:bg-opacity-80`}
-                              title={listing.featured ? 'Ta bort från utvalda' : 'Gör till utvald'}
+                              onClick={() => handleStarListing(listing.id)}
+                              className={`p-2 rounded ${listing.starred ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-600'} hover:bg-opacity-80`}
+                              title={listing.starred ? 'Ta bort stjärnmarkering' : 'Stjärnmarkera'}
                             >
                               <Star className="w-4 h-4" />
                             </button>
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenDropdown(openDropdown === `promotion-${listing.id}` ? null : `promotion-${listing.id}`)}
+                                className="p-2 rounded bg-purple-100 text-purple-600 hover:bg-purple-200"
+                                title="Marknadsföringsstatus"
+                              >
+                                <Award className="w-4 h-4" />
+                              </button>
+                              {openDropdown === `promotion-${listing.id}` && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                                  <div className="py-1">
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'hot_sale');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50"
+                                    >
+                                      🔥 Hot Sale
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'premium');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
+                                    >
+                                      ⭐ Premium
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'featured');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50"
+                                    >
+                                      ⚡ Framhävd
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        handleSetListingStatus(listing.id, 'normal');
+                                        setOpenDropdown(null);
+                                      }}
+                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                      ❌ Ta bort status
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                             <button
+                              onClick={() => handleViewListing(listing)}
                               className="p-2 rounded bg-blue-100 text-blue-600 hover:bg-blue-200"
                               title="Visa detaljer"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
+                              onClick={() => handleEditListing(listing)}
                               className="p-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
                               title="Redigera annons"
                             >
@@ -1326,6 +1622,222 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                 </table>
               </div>
             </div>
+
+            {/* Listing View Modal */}
+            {viewingListing && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Annonsdetaljer: {viewingListing.title}</h3>
+                    <button
+                      onClick={() => setViewingListing(null)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Grundläggande Information</h4>
+                        <div className="space-y-2">
+                          <p><strong>Titel:</strong> {viewingListing.title}</p>
+                          <p><strong>Pris:</strong> {viewingListing.price} SEK</p>
+                          <p><strong>Kategori:</strong> {viewingListing.category}</p>
+                          <p><strong>Plats:</strong> {viewingListing.location}</p>
+                          <p><strong>Status:</strong> 
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                              viewingListing.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
+                              viewingListing.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {viewingListing.status}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Marknadsföring</h4>
+                        <div className="space-y-2">
+                          <p><strong>Stjärnmarkerad:</strong> {viewingListing.starred ? 'Ja' : 'Nej'}</p>
+                          <p><strong>Promotion Status:</strong> {viewingListing.promotionStatus || 'Ingen'}</p>
+                          <p><strong>Framhävd:</strong> {viewingListing.featured ? 'Ja' : 'Nej'}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Säljare</h4>
+                        <div className="space-y-2">
+                          <p><strong>Namn:</strong> {viewingListing.seller}</p>
+                          <p><strong>ID:</strong> {viewingListing.sellerId}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-3">Statistik</h4>
+                        <div className="space-y-2">
+                          <p><strong>Visningar:</strong> {viewingListing.views}</p>
+                          <p><strong>Skapad:</strong> {viewingListing.createdAt}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-gray-900 mb-3">Beskrivning</h4>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-700">{viewingListing.description || 'Ingen beskrivning angiven'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-3 mt-8">
+                    <button
+                      onClick={() => {
+                        setViewingListing(null);
+                        handleEditListing(viewingListing);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Redigera annons
+                    </button>
+                    <button
+                      onClick={() => setViewingListing(null)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Stäng
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Listing Edit Modal */}
+            {editingListing && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Redigera annons: {editingListing.title}</h3>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                      <input
+                        type="text"
+                        value={editingListing.title}
+                        onChange={(e) => setEditingListing({...editingListing, title: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Pris</label>
+                      <input
+                        type="text"
+                        value={editingListing.price}
+                        onChange={(e) => setEditingListing({...editingListing, price: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                      <input
+                        type="text"
+                        value={editingListing.category}
+                        onChange={(e) => setEditingListing({...editingListing, category: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Plats</label>
+                      <input
+                        type="text"
+                        value={editingListing.location}
+                        onChange={(e) => setEditingListing({...editingListing, location: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select
+                        value={editingListing.status}
+                        onChange={(e) => setEditingListing({...editingListing, status: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="PENDING">Väntande</option>
+                        <option value="ACTIVE">Aktiv</option>
+                        <option value="REJECTED">Avvisad</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Promotion Status</label>
+                      <select
+                        value={editingListing.promotionStatus || 'normal'}
+                        onChange={(e) => setEditingListing({...editingListing, promotionStatus: e.target.value})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="hot_sale">Hot Sale</option>
+                        <option value="premium">Premium</option>
+                        <option value="featured">Framhävd</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
+                      <textarea
+                        value={editingListing.description || ''}
+                        onChange={(e) => setEditingListing({...editingListing, description: e.target.value})}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 resize-none"
+                      />
+                    </div>
+                    <div className="md:col-span-2 flex items-center space-x-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={editingListing.starred}
+                          onChange={(e) => setEditingListing({...editingListing, starred: e.target.checked})}
+                          className="mr-2"
+                        />
+                        Stjärnmarkerad
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={editingListing.featured}
+                          onChange={(e) => setEditingListing({...editingListing, featured: e.target.checked})}
+                          className="mr-2"
+                        />
+                        Framhävd
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-3 mt-6">
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Avbryt
+                    </button>
+                    <button
+                      onClick={handleSaveListing}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Spara ändringar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1870,6 +2382,100 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                   <p className="mt-2 text-sm text-gray-500">Det finns inga betalningsförfrågningar att granska just nu.</p>
                 </div>
               )}
+            </div>
+
+            {/* URL-based Listing Promotion */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Snabb Annonsbefordran</h3>
+                <p className="text-sm text-gray-600">Klistra in en annons-URL för att tilldela badges och marknadsföringsstatus</p>
+              </div>
+              
+              <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* URL Input Section */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Annons-URL</label>
+                      <div className="flex space-x-2">
+                        <input
+                          type="text"
+                          value={listingUrl}
+                          onChange={(e) => setListingUrl(e.target.value)}
+                          placeholder="https://123hansa.se/listing/123"
+                          className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          onClick={handleProcessListingUrl}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                          Ladda
+                        </button>
+                      </div>
+                    </div>
+
+                    {selectedPromotionListing && (
+                      <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+                        <h4 className="font-medium text-green-900 mb-2">Laddad annons:</h4>
+                        <div className="text-sm">
+                          <p className="text-green-800"><strong>Titel:</strong> {selectedPromotionListing.title}</p>
+                          <p className="text-green-700"><strong>ID:</strong> {selectedPromotionListing.id}</p>
+                          <p className="text-green-700"><strong>Status:</strong> {selectedPromotionListing.status}</p>
+                          <p className="text-green-700"><strong>Nuvarande badge:</strong> {selectedPromotionListing.promotionStatus || 'Ingen'}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Promotion Actions */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Tillgängliga badges:</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => handleApplyPromotion('hot_sale')}
+                        disabled={!selectedPromotionListing}
+                        className="flex items-center justify-center px-4 py-3 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Award className="w-4 h-4 mr-2" />
+                        Hot Sale
+                      </button>
+                      
+                      <button
+                        onClick={() => handleApplyPromotion('premium')}
+                        disabled={!selectedPromotionListing}
+                        className="flex items-center justify-center px-4 py-3 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Premium
+                      </button>
+                      
+                      <button
+                        onClick={() => handleApplyPromotion('featured')}
+                        disabled={!selectedPromotionListing}
+                        className="flex items-center justify-center px-4 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Zap className="w-4 h-4 mr-2" />
+                        Framhävd
+                      </button>
+                      
+                      <button
+                        onClick={() => handleApplyPromotion('normal')}
+                        disabled={!selectedPromotionListing}
+                        className="flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Ta bort badge
+                      </button>
+                    </div>
+                    
+                    {!selectedPromotionListing && (
+                      <p className="text-sm text-gray-500 text-center mt-4">
+                        Klistra in en annons-URL och klicka "Ladda" för att börja
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

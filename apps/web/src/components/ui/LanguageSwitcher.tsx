@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface Language {
   code: string;
@@ -13,31 +14,26 @@ const languages: Language[] = [
 ];
 
 interface LanguageSwitcherProps {
-  currentLanguage?: string;
-  onLanguageChange?: (language: string) => void;
   variant?: 'header' | 'footer';
 }
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
-  currentLanguage = 'sv',
-  onLanguageChange,
   variant = 'header'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t, changeLanguage, getCurrentLanguage } = useTranslation();
+  
+  const currentLanguage = getCurrentLanguage();
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0];
 
   const handleLanguageSelect = (langCode: string) => {
-    onLanguageChange?.(langCode);
+    changeLanguage(langCode);
     setIsOpen(false);
     
-    // Store language preference in localStorage
-    localStorage.setItem('preferredLanguage', langCode);
-    
-    // You would implement actual language switching logic here
-    // For now, we'll just show a toast message
+    // Show toast message
     import('react-hot-toast').then(({ toast }) => {
       const newLang = languages.find(l => l.code === langCode);
-      toast.success(`Språk ändrat till ${newLang?.name}`);
+      toast.success(t('notification.language-changed', { language: newLang?.name }));
     });
   };
 

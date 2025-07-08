@@ -21,10 +21,12 @@ import {
   getFeaturedCampaigns, 
   getTrendingCampaigns 
 } from '../../data/crowdfundingData';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const CrowdfundingHomePage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { t, isEnglish } = useTranslation();
   const featuredCampaigns = getFeaturedCampaigns();
   const trendingCampaigns = getTrendingCampaigns().slice(0, 3);
   const [buttonClickedMessage, setButtonClickedMessage] = React.useState<string>('');

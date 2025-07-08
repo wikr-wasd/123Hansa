@@ -18,6 +18,7 @@ import {
   Award
 } from 'lucide-react';
 import CategoryIcons from '../components/search/CategoryIcons';
+import { useTranslation } from '../hooks/useTranslation';
 
 // Enhanced asset category definitions with new digital categories
 const ASSET_CATEGORIES = [
@@ -148,8 +149,138 @@ const FEATURED_DEALS = [
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { t, isEnglish } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const navigate = useNavigate();
+
+  // Get localized categories
+  const getLocalizedCategories = () => {
+    if (isEnglish) {
+      return [
+        {
+          id: 'companies',
+          title: 'Companies & Corporations',
+          icon: Building2,
+          color: 'blue',
+          items: [
+            { name: 'Limited Companies (AB)', description: 'Complete companies with employees and operations' },
+            { name: 'Partnerships', description: 'Partnership-based companies' },
+            { name: 'Sole Proprietorships', description: 'Single-person businesses' },
+            { name: 'Limited Partnerships', description: 'Limited liability partnerships' }
+          ]
+        },
+        {
+          id: 'ecommerce',
+          title: 'E-commerce & Webshops',
+          icon: Globe,
+          color: 'green',
+          items: [
+            { name: 'Webshops', description: 'Established e-commerce platforms' },
+            { name: 'Dropshipping', description: 'Dropshipping businesses' },
+            { name: 'Marketplace', description: 'Multi-vendor platforms' },
+            { name: 'Subscription', description: 'Subscription-based services' }
+          ]
+        },
+        {
+          id: 'domains',
+          title: 'Domains & Websites',
+          icon: Globe,
+          color: 'purple',
+          items: [
+            { name: 'Premium domains', description: 'Valuable .se, .com domains' },
+            { name: 'Developed sites', description: 'Ready-made websites' },
+            { name: 'Parked domains', description: 'Domains with traffic' },
+            { name: 'Brandable domains', description: 'Unique brand domains' }
+          ]
+        },
+        {
+          id: 'content',
+          title: 'Content & Media',
+          icon: FileText,
+          color: 'orange',
+          items: [
+            { name: 'Blogs', description: 'Established blogs with traffic' },
+            { name: 'YouTube channels', description: 'Monetized YouTube channels' },
+            { name: 'Podcasts', description: 'Podcast series with audience' },
+            { name: 'News sites', description: 'Niche news websites' }
+          ]
+        },
+        {
+          id: 'social',
+          title: 'Social Media',
+          icon: Users,
+          color: 'pink',
+          items: [
+            { name: 'Instagram accounts', description: 'Accounts with large followings' },
+            { name: 'TikTok accounts', description: 'Viral TikTok accounts' },
+            { name: 'Facebook pages', description: 'Established Facebook pages' },
+            { name: 'LinkedIn pages', description: 'B2B LinkedIn presence' }
+          ]
+        },
+        {
+          id: 'affiliate',
+          title: 'Affiliate & Passive Income',
+          icon: TrendingUp,
+          color: 'indigo',
+          items: [
+            { name: 'Affiliate sites', description: 'Sites with passive income' },
+            { name: 'Review sites', description: 'Product reviews with revenue' },
+            { name: 'Email lists', description: 'Large, engaged email lists' },
+            { name: 'Online courses', description: 'Monetized online courses' }
+          ]
+        }
+      ];
+    }
+    return ASSET_CATEGORIES;
+  };
+
+  // Get localized deals
+  const getLocalizedDeals = () => {
+    if (isEnglish) {
+      return [
+        {
+          id: 1,
+          title: 'TechStartup AB',
+          category: 'SaaS Company',
+          price: '12.5M SEK',
+          industry: 'Fintech',
+          employees: 25,
+          location: 'Stockholm',
+          soldDate: '2024-06-15',
+          description: 'AI-driven payment solution with 200+ corporate customers',
+          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&auto=format',
+          logo: 'https://ui-avatars.com/api/?name=TechStartup+AB&background=0D8ABC&color=fff&size=80'
+        },
+        {
+          id: 2,
+          title: 'Nordic E-commerce',
+          category: 'E-commerce Platform',
+          price: '8.2M SEK',
+          industry: 'E-commerce',
+          employees: 15,
+          location: 'Gothenburg',
+          soldDate: '2024-06-10',
+          description: 'Established e-commerce platform with strong growth',
+          image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop&auto=format',
+          logo: 'https://ui-avatars.com/api/?name=Nordic+E-commerce&background=10B981&color=fff&size=80'
+        },
+        {
+          id: 3,
+          title: 'Sustainable Solutions',
+          category: 'Consulting Company',
+          price: '5.8M SEK',
+          industry: 'Sustainability',
+          employees: 12,
+          location: 'Malmö',
+          soldDate: '2024-06-08',
+          description: 'Environmental consulting company with large corporate clients',
+          image: 'https://images.unsplash.com/photo-1497436072909-f5e4be85ed30?w=400&h=300&fit=crop&auto=format',
+          logo: 'https://ui-avatars.com/api/?name=Sustainable+Solutions&background=059669&color=fff&size=80'
+        }
+      ];
+    }
+    return FEATURED_DEALS;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,9 +304,9 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>123Hansa.se - Nordens Marknadsplats för Företag</title>
-        <meta name="description" content="Köp och sälj företag, digitala tillgångar, fastigheter och affärstjänster på Nordens ledande marknadsplats. Säkra transaktioner med professionell support." />
-        <meta name="keywords" content="köpa företag, sälja företag, företagsförvärv, M&A, företagsmäklare, Sverige, Norge, Danmark" />
+        <title>{t('homepage.title')}</title>
+        <meta name="description" content={t('homepage.meta-description')} />
+        <meta name="keywords" content={t('homepage.meta-keywords')} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -186,31 +317,29 @@ const HomePage: React.FC = () => {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6">
-                <span className="block">Nordens</span>
+                <span className="block">{t('homepage.hero.title.line1')}</span>
                 <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Marknadsplats
+                  {t('homepage.hero.title.line2')}
                 </span>
-                <span className="block">för Företag</span>
+                <span className="block">{t('homepage.hero.title.line3')}</span>
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-600 mb-8 leading-relaxed">
-                🚀 <strong>3,2 miljarder SEK</strong> i genomförda affärer senaste året! 
-                Köp och sälj företag, digitala tillgångar och affärstjänster med förtroende. 
-                Professionell support från start till slutförd affär.
+                {t('homepage.hero.subtitle')}
               </p>
               
               <div className="flex flex-wrap justify-center gap-6 mb-12 text-sm font-semibold text-slate-500">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  Över 15,000 registrerade köpare
+                  {t('homepage.hero.social-proof.registered-buyers')}
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  95% nöjdhet från säljare
+                  {t('homepage.hero.social-proof.seller-satisfaction')}
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  Genomsnittlig försäljningstid: 45 dagar
+                  {t('homepage.hero.social-proof.avg-time')}
                 </div>
               </div>
 
@@ -225,7 +354,7 @@ const HomePage: React.FC = () => {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Sök efter företag, domäner, lokaler eller tjänster..."
+                        placeholder={t('homepage.search.placeholder')}
                         className="w-full pl-12 pr-4 py-4 text-lg border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       />
                     </div>
@@ -235,8 +364,8 @@ const HomePage: React.FC = () => {
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       className="px-4 py-4 border-0 rounded-xl bg-slate-50 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
-                      <option value="">Alla kategorier</option>
-                      {ASSET_CATEGORIES.map(category => (
+                      <option value="">{t('homepage.search.all-categories')}</option>
+                      {getLocalizedCategories().map(category => (
                         <option key={category.id} value={category.id}>
                           {category.title}
                         </option>
@@ -247,7 +376,7 @@ const HomePage: React.FC = () => {
                       type="submit"
                       className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      Sök
+                      {t('homepage.search.button')}
                     </button>
                   </div>
                 </form>
@@ -263,27 +392,27 @@ const HomePage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.activeListings.toLocaleString('sv-SE')}
+                  {SOCIAL_PROOF_STATS.activeListings.toLocaleString(isEnglish ? 'en-US' : 'sv-SE')}
                 </div>
-                <div className="text-slate-600 font-medium">Aktiva annonser</div>
+                <div className="text-slate-600 font-medium">{t('homepage.stats.active-listings')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.completedDeals.toLocaleString('sv-SE')}
+                  {SOCIAL_PROOF_STATS.completedDeals.toLocaleString(isEnglish ? 'en-US' : 'sv-SE')}
                 </div>
-                <div className="text-slate-600 font-medium">Genomförda affärer</div>
+                <div className="text-slate-600 font-medium">{t('homepage.stats.completed-deals')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.totalValue}B SEK
+                  {SOCIAL_PROOF_STATS.totalValue}{t('homepage.stats.billion')} SEK
                 </div>
-                <div className="text-slate-600 font-medium">Total omsättning</div>
+                <div className="text-slate-600 font-medium">{t('homepage.stats.total-value')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
                   {SOCIAL_PROOF_STATS.averageTime}
                 </div>
-                <div className="text-slate-600 font-medium">Dagar till affär</div>
+                <div className="text-slate-600 font-medium">{t('homepage.stats.avg-time')} ({t('homepage.stats.days')})</div>
               </div>
             </div>
           </div>
@@ -294,15 +423,15 @@ const HomePage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                Vad kan du köpa och sälja?
+                {t('homepage.categories.title')}
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                123hansa är Nordens mest omfattande marknadsplats för alla typer av affärstillgångar
+                {t('homepage.categories.subtitle')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {ASSET_CATEGORIES.map((category) => {
+              {getLocalizedCategories().map((category) => {
                 const IconComponent = category.icon;
                 return (
                   <div
