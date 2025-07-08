@@ -24,6 +24,12 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
   const [editingListing, setEditingListing] = useState<any>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   
+  // Advanced filtering and sorting state
+  const [statusFilter, setStatusFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [promotionFilter, setPromotionFilter] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  
   // Promotion requests system
   const [promotionRequests, setPromotionRequests] = useState([
     {
@@ -519,12 +525,48 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
     user.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredListings = listings.filter(listing => 
-    listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.seller.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Enhanced filtering and sorting logic
+  const filteredAndSortedListings = React.useMemo(() => {
+    let filtered = listings.filter(listing => {
+      const matchesSearch = 
+        listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.seller.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.phone.includes(searchTerm) ||
+        listing.id.toLowerCase().includes(searchTerm.toLowerCase());
+        
+      const matchesStatus = !statusFilter || listing.status === statusFilter;
+      const matchesCategory = !categoryFilter || listing.category === categoryFilter;
+      const matchesPromotion = !promotionFilter || listing.promotionStatus === promotionFilter;
+      
+      return matchesSearch && matchesStatus && matchesCategory && matchesPromotion;
+    });
+
+    // Sorting logic
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'price_high':
+          return b.price - a.price;
+        case 'price_low':
+          return a.price - b.price;
+        case 'views_high':
+          return b.views - a.views;
+        case 'inquiries_high':
+          return b.inquiries - a.inquiries;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [listings, searchTerm, statusFilter, categoryFilter, promotionFilter, sortBy]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK' }).format(price);
@@ -1755,23 +1797,81 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
               </div>
             </div>
 
+            {/* Advanced Filters */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Avancerade Filter & Sortering
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <select 
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Alla status</option>
+                  <option value="PENDING">Väntar granskning</option>
+                  <option value="ACTIVE">Aktiva</option>
+                  <option value="REJECTED">Avvisade</option>
+                </select>
+                
+                <select 
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <option value="">Alla kategorier</option>
+                  <option value="Technology">Teknik/IT</option>
+                  <option value="Restaurant">Restaurang</option>
+                  <option value="E-commerce">E-handel</option>
+                  <option value="Consulting">Konsulting</option>
+                  <option value="Construction">Bygg</option>
+                  <option value="Marketing">Marknadsföring</option>
+                </select>
+                
+                <select 
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setPromotionFilter(e.target.value)}
+                >
+                  <option value="">Alla marknadsföringsstatus</option>
+                  <option value="vip">🏆 VIP</option>
+                  <option value="featured">⚡ Framhävda</option>
+                  <option value="premium">⭐ Premium</option>
+                  <option value="hot_sale">🔥 Hot Sale</option>
+                  <option value="normal">Normal</option>
+                </select>
+                
+                <select 
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="newest">Senaste först</option>
+                  <option value="oldest">Äldsta först</option>
+                  <option value="price_high">Högsta pris</option>
+                  <option value="price_low">Lägsta pris</option>
+                  <option value="views_high">Flest visningar</option>
+                  <option value="inquiries_high">Flest förfrågningar</option>
+                </select>
+              </div>
+            </div>
+
             {/* Deleted Listings Recovery */}
             {deletedListings.length > 0 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <Undo2 className="w-5 h-5 text-yellow-600 mr-2" />
-                    <span className="text-sm font-medium text-yellow-800">
-                      {deletedListings.length} annonser har tagits bort nyligen
-                    </span>
+                    <Undo2 className="w-6 h-6 text-yellow-600 mr-3" />
+                    <div>
+                      <h4 className="font-semibold text-yellow-800">Återställning tillgänglig</h4>
+                      <p className="text-sm text-yellow-700">{deletedListings.length} annonser har tagits bort nyligen</p>
+                    </div>
                   </div>
-                  <div className="space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     {deletedListings.map(listing => (
                       <button
                         key={listing.id}
                         onClick={() => handleRestoreListing(listing.id)}
-                        className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded hover:bg-yellow-300"
+                        className="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
                       >
+                        <Undo2 className="w-4 h-4 inline mr-1" />
                         Återställ {listing.title}
                       </button>
                     ))}
@@ -1780,180 +1880,291 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Annons & Risk</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori & Pris</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Säljare</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status & Aktivitet</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Åtgärder</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredListings.map((listing) => (
-                      <tr key={listing.id} className={`hover:bg-gray-50 ${listing.status === 'PENDING' ? 'bg-yellow-50' : ''}`}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <Building2 className="w-5 h-5 text-gray-400 mr-3" />
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{listing.title}</div>
-                              <div className="text-sm text-gray-500 max-w-xs truncate">{listing.description}</div>
-                              <div className="flex items-center mt-1 space-x-2">
-                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${getRiskColor(listing.riskScore)}`}>
-                                  Risk: {listing.riskScore}%
+            {/* Results Summary */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900">
+                  📋 Annonser ({filteredAndSortedListings.length} av {listings.length})
+                </h3>
+                <div className="text-sm text-gray-600">
+                  Sorterat efter: <span className="font-medium">{
+                    sortBy === 'newest' ? 'Senaste först' :
+                    sortBy === 'oldest' ? 'Äldsta först' :
+                    sortBy === 'price_high' ? 'Högsta pris' :
+                    sortBy === 'price_low' ? 'Lägsta pris' :
+                    sortBy === 'views_high' ? 'Flest visningar' :
+                    'Flest förfrågningar'
+                  }</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Professional Listings Grid */}
+            <div className="grid grid-cols-1 gap-6">
+              {filteredAndSortedListings.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                  <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">Inga annonser hittades</h3>
+                  <p className="text-gray-600">Prova att ändra dina sökkriterier eller filter</p>
+                </div>
+              ) : (
+                filteredAndSortedListings.map((listing) => (
+                  <div key={listing.id} className={`bg-white rounded-xl shadow-lg border-2 transition-all duration-200 hover:shadow-xl ${
+                    listing.status === 'PENDING' ? 'border-yellow-300 bg-yellow-50' : 
+                    listing.promotionStatus === 'vip' ? 'border-purple-300' :
+                    listing.promotionStatus === 'featured' ? 'border-blue-300' :
+                    listing.promotionStatus === 'premium' ? 'border-yellow-300' :
+                    listing.promotionStatus === 'hot_sale' ? 'border-red-300' :
+                    'border-gray-200'
+                  }`}>
+                    <div className="p-6">
+                      {/* Header with Status */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start space-x-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            listing.status === 'PENDING' ? 'bg-yellow-100' :
+                            listing.status === 'ACTIVE' ? 'bg-green-100' :
+                            'bg-gray-100'
+                          }`}>
+                            <Building2 className={`w-6 h-6 ${
+                              listing.status === 'PENDING' ? 'text-yellow-600' :
+                              listing.status === 'ACTIVE' ? 'text-green-600' :
+                              'text-gray-600'
+                            }`} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="text-xl font-bold text-gray-900">{listing.title}</h3>
+                              {listing.promotionStatus && listing.promotionStatus !== 'normal' && (
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                  listing.promotionStatus === 'vip' ? 'bg-purple-100 text-purple-800' :
+                                  listing.promotionStatus === 'featured' ? 'bg-blue-100 text-blue-800' :
+                                  listing.promotionStatus === 'premium' ? 'bg-yellow-100 text-yellow-800' :
+                                  listing.promotionStatus === 'hot_sale' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {listing.promotionStatus === 'vip' ? '👑 VIP' :
+                                   listing.promotionStatus === 'featured' ? '⚡ Framhävd' :
+                                   listing.promotionStatus === 'premium' ? '⭐ Premium' :
+                                   listing.promotionStatus === 'hot_sale' ? '🔥 Hot Sale' :
+                                   listing.promotionStatus}
                                 </span>
-                                {listing.featured && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                                    <Star className="w-3 h-3 mr-1" />
-                                    Utvald
-                                  </span>
-                                )}
-                                {listing.reports > 0 && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                    {listing.reports} rapport(er)
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            <div className="font-medium">{listing.category}</div>
-                            <div className="text-lg font-bold text-green-600">{formatPrice(listing.price)}</div>
-                            <div className="text-xs text-gray-500">{listing.location}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-xs font-medium text-gray-600">{listing.seller.charAt(0)}</span>
-                            </div>
-                            <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">{listing.seller}</div>
-                              <div className="text-xs text-gray-500">ID: {listing.sellerId}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="space-y-1">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(listing.status)}`}>
-                              {listing.status === 'PENDING' ? 'Väntar' : listing.status === 'ACTIVE' ? 'Aktiv' : listing.status}
-                            </span>
-                            <div className="text-xs text-gray-500">
-                              <div>{listing.views} visningar</div>
-                              <div>Skapad: {formatDate(listing.createdAt)}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-1">
-                            {listing.status === 'PENDING' && (
-                              <>
-                                <button
-                                  onClick={() => handleApproveListing(listing.id)}
-                                  className="p-2 rounded bg-green-100 text-green-600 hover:bg-green-200"
-                                  title="Godkänn annons"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleRejectListing(listing.id)}
-                                  className="p-2 rounded bg-red-100 text-red-600 hover:bg-red-200"
-                                  title="Avslå annons"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => handleStarListing(listing.id)}
-                              className={`p-2 rounded ${listing.starred ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-600'} hover:bg-opacity-80`}
-                              title={listing.starred ? 'Ta bort stjärnmarkering' : 'Stjärnmarkera'}
-                            >
-                              <Star className="w-4 h-4" />
-                            </button>
-                            <div className="relative">
-                              <button
-                                onClick={() => setOpenDropdown(openDropdown === `promotion-${listing.id}` ? null : `promotion-${listing.id}`)}
-                                className="p-2 rounded bg-purple-100 text-purple-600 hover:bg-purple-200"
-                                title="Marknadsföringsstatus"
-                              >
-                                <Award className="w-4 h-4" />
-                              </button>
-                              {openDropdown === `promotion-${listing.id}` && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                                  <div className="py-1">
-                                    <button
-                                      onClick={() => {
-                                        handleSetListingStatus(listing.id, 'hot_sale');
-                                        setOpenDropdown(null);
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50"
-                                    >
-                                      🔥 Hot Sale
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        handleSetListingStatus(listing.id, 'premium');
-                                        setOpenDropdown(null);
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
-                                    >
-                                      ⭐ Premium
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        handleSetListingStatus(listing.id, 'featured');
-                                        setOpenDropdown(null);
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50"
-                                    >
-                                      ⚡ Framhävd
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        handleSetListingStatus(listing.id, 'normal');
-                                        setOpenDropdown(null);
-                                      }}
-                                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                      ❌ Ta bort status
-                                    </button>
-                                  </div>
-                                </div>
+                              )}
+                              {listing.starred && (
+                                <Star className="w-5 h-5 text-yellow-500 fill-current" />
                               )}
                             </div>
-                            <button
-                              onClick={() => handleViewListing(listing)}
-                              className="p-2 rounded bg-blue-100 text-blue-600 hover:bg-blue-200"
-                              title="Visa detaljer"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleEditListing(listing)}
-                              className="p-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
-                              title="Redigera annons"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteListing(listing.id)}
-                              className="p-2 rounded bg-red-100 text-red-600 hover:bg-red-200"
-                              title="Ta bort annons"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <p className="text-gray-600 mb-3">{listing.description}</p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                              <span className="flex items-center">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                {listing.location}
+                              </span>
+                              <span className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-1" />
+                                {formatDate(listing.createdAt)}
+                              </span>
+                              <span className="flex items-center">
+                                <User className="w-4 h-4 mr-1" />
+                                ID: {listing.id}
+                              </span>
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            listing.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            listing.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {listing.status === 'PENDING' ? '⏳ Väntar granskning' :
+                             listing.status === 'ACTIVE' ? '✅ Aktiv' :
+                             '❌ Avvisad'}
+                          </span>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-green-600">{formatPrice(listing.price)}</div>
+                            <div className="text-sm text-gray-500">{listing.category}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Performance Metrics */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">{listing.views}</div>
+                          <div className="text-xs text-gray-500">Visningar</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{listing.inquiries}</div>
+                          <div className="text-xs text-gray-500">Förfrågningar</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">{listing.reports}</div>
+                          <div className="text-xs text-gray-500">Rapporter</div>
+                        </div>
+                        <div className="text-center">
+                          <div className={`text-2xl font-bold ${
+                            listing.riskScore <= 15 ? 'text-green-600' :
+                            listing.riskScore <= 30 ? 'text-yellow-600' :
+                            'text-red-600'
+                          }`}>{listing.riskScore}%</div>
+                          <div className="text-xs text-gray-500">Risk</div>
+                        </div>
+                      </div>
+
+                      {/* Seller Information */}
+                      <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                          <User className="w-4 h-4 mr-2 text-blue-600" />
+                          Säljare Information
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Namn:</span>
+                            <div className="font-medium">{listing.seller}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">E-post:</span>
+                            <div className="font-medium">{listing.email}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Telefon:</span>
+                            <div className="font-medium">{listing.phone}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-3">
+                        {listing.status === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => handleApproveListing(listing.id)}
+                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Godkänn
+                            </button>
+                            <button
+                              onClick={() => handleRejectListing(listing.id)}
+                              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                            >
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Avslå
+                            </button>
+                          </>
+                        )}
+                        
+                        <button
+                          onClick={() => handleViewListing(listing)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Visa Detaljer
+                        </button>
+                        
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenDropdown(openDropdown === `promotion-${listing.id}` ? null : `promotion-${listing.id}`)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                          >
+                            <Award className="w-4 h-4 mr-2" />
+                            Promota Annons
+                          </button>
+                          {openDropdown === `promotion-${listing.id}` && (
+                            <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
+                              <div className="p-4">
+                                <h5 className="font-semibold text-gray-900 mb-3">Välj Marknadsföringspaket</h5>
+                                <div className="space-y-2">
+                                  <button
+                                    onClick={() => {
+                                      handleSetListingStatus(listing.id, 'vip');
+                                      setOpenDropdown(null);
+                                    }}
+                                    className="w-full text-left p-3 rounded-lg border border-purple-200 hover:bg-purple-50 transition-colors"
+                                  >
+                                    <div className="font-medium text-purple-800">👑 VIP Paket</div>
+                                    <div className="text-sm text-gray-600">2,995 SEK - Högsta prioritet</div>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleSetListingStatus(listing.id, 'featured');
+                                      setOpenDropdown(null);
+                                    }}
+                                    className="w-full text-left p-3 rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
+                                  >
+                                    <div className="font-medium text-blue-800">⚡ Framhävd</div>
+                                    <div className="text-sm text-gray-600">1,995 SEK - Framhävd placering</div>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleSetListingStatus(listing.id, 'premium');
+                                      setOpenDropdown(null);
+                                    }}
+                                    className="w-full text-left p-3 rounded-lg border border-yellow-200 hover:bg-yellow-50 transition-colors"
+                                  >
+                                    <div className="font-medium text-yellow-800">⭐ Premium</div>
+                                    <div className="text-sm text-gray-600">995 SEK - Premium badge</div>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleSetListingStatus(listing.id, 'hot_sale');
+                                      setOpenDropdown(null);
+                                    }}
+                                    className="w-full text-left p-3 rounded-lg border border-red-200 hover:bg-red-50 transition-colors"
+                                  >
+                                    <div className="font-medium text-red-800">🔥 Hot Sale</div>
+                                    <div className="text-sm text-gray-600">Gratis - Brändheta annonser</div>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleSetListingStatus(listing.id, 'normal');
+                                      setOpenDropdown(null);
+                                    }}
+                                    className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="font-medium text-gray-800">❌ Ta bort marknadsföring</div>
+                                    <div className="text-sm text-gray-600">Normal status</div>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button
+                          onClick={() => handleStarListing(listing.id)}
+                          className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center ${
+                            listing.starred 
+                              ? 'bg-yellow-600 hover:bg-yellow-700 text-white' 
+                              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                          }`}
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          {listing.starred ? 'Ta bort stjärna' : 'Stjärnmärk'}
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            window.location.href = `mailto:${listing.email}?subject=Angående din annons: ${listing.title}&body=Hej ${listing.seller},%0D%0A%0D%0AJag kontaktar dig angående din annons "${listing.title}" på Hansa.%0D%0A%0D%0AMed vänliga hälsningar,%0D%0AWilli - Hansa Admin`;
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Kontakta Säljare
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDeleteListing(listing.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Ta Bort
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
