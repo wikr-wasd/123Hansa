@@ -13,15 +13,6 @@ export const prisma = globalThis.__prisma || new PrismaClient({
       url: config.databaseUrl,
     },
   },
-  // Production optimizations for 1000+ users
-  ...config.nodeEnv === 'production' && {
-    connectionLimit: 20,
-    poolTimeout: 20,
-    transactionOptions: {
-      maxWait: 5000,
-      timeout: 10000,
-    },
-  },
 });
 
 if (config.nodeEnv !== 'production') {

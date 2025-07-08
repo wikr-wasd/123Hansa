@@ -16,7 +16,6 @@ export async function connectRedis(): Promise<RedisClient> {
       url: config.redisUrl,
       socket: {
         connectTimeout: 5000,
-        lazyConnect: true,
       },
     });
 

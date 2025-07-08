@@ -4,12 +4,30 @@ import { prisma } from '@/config/database';
 import { createError } from './errorHandler';
 import { logger } from '@/utils/logger';
 
+// Export AuthenticatedRequest type
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    userId: string;  // Add userId alias for compatibility
+    email: string;
+    role: string;
+    verificationLevel: string;
+    adminProfile?: {
+      id: string;
+      role: string;
+      permissions: any;
+      isActive: boolean;
+    };
+  };
+}
+
 // Extend Express Request type to include user
 declare global {
   namespace Express {
     interface Request {
       user?: {
         id: string;
+        userId: string;  // Add userId alias for compatibility
         email: string;
         role: string;
         verificationLevel: string;
@@ -73,6 +91,7 @@ export const authenticateToken = async (
     // Attach user to request
     req.user = {
       id: user.id,
+      userId: user.id,  // Add userId alias for compatibility
       email: user.email,
       role: user.role,
       verificationLevel: user.verificationLevel,
@@ -197,6 +216,7 @@ export const optionalAuth = async (
       if (user) {
         req.user = {
           id: user.id,
+          userId: user.id,  // Add userId alias for compatibility
           email: user.email,
           role: user.role,
           verificationLevel: user.verificationLevel,

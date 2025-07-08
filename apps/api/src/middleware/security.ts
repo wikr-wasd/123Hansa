@@ -74,8 +74,9 @@ export const contactLimiter = rateLimit({
 export const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000, // 15 minutes
   delayAfter: 50, // allow 50 requests per 15 minutes at full speed
-  delayMs: 500, // add 500ms delay per request after delayAfter
+  delayMs: () => 500, // add 500ms delay per request after delayAfter
   maxDelayMs: 10000, // maximum delay of 10 seconds
+  validate: { delayMs: false }, // disable deprecation warning
   skip: (req) => {
     const trustedIPs = process.env.TRUSTED_IPS?.split(',') || [];
     return trustedIPs.includes(req.ip);

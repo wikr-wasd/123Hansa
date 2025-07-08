@@ -5,18 +5,7 @@ import { z } from 'zod';
 const prisma = new PrismaClient();
 
 // Types for CMS
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-    verificationLevel: string;
-    adminProfile?: {
-      role: string;
-      permissions: any;
-    };
-  };
-}
+import { AuthenticatedRequest } from '@/middleware/auth';
 
 // Validation schemas
 const createAdminSchema = z.object({
@@ -71,9 +60,9 @@ export const getDashboardStats = async (req: AuthenticatedRequest, res: Response
       prisma.businessListing.count({ where: { status: 'ACTIVE' } }),
       prisma.businessListing.count({ where: { status: 'SOLD' } }),
       
-      // Transactions
-      prisma.transaction.count(),
-      prisma.transaction.aggregate({ _sum: { amount: true } }),
+      // Platform metrics
+      prisma.platformMetrics.aggregate({ _sum: { transactionVolume: true } }),
+      prisma.platformMetrics.aggregate({ _sum: { totalTransactions: true } }),
       
       // Support
       prisma.supportTicket.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } } }),

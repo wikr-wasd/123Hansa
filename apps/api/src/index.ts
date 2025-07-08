@@ -68,10 +68,11 @@ app.use(session({
   secret: config.jwtSecret,
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: config.databaseUrl,
-    ttl: 24 * 60 * 60 // 24 hours
-  }),
+  // Use memory store for development (replace with Redis in production)
+  // store: MongoStore.create({
+  //   mongoUrl: config.databaseUrl,
+  //   ttl: 24 * 60 * 60 // 24 hours
+  // }),
   cookie: {
     secure: config.nodeEnv === 'production',
     httpOnly: true,
