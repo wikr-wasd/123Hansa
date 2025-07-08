@@ -214,7 +214,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
           <div className="space-y-8">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Min Översikt</h2>
-              <p className="text-gray-600">Här är en sammanfattning av din aktivitet på Tubba</p>
+              <p className="text-gray-600">Här är en sammanfattning av din aktivitet på Hansa</p>
             </div>
 
             {/* Stats Cards */}

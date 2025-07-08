@@ -951,12 +951,6 @@ const HomePage: React.FC = () => {
               >
                 Köp ett företag
               </Link>
-              <Link
-                to="/test-login"
-                className="px-6 py-3 bg-yellow-500 text-yellow-900 font-semibold rounded-xl hover:bg-yellow-400 transition-colors duration-200 shadow-lg text-sm"
-              >
-                🧪 Test Login
-              </Link>
             </div>
           </div>
         </section>

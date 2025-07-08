@@ -59,7 +59,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <Shield className="h-8 w-8 text-blue-600" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Tubba Admin Portal
+            Hansa Admin Portal
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Logga in för att komma åt din admin-panel
@@ -139,11 +139,54 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </button>
           </div>
 
-          <div className="text-center">
-            <div className="text-xs text-gray-500 space-y-1">
-              <p><strong>Admin:</strong> Användarnamn: Willi, Lösenord: Rickilito00</p>
-              <p><strong>Test-kund:</strong> anna.karlsson / customer123</p>
+          {/* Quick Test Login Section */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+            <h3 className="text-sm font-medium text-gray-700 text-center">Snabb inloggning</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setUsername('anna.karlsson');
+                  setPassword('customer123');
+                }}
+                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+              >
+                <div className="font-medium text-sm text-gray-900">Anna Karlsson</div>
+                <div className="text-xs text-gray-500">Kund / Köpare</div>
+              </button>
+              <button
+                onClick={() => {
+                  setUsername('erik.johansson');
+                  setPassword('customer456');
+                }}
+                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+              >
+                <div className="font-medium text-sm text-gray-900">Erik Johansson</div>
+                <div className="text-xs text-gray-500">Säljare / Företagare</div>
+              </button>
+              <button
+                onClick={() => {
+                  setUsername('maria.svensson');
+                  setPassword('customer789');
+                }}
+                className="p-3 text-left bg-white rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+              >
+                <div className="font-medium text-sm text-gray-900">Maria Svensson</div>
+                <div className="text-xs text-gray-500">Investerare</div>
+              </button>
+              <button
+                onClick={() => {
+                  setUsername('Willi');
+                  setPassword('Rickilito00');
+                }}
+                className="p-3 text-left bg-blue-50 rounded border border-blue-200 hover:border-blue-300 hover:shadow-sm transition-all"
+              >
+                <div className="font-medium text-sm text-blue-900">Willi (Admin)</div>
+                <div className="text-xs text-blue-600">Fullständig admin-åtkomst</div>
+              </button>
             </div>
+            <p className="text-xs text-gray-500 text-center">
+              Klicka på ett konto för att fylla i inloggningsuppgifterna automatiskt
+            </p>
           </div>
         </form>
       </div>
