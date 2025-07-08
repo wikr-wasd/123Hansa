@@ -12,7 +12,7 @@
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:admin": "npm run dev --workspace=apps/admin",
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspace=apps/web",
     "build:development": "NODE_ENV=development npm run build --workspaces",
     "build:staging": "NODE_ENV=staging npm run build --workspaces",
     "build:production": "NODE_ENV=production npm run build --workspaces",

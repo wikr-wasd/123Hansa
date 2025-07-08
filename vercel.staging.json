@@ -1,15 +1,13 @@
 {
   "version": 2,
   "name": "123hansa-staging",
+  "buildCommand": "cd apps/web && npm run build",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "npm install && cd apps/web && npm install",
+  "framework": null,
   "env": {
     "NODE_ENV": "staging",
     "VITE_API_URL": "https://staging-123hansa.vercel.app/api"
-  },
-  "functions": {
-    "api/index.ts": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
   },
   "headers": [
     {
@@ -88,34 +86,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/api/listings/([^/]+)",
-      "destination": "/api/listings/[id].ts?id=$1"
-    },
-    {
-      "source": "/api/listings",
-      "destination": "/api/listings.ts"
-    },
-    {
-      "source": "/api/auth",
-      "destination": "/api/auth.ts"
-    },
-    {
-      "source": "/api/messages",
-      "destination": "/api/messages.ts"
-    },
-    {
-      "source": "/api/crm/contact",
-      "destination": "/api/crm/contact.ts"
-    },
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/api/robots"
-    },
     {
       "source": "/((?!api).*)",
       "destination": "/index.html"
