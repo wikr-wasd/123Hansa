@@ -1,9 +1,10 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "cd apps/web && npm run build",
-  "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install && cd apps/web && npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "rootDirectory": "apps/web",
   "framework": null,
   "env": {
     "NODE_ENV": "staging",
