@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLogin from './AdminLogin';
 import AdvancedAdminPanel from './AdvancedAdminPanel';
 import CustomerAdminPanel from './CustomerAdminPanel';
@@ -18,20 +18,40 @@ const AuthenticatedAdminWrapper: React.FC = () => {
     userId: null
   });
 
+  // Restore authentication state from localStorage on component mount
+  useEffect(() => {
+    const savedAuthState = localStorage.getItem('adminAuthState');
+    if (savedAuthState) {
+      try {
+        const parsedState = JSON.parse(savedAuthState);
+        setAuthState(parsedState);
+      } catch (error) {
+        console.error('Failed to parse saved auth state:', error);
+        localStorage.removeItem('adminAuthState');
+      }
+    }
+  }, []);
+
   const handleLogin = (userType: UserType, userId?: string) => {
-    setAuthState({
+    const newAuthState = {
       isAuthenticated: true,
       userType,
       userId: userId || null
-    });
+    };
+    setAuthState(newAuthState);
+    // Save to localStorage for persistence across browser navigation
+    localStorage.setItem('adminAuthState', JSON.stringify(newAuthState));
   };
 
   const handleLogout = () => {
-    setAuthState({
+    const newAuthState = {
       isAuthenticated: false,
       userType: null,
       userId: null
-    });
+    };
+    setAuthState(newAuthState);
+    // Clear from localStorage on logout
+    localStorage.removeItem('adminAuthState');
   };
 
   if (!authState.isAuthenticated) {

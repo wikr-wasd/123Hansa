@@ -22,6 +22,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
   const [selectedPromotionListing, setSelectedPromotionListing] = useState<any>(null);
   const [viewingListing, setViewingListing] = useState<any>(null);
   const [editingListing, setEditingListing] = useState<any>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   
   // Promotion requests system
   const [promotionRequests, setPromotionRequests] = useState([
@@ -312,6 +313,20 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       ]
     }
   ]);
+
+  // Filtered data for search functionality
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredListings = listings.filter(listing => 
+    listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    listing.seller.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    listing.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    listing.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK' }).format(price);
@@ -735,17 +750,6 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
     ));
     toast.success('Ticket återöppnat');
   };
-
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredListings = listings.filter(listing => 
-    listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.seller.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const openTickets = supportTickets.filter(t => t.status === 'open' || t.status === 'in_progress');
   const resolvedTickets = supportTickets.filter(t => t.status === 'resolved' || t.status === 'closed');
