@@ -1092,15 +1092,89 @@ const CreateListingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Info Card */}
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                <h3 className="font-semibold text-green-900 mb-4">Fördelar med 123Hansa</h3>
-                <ul className="space-y-2 text-sm text-green-800">
-                  <li>• Endast 3% provision vid genomförd affär</li>
-                  <li>• Säkra avtal via Heart-appen</li>
-                  <li>• Professionell marknadsföring</li>
-                  <li>• Kvalificerade köpare</li>
-                  <li>• Juridisk support</li>
+              {/* Marknadsföringspaket Info */}
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6">
+                <h3 className="font-semibold text-emerald-900 mb-4 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Professionell Marknadsföring Ingår!
+                </h3>
+                
+                <div className="space-y-4">
+                  {/* Direktreklam */}
+                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
+                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">🎯 Direktreklam</h4>
+                    <ul className="space-y-1 text-xs text-emerald-800">
+                      <li>• Google Ads (Sök & Display)</li>
+                      <li>• Facebook & Instagram Ads</li>
+                      <li>• LinkedIn Business Targeting</li>
+                      <li>• YouTube marknadsföring</li>
+                    </ul>
+                  </div>
+
+                  {/* Media */}
+                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
+                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">📰 Medieplaceringar</h4>
+                    <ul className="space-y-1 text-xs text-emerald-800">
+                      <li>• Aftonbladet & Schibsted-koncernen</li>
+                      <li>• Blocket & lokala medier</li>
+                      <li>• Branschspecifika publikationer</li>
+                      <li>• PR & pressutskick</li>
+                    </ul>
+                  </div>
+
+                  {/* Digital */}
+                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
+                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">📧 Digital Marknadsföring</h4>
+                    <ul className="space-y-1 text-xs text-emerald-800">
+                      <li>• E-post till 50,000+ prenumeranter</li>
+                      <li>• SMS & push-notiser</li>
+                      <li>• Segmenterade kampanjer</li>
+                      <li>• Nyhetsbrev & automation</li>
+                    </ul>
+                  </div>
+
+                  {/* Team */}
+                  <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg p-3 border border-emerald-100">
+                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">👥 Dedikerat Team</h4>
+                    <ul className="space-y-1 text-xs text-emerald-800">
+                      <li>• Målgruppsanalys & optimering</li>
+                      <li>• Kontinuerlig kampanjförbättring</li>
+                      <li>• Veckovisa rapporter</li>
+                      <li>• Personlig marknadsföringsspecialist</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-4 bg-emerald-600 text-white rounded p-3 text-center">
+                  <p className="text-sm font-bold">Marknadsföringsvärde: 50,000+ kr</p>
+                  <p className="text-xs mt-1 opacity-90">Allt ingår utan extra kostnad!</p>
+                </div>
+              </div>
+
+              {/* Andra fördelar */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <h3 className="font-semibold text-blue-900 mb-4">Andra Fördelar</h3>
+                <ul className="space-y-2 text-sm text-blue-800">
+                  <li className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                    Endast 3% provision vid genomförd affär
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                    Säkra avtal via Heart-appen
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                    Escrow-tjänst för säkra transaktioner
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                    Kvalificerade köpare
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                    Juridisk support
+                  </li>
                 </ul>
               </div>
             </div>

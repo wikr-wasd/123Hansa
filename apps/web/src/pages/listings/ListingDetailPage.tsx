@@ -682,6 +682,14 @@ const ListingDetailPage: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 20);
+  const [interestForm, setInterestForm] = useState({
+    name: '',
+    email: '',
+    message: '',
+    phone: ''
+  });
+  const [isSubmittingInterest, setIsSubmittingInterest] = useState(false);
+  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
   // Check if listing is favorited on component load
   useEffect(() => {
@@ -691,6 +699,30 @@ const ListingDetailPage: React.FC = () => {
       setIsLiked(isFavorited);
     }
   }, [listing, authUser]);
+
+  // Pre-fill interest form when modal opens
+  useEffect(() => {
+    if (showInterestModal && authUser && listing) {
+      setInterestForm({
+        name: `${authUser.firstName} ${authUser.lastName}`,
+        email: authUser.email,
+        phone: '',
+        message: `Hej ${listing.seller.name},
+
+Jag är intresserad av ditt företag "${listing.title}" och skulle vilja veta mer om affären.
+
+Kan du kontakta mig för att diskutera möjligheterna?
+
+Med vänliga hälsningar,
+${authUser.firstName} ${authUser.lastName}`
+      });
+      // Clear any existing form errors when modal opens
+      setFormErrors({});
+    } else if (!showInterestModal) {
+      // Reset form errors when modal closes
+      setFormErrors({});
+    }
+  }, [showInterestModal, authUser, listing]);
 
   // Fetch listing details
   useEffect(() => {
@@ -768,6 +800,21 @@ const ListingDetailPage: React.FC = () => {
   const handleInterest = async () => {
     if (!listing) return;
     
+    // Check if user is authenticated
+    if (!authUser) {
+      toast.error('Du måste vara inloggad för att visa intresse');
+      return;
+    }
+
+    // Validate entire form
+    const isFormValid = validateInterestForm();
+    if (!isFormValid) {
+      toast.error('Vänligen korrigera felen i formuläret');
+      return;
+    }
+    
+    setIsSubmittingInterest(true);
+    
     try {
       // Send interest message via our messages API
       const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
@@ -779,30 +826,50 @@ const ListingDetailPage: React.FC = () => {
         body: JSON.stringify({
           listingId: listing.id,
           sellerId: `seller_${listing.id}`,
-          inquiryType: 'GENERAL',
-          message: `Hej ${listing.seller.name},
-
-Jag är intresserad av ditt företag "${listing.title}" och skulle vilja veta mer.
-
-Kan du kontakta mig för att diskutera möjligheterna?
-
-Med vänliga hälsningar`,
-          name: 'Intresserad köpare',
-          email: 'interested@example.com'
+          inquiryType: 'INTEREST',
+          message: interestForm.message,
+          name: interestForm.name,
+          email: interestForm.email,
+          phone: interestForm.phone,
+          userId: authUser.id
         })
       });
       
       if (response.ok) {
-        toast.success('Ditt intresse har registrerats! Säljaren kommer att kontakta dig.');
+        const result = await response.json();
+        toast.success('Ditt intresse har registrerats! Säljaren kommer att kontakta dig inom 24-48 timmar.', {
+          duration: 4000,
+          icon: '📧'
+        });
         setShowInterestModal(false);
+        // Reset form and errors
+        setInterestForm({ name: '', email: '', message: '', phone: '' });
+        setFormErrors({});
         // Update interested buyers count
         setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
       } else {
-        toast.error('Kunde inte skicka intresse');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || 'Kunde inte skicka intresse. Försök igen senare.';
+        toast.error(errorMessage);
+        
+        // Handle specific error cases
+        if (response.status === 429) {
+          toast.error('För många förfrågningar. Vänta en stund innan du försöker igen.');
+        } else if (response.status >= 500) {
+          toast.error('Serverfel. Försök igen senare eller kontakta supporten.');
+        }
       }
     } catch (err) {
-      toast.error('Ett fel inträffade');
       console.error('Error submitting interest:', err);
+      
+      // Network or other client-side errors
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        toast.error('Nätverksfel. Kontrollera din internetanslutning och försök igen.');
+      } else {
+        toast.error('Ett oväntat fel inträffade. Försök igen senare.');
+      }
+    } finally {
+      setIsSubmittingInterest(false);
     }
   };
 
@@ -836,6 +903,59 @@ Med vänliga hälsningar`,
     }
     
     return { valid: true };
+  };
+
+  // Real-time form validation for interest form
+  const validateInterestForm = (field?: string) => {
+    const errors: {[key: string]: string} = {};
+    
+    // Name validation
+    if (!field || field === 'name') {
+      if (!interestForm.name.trim()) {
+        errors.name = 'Namn är obligatoriskt';
+      } else if (interestForm.name.trim().length < 2) {
+        errors.name = 'Namnet måste vara minst 2 tecken';
+      } else if (interestForm.name.trim().length > 100) {
+        errors.name = 'Namnet är för långt (max 100 tecken)';
+      }
+    }
+    
+    // Email validation
+    if (!field || field === 'email') {
+      const emailValidation = validateEmail(interestForm.email);
+      if (!emailValidation.valid) {
+        errors.email = emailValidation.error;
+      }
+    }
+    
+    // Message validation
+    if (!field || field === 'message') {
+      if (!interestForm.message.trim()) {
+        errors.message = 'Meddelande är obligatoriskt';
+      } else if (interestForm.message.trim().length < 10) {
+        errors.message = 'Meddelandet måste vara minst 10 tecken';
+      } else if (interestForm.message.length > 1000) {
+        errors.message = 'Meddelandet är för långt (max 1000 tecken)';
+      }
+    }
+    
+    // Phone validation (optional field)
+    if (!field || field === 'phone') {
+      if (interestForm.phone.trim()) {
+        const phoneRegex = /^(\+46|0)[- ]?(\d{2,3}[- ]?\d{3}[- ]?\d{2,3}[- ]?\d{2,3}|\d{7,10})$/;
+        if (!phoneRegex.test(interestForm.phone.replace(/\s/g, ''))) {
+          errors.phone = 'Ogiltigt telefonnummer format';
+        }
+      }
+    }
+    
+    if (field) {
+      setFormErrors(prev => ({ ...prev, [field]: errors[field] || '' }));
+    } else {
+      setFormErrors(errors);
+    }
+    
+    return Object.keys(errors).length === 0;
   };
 
   // Legacy function for backward compatibility
@@ -1733,26 +1853,183 @@ ${contactInfo.name}`;
         </div>
       )}
 
-      {/* Interest Modal */}
+      {/* Enhanced Interest Modal */}
       {showInterestModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Visa intresse</h3>
-            <p className="text-gray-600 mb-6">
-              Genom att visa intresse kommer säljaren att kontakta dig med mer information inom 24 timmar.
-            </p>
-            <div className="flex space-x-3">
+          <div className="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Visa intresse</h3>
               <button
                 onClick={() => setShowInterestModal(false)}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Skicka ett personligt meddelande till säljaren för att visa ditt intresse för "{listing?.title}".
+            </p>
+
+            <div className="space-y-4 mb-6">
+              {/* Name field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Namn *
+                </label>
+                <input
+                  type="text"
+                  value={interestForm.name}
+                  onChange={(e) => {
+                    setInterestForm(prev => ({ ...prev, name: e.target.value }));
+                    // Clear error when user starts typing
+                    if (formErrors.name) {
+                      setFormErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
+                  onBlur={() => validateInterestForm('name')}
+                  placeholder="Ditt fullständiga namn"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    formErrors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  disabled={!!authUser}
+                />
+                {formErrors.name && (
+                  <p className="text-red-600 text-sm mt-1">{formErrors.name}</p>
+                )}
+              </div>
+
+              {/* Email field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  E-post *
+                </label>
+                <input
+                  type="email"
+                  value={interestForm.email}
+                  onChange={(e) => {
+                    setInterestForm(prev => ({ ...prev, email: e.target.value }));
+                    // Clear error when user starts typing
+                    if (formErrors.email) {
+                      setFormErrors(prev => ({ ...prev, email: '' }));
+                    }
+                  }}
+                  onBlur={() => validateInterestForm('email')}
+                  placeholder="din@email.com"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    formErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  disabled={!!authUser}
+                />
+                {formErrors.email && (
+                  <p className="text-red-600 text-sm mt-1">{formErrors.email}</p>
+                )}
+              </div>
+
+              {/* Phone field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefonnummer (valfritt)
+                </label>
+                <input
+                  type="tel"
+                  value={interestForm.phone}
+                  onChange={(e) => {
+                    setInterestForm(prev => ({ ...prev, phone: e.target.value }));
+                    // Clear error when user starts typing
+                    if (formErrors.phone) {
+                      setFormErrors(prev => ({ ...prev, phone: '' }));
+                    }
+                  }}
+                  onBlur={() => validateInterestForm('phone')}
+                  placeholder="+46 70 123 45 67"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    formErrors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                />
+                {formErrors.phone && (
+                  <p className="text-red-600 text-sm mt-1">{formErrors.phone}</p>
+                )}
+              </div>
+
+              {/* Message field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Meddelande *
+                </label>
+                <textarea
+                  value={interestForm.message}
+                  onChange={(e) => {
+                    setInterestForm(prev => ({ ...prev, message: e.target.value }));
+                    // Clear error when user starts typing
+                    if (formErrors.message) {
+                      setFormErrors(prev => ({ ...prev, message: '' }));
+                    }
+                  }}
+                  onBlur={() => validateInterestForm('message')}
+                  placeholder="Skriv ditt meddelande till säljaren..."
+                  rows={6}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    formErrors.message ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  maxLength={1000}
+                />
+                <div className="flex justify-between text-xs mt-1">
+                  <div>
+                    {formErrors.message && (
+                      <span className="text-red-600">{formErrors.message}</span>
+                    )}
+                  </div>
+                  <div className={`${
+                    interestForm.message.length > 900 ? 'text-red-600' : 
+                    interestForm.message.length > 800 ? 'text-yellow-600' : 
+                    'text-gray-500'
+                  }`}>
+                    {interestForm.message.length}/1000 tecken
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Info box */}
+            <div className="bg-blue-50 p-4 rounded-lg mb-6">
+              <div className="flex items-start gap-2">
+                <MessageCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="font-medium text-blue-900">Tips för bästa svar</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Beskriv ditt intresse och bakgrund</li>
+                    <li>• Ställ specifika frågor om affären</li>
+                    <li>• Visa att du är en seriös köpare</li>
+                    <li>• Säljaren kommer att svara inom 24-48 timmar</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-0">
+              <button
+                onClick={() => setShowInterestModal(false)}
+                className="w-full sm:flex-1 py-3 sm:py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors order-2 sm:order-1"
               >
                 Avbryt
               </button>
               <button
                 onClick={handleInterest}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={isSubmittingInterest || !validateInterestForm()}
+                className="w-full sm:flex-1 py-3 sm:py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors order-1 sm:order-2"
               >
-                Skicka intresse
+                {isSubmittingInterest ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block" />
+                    Skickar...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2 inline" />
+                    Skicka intresse
+                  </>
+                )}
               </button>
             </div>
           </div>

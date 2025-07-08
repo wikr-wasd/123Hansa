@@ -312,10 +312,10 @@ const CreateCampaignPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <h4 className="font-medium text-blue-900 mb-2">Finansieringsmodell</h4>
               <p className="text-blue-800 text-sm mb-3">
-                Tubba använder "allt-eller-inget" modell. Om du inte når ditt mål får supporters tillbaka sina pengar.
+                123hansa.se använder "allt-eller-inget" modell. Om du inte når ditt mål får supporters tillbaka sina pengar.
               </p>
               <div className="flex items-center text-blue-700 text-sm">
                 <Check className="w-4 h-4 mr-2" />
@@ -324,6 +324,189 @@ const CreateCampaignPage: React.FC = () => {
               <div className="flex items-center text-blue-700 text-sm mt-1">
                 <Check className="w-4 h-4 mr-2" />
                 <span>Motiverar till realistiska mål</span>
+              </div>
+            </div>
+
+            {/* Ny avgiftsstruktur och marknadsföring */}
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-6">
+              <h4 className="font-medium text-emerald-900 mb-3 flex items-center">
+                <DollarSign className="w-5 h-5 mr-2" />
+                Avgifter och Tjänster
+              </h4>
+              
+              <div className="space-y-4">
+                {/* Plattformsavgift */}
+                <div className="bg-white rounded-lg p-4 border border-emerald-100">
+                  <h5 className="font-medium text-gray-900 mb-2">Plattformsavgift</h5>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Procentuell avgift:</span>
+                    <span className="font-semibold text-emerald-600">8%</span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Fast avgift per transaktion:</span>
+                    <span className="font-semibold text-emerald-600">4 kr</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Avgiften dras endast vid lyckad kampanj och täcker plattformens drift och säkerhet.
+                  </p>
+                </div>
+
+                {/* Escrow-struktur */}
+                <div className="bg-white rounded-lg p-4 border border-emerald-100">
+                  <h5 className="font-medium text-gray-900 mb-2">Escrow-tjänst (Säker förvaring)</h5>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Kampanjer under 1M SEK:</span>
+                    <span className="font-semibold text-blue-600">10%</span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Kampanjer över 1M SEK:</span>
+                    <span className="font-semibold text-blue-600">5%</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Escrow-avgiften garanterar säker hantering av medel och skyddar både kampanjskapare och supporters.
+                  </p>
+                </div>
+
+                {/* Marknadsföringspaket */}
+                <div className="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg p-4 border border-emerald-200">
+                  <h5 className="font-medium text-emerald-900 mb-3 flex items-center">
+                    <Rocket className="w-5 h-5 mr-2" />
+                    Professionellt Marknadsföringspaket - Ingår i Priset!
+                  </h5>
+                  
+                  <div className="space-y-4">
+                    {/* Direktreklam */}
+                    <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-200">
+                      <h6 className="font-semibold text-emerald-900 mb-2 text-sm">🎯 Direktreklam & Betalda Annonser</h6>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Google Ads (Sök & Display)</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Facebook & Instagram Ads</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>LinkedIn Business Targeting</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>YouTube & Video Advertising</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Media & Press */}
+                    <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-200">
+                      <h6 className="font-semibold text-emerald-900 mb-2 text-sm">📰 Medieplaceringar & Press</h6>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Aftonbladet placements</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Blocket & Schibsted-koncernen</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Lokala tidningar & media</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Branschspecifika publikationer</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Digital Marketing */}
+                    <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-200">
+                      <h6 className="font-semibold text-emerald-900 mb-2 text-sm">📧 Digital Marknadsföring</h6>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>E-postmarknadsföring (segmenterad)</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Nyhetsbrev till våra prenumeranter</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>SMS-kampanjer (vid behov)</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span>Push-notiser till app-användare</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Team & Strategy */}
+                    <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg p-3 border border-emerald-200">
+                      <h6 className="font-semibold text-emerald-900 mb-2 text-sm">👥 Dedikerat Marknadsföringsteam</h6>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span><strong>Målgruppsanalys:</strong> Vi identifierar och når rätt investerare för ditt projekt</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span><strong>Kampanjoptimering:</strong> Kontinuerlig förbättring av annonsernas prestanda</span>
+                        </div>
+                        <div className="flex items-center text-xs text-emerald-800">
+                          <Check className="w-3 h-3 mr-2 text-emerald-600" />
+                          <span><strong>Rapportering:</strong> Veckovisa updates om kampanjens framsteg och reach</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 bg-emerald-600 text-white rounded p-3 text-center">
+                    <p className="text-sm font-medium">
+                      💡 <strong>Totalt marknadsföringsvärde: 50,000+ kr</strong> - Allt ingår utan extra kostnad!
+                    </p>
+                    <p className="text-xs mt-1 opacity-90">
+                      Vårt team arbetar aktivt för att din kampanj når maximal synlighet och attraherar rätt investerare
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sammanfattning */}
+                <div className="bg-white rounded-lg p-4 border-2 border-emerald-200">
+                  <h5 className="font-medium text-gray-900 mb-2">Kostnadsexempel</h5>
+                  <div className="text-sm text-gray-700 space-y-1">
+                    {campaignData.fundingGoal > 0 && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>Kampanjmål:</span>
+                          <span className="font-medium">{campaignData.fundingGoal.toLocaleString('sv-SE')} kr</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Plattformsavgift (8%):</span>
+                          <span className="font-medium">{Math.round(campaignData.fundingGoal * 0.08).toLocaleString('sv-SE')} kr</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Escrow-avgift ({campaignData.fundingGoal >= 1000000 ? '5%' : '10%'}):</span>
+                          <span className="font-medium">
+                            {Math.round(campaignData.fundingGoal * (campaignData.fundingGoal >= 1000000 ? 0.05 : 0.10)).toLocaleString('sv-SE')} kr
+                          </span>
+                        </div>
+                        <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-semibold">
+                          <span>Du får:</span>
+                          <span className="text-emerald-600">
+                            {Math.round(campaignData.fundingGoal * (campaignData.fundingGoal >= 1000000 ? 0.87 : 0.82)).toLocaleString('sv-SE')} kr
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {campaignData.fundingGoal === 0 && (
+                      <p className="text-gray-500 italic">Ange ditt finansieringsmål ovan för att se kostnadsexempel</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
