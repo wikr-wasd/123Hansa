@@ -10,7 +10,7 @@ node_modules/
 apps/*/node_modules/
 packages/*/node_modules/
 
-# Build artifacts
+# Build artifacts (keep source files)
 apps/web/dist/
 apps/api/dist/
 *.tsbuildinfo
@@ -26,7 +26,6 @@ apps/api/coverage/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS files
 .DS_Store
@@ -50,13 +49,20 @@ docker-compose.*.yml
 Dockerfile*
 .dockerignore
 
-# Scripts and docs
-scripts/
-docs/
-*.md
+# Documentation (keep essential files, exclude heavy docs)
+ANALYTICS_INTELLIGENCE_SETUP.md
+BEGINNER_DEPLOYMENT_GUIDE.md
+CLOUD_LÖSNING.md
+COMPREHENSIVE_DEMO_GUIDE.md
+DEMO_STARTUP_GUIDE.md
 DEPLOYMENT_*.md
 SETUP_*.md
 TEST_*.md
+SESSION_*.md
+SOCIAL_AUTH_*.md
+SUPABASE_*.md
+TESTING_*.md
+TROUBLESHOOTING_*.md
 
 # Test files
 apps/*/test/
@@ -69,10 +75,11 @@ apps/*/test/
 *.backup.*
 *.bak
 *.tmp
-*~
 
-# Admin and demo apps
+# Specific admin and demo exclusions (but keep apps/web!)
 apps/admin/
 test-*.html
-*-demo-server.js
+demo-server.js
 enhanced-demo-server.js
+simple-server.js
+test-server.js
