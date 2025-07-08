@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown, Plus, Save, StickyNote, CreditCard, Lock, Unlock, FileText, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Shield, BarChart3, Users, Building2, MessageSquare, DollarSign, Settings, Eye, Edit, Trash2, CheckCircle, XCircle, AlertTriangle, TrendingUp, Activity, Search, Filter, Send, Clock, User, Calendar, RefreshCw, Undo2, Mail, Phone, MapPin, Star, ThumbsUp, ThumbsDown, Plus, Save, StickyNote, CreditCard, Lock, Unlock, FileText, X, Award } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ChatSystem from '../../components/chat/ChatSystem';
 
@@ -526,7 +526,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
   );
 
   // Enhanced filtering and sorting logic
-  const filteredAndSortedListings = React.useMemo(() => {
+  const filteredAndSortedListings = useMemo(() => {
     let filtered = listings.filter(listing => {
       const matchesSearch = 
         listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1749,7 +1749,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
                     <p className="text-3xl font-bold text-gray-900">{formatPrice(listings.reduce((sum, l) => sum + l.price, 0))}</p>
                     <p className="text-xs text-green-600 flex items-center mt-2">
                       <DollarSign className="w-3 h-3 mr-1" />
-                      ⌀ {formatPrice(listings.reduce((sum, l) => sum + l.price, 0) / listings.length)}
+                      ⌀ {formatPrice(listings.length > 0 ? listings.reduce((sum, l) => sum + l.price, 0) / listings.length : 0)}
                     </p>
                   </div>
                   <div className="p-3 rounded-full bg-green-100">
