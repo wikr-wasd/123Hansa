@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, X, Minimize, Maximize, User, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useMessageStore, type Message, type Conversation } from '../../stores/messageStore';
-
-// Remove duplicate interfaces since we're importing from store
+import { useMessageStore } from '../../stores/messageStore';
 
 interface ChatSystemProps {
   currentUserId: string;
@@ -16,14 +14,10 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [message, setMessage] = useState('');
-  const [showNewChatModal, setShowNewChatModal] = useState(false);
-  const [newChatRecipient, setNewChatRecipient] = useState('');
-  const [newChatMessage, setNewChatMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Message store
   const {
-    conversations,
     addMessage,
     markConversationAsRead,
     getUnreadCount,
@@ -32,515 +26,220 @@ const ChatSystem: React.FC<ChatSystemProps> = ({ currentUserId, currentUserName,
     initializeDefaultData,
   } = useMessageStore();
 
-  // Initialize user conversations from store
+  // Get user conversations and unread count
   const userConversations = getUserConversations(currentUserId);
-  
-  // Initialize default data if no conversations exist
+  const totalUnreadCount = getUnreadCount(currentUserId);
+
+  // Initialize default data if needed
   useEffect(() => {
     if (userConversations.length === 0) {
       initializeDefaultData(currentUserId, currentUserName, currentUserType);
     }
   }, [currentUserId, currentUserName, currentUserType, userConversations.length, initializeDefaultData]);
 
-  // Get total unread count for chat bubble
-  const totalUnreadCount = getUnreadCount(currentUserId);
-
   // Get messages for active conversation
   const activeConversationMessages = activeConversation 
     ? getConversationMessages(activeConversation) 
     : [];
-          senderId: 'support',
-          senderName: '123Hansa Support',
-          senderType: 'support',
-          message: `Hej ${currentUserName.split(' ')[0]}! Hur kan vi hjälpa dig idag?`,
-          timestamp: '2024-06-26 10:30',
-          read: false
-        }
-      ]
-    };
 
-    if (currentUserType === 'admin') {
-      baseMessages['conv_user_anna'] = [
-        {
-          id: 'msg_anna_1',
-          senderId: 'user_anna',
-          senderName: 'Anna Karlsson',
-          senderType: 'user',
-          message: 'Hej Willi! Tack för den snabba supporten med min annons.',
-          timestamp: '2024-06-26 15:20',
-          read: false
-        }
-      ];
-      baseMessages['conv_user_erik'] = [
-        {
-          id: 'msg_erik_1',
-          senderId: 'user_erik',
-          senderName: 'Erik Johansson',
-          senderType: 'user',
-          message: 'Hej! Har du tid för ett möte imorgon om plattformen?',
-          timestamp: '2024-06-26 14:15',
-          read: true
-        }
-      ];
-    } else if (currentUserName.includes('Anna')) {
-      baseMessages['conv_user_erik'] = [
-        {
-          id: 'msg_erik_to_anna_1',
-          senderId: 'user_erik',
-          senderName: 'Erik Johansson',
-          senderType: 'user',
-          message: 'Hej Anna! Jag såg ditt TechStartup-företag. Kan du berätta mer om det?',
-          timestamp: '2024-06-26 11:00',
-          read: true
-        },
-        {
-          id: 'msg_anna_reply_1',
-          senderId: currentUserId,
-          senderName: currentUserName,
-          senderType: currentUserType,
-          message: 'Hej Erik! Absolut, det är ett innovativt teknikföretag med stark tillväxt.',
-          timestamp: '2024-06-26 11:15',
-          read: true
-        },
-        {
-          id: 'msg_erik_to_anna_2',
-          senderId: 'user_erik',
-          senderName: 'Erik Johansson',
-          senderType: 'user',
-          message: 'Intressant! Kan vi boka ett möte för att diskutera mer?',
-          timestamp: '2024-06-26 11:30',
-          read: false
-        }
-      ];
-    } else if (currentUserName.includes('Erik')) {
-      baseMessages['conv_user_anna'] = [
-        {
-          id: 'msg_anna_to_erik_1',
-          senderId: 'user_anna',
-          senderName: 'Anna Karlsson',
-          senderType: 'user',
-          message: 'Hej Erik! Tack för intresset för mitt företag.',
-          timestamp: '2024-06-26 12:30',
-          read: true
-        },
-        {
-          id: 'msg_erik_reply_1',
-          senderId: currentUserId,
-          senderName: currentUserName,
-          senderType: currentUserType,
-          message: 'Hej Anna! Jag är mycket intresserad. Kan du skicka mer information?',
-          timestamp: '2024-06-26 12:45',
-          read: true
-        }
-      ];
-    } else {
-      baseMessages['conv_demo_seller'] = [
-        {
-          id: 'msg_seller_1',
-          senderId: 'demo_seller',
-          senderName: 'Företagssäljare',
-          senderType: 'user',
-          message: 'Hej! Intresserad av mitt företag? Det har bra potential.',
-          timestamp: '2024-06-26 10:15',
-          read: false
-        }
-      ];
-      baseMessages['conv_demo_buyer'] = [
-        {
-          id: 'msg_buyer_1',
-          senderId: 'demo_buyer',
-          senderName: 'Potentiell Köpare',
-          senderType: 'user',
-          message: 'Hej! Kan vi diskutera priset för ditt företag?',
-          timestamp: '2024-06-25 18:20',
-          read: true
-        }
-      ];
-    }
-
-    return baseMessages;
-  };
-
-  const [messages, setMessages] = useState<{ [conversationId: string]: ChatMessage[] }>(() => initializeMessages());
-
-  const totalUnreadCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
-
+  // Auto scroll to bottom
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, activeConversation]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeConversationMessages]);
 
-  const handleSendMessage = () => {
+  // Send message
+  const sendMessage = () => {
     if (!message.trim() || !activeConversation) return;
 
-    const newMessage: ChatMessage = {
-      id: `msg_${Date.now()}`,
+    const conversation = userConversations.find(c => c.id === activeConversation);
+    if (!conversation) return;
+
+    const recipientId = conversation.participants.find(p => p !== currentUserId) || '';
+    const recipientName = conversation.participantNames.find((name, index) => 
+      conversation.participants[index] !== currentUserId
+    ) || '';
+
+    addMessage({
       senderId: currentUserId,
       senderName: currentUserName,
       senderType: currentUserType,
-      message: message.trim(),
-      timestamp: new Date().toLocaleString('sv-SE'),
-      read: true
-    };
-
-    setMessages(prev => ({
-      ...prev,
-      [activeConversation]: [...(prev[activeConversation] || []), newMessage]
-    }));
-
-    // Update conversation last message
-    setConversations(prev => prev.map(conv => 
-      conv.id === activeConversation 
-        ? { ...conv, lastMessage: message.trim(), lastMessageTime: newMessage.timestamp }
-        : conv
-    ));
+      recipientId,
+      recipientName,
+      subject: conversation.title,
+      content: message,
+      read: false,
+      conversationId: activeConversation,
+    });
 
     setMessage('');
-    toast.success('Meddelande skickat!');
   };
 
-  const handleMarkAsRead = (conversationId: string) => {
-    setConversations(prev => prev.map(conv => 
-      conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
-    ));
-
-    setMessages(prev => ({
-      ...prev,
-      [conversationId]: prev[conversationId]?.map(msg => ({ ...msg, read: true })) || []
-    }));
-  };
-
-  const getStatusColor = (online: boolean) => {
-    return online ? 'bg-green-400' : 'bg-gray-400';
-  };
-
-  const getSenderTypeColor = (senderType: string) => {
-    switch (senderType) {
-      case 'support': return 'bg-blue-100 text-blue-800';
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
-      >
-        <MessageSquare className="w-6 h-6" />
-        {totalUnreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
-            {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-          </span>
-        )}
-      </button>
-    );
-  }
+  const openConversation = (conversationId: string) => {
+    setActiveConversation(conversationId);
+    markConversationAsRead(conversationId);
+    if (isMinimized) setIsMinimized(false);
+  };
+
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('sv-SE', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
 
   return (
-    <div className={`fixed bottom-6 right-6 bg-white rounded-lg shadow-xl border z-50 transition-all duration-200 ${
-      isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
-    }`}>
-      {/* Header */}
-      <div 
-        className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg cursor-pointer"
-        onClick={() => setIsMinimized(!isMinimized)}
-      >
-        <div className="flex items-center">
-          <MessageSquare className="w-5 h-5 mr-2" />
-          <h3 className="font-semibold">
-            {activeConversation 
-              ? conversations.find(c => c.id === activeConversation)?.title || 'Chat'
-              : 'Meddelanden'
-            }
-          </h3>
-          {totalUnreadCount > 0 && !isMinimized && (
-            <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+    <>
+      {/* Chat Bubble */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 relative"
+        >
+          <MessageSquare className="w-6 h-6" />
+          {totalUnreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
               {totalUnreadCount}
             </span>
           )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMinimized(!isMinimized);
-            }}
-            className="p-1 hover:bg-blue-700 rounded"
-          >
-            {isMinimized ? <Maximize className="w-4 h-4" /> : <Minimize className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(false);
-            }}
-            className="p-1 hover:bg-blue-700 rounded"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        </button>
       </div>
 
-      {!isMinimized && (
-        <>
-          {!activeConversation ? (
-            /* Conversation List */
-            <div className="flex-1 overflow-hidden">
-              <div className="p-4 border-b">
-                <button
-                  onClick={() => setShowNewChatModal(true)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  + Ny konversation
-                </button>
-              </div>
-              
-              <div className="overflow-y-auto h-[500px]">
-                {conversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    onClick={() => {
-                      setActiveConversation(conversation.id);
-                      handleMarkAsRead(conversation.id);
-                    }}
-                    className="p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center">
-                        <div className="relative">
-                          <User className="w-8 h-8 text-gray-400" />
-                          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(conversation.online)}`}></div>
-                        </div>
-                        <div className="ml-3">
-                          <h4 className="font-medium text-gray-900">{conversation.title}</h4>
-                          <div className="flex items-center">
-                            {conversation.type === 'user_to_support' && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mr-2">
-                                Support
-                              </span>
-                            )}
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {conversation.lastMessageTime}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {conversation.unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                          {conversation.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* Chat Messages */
-            <div className="flex flex-col h-[536px]">
-              {/* Back Button */}
-              <div className="p-3 border-b">
-                <button
-                  onClick={() => setActiveConversation(null)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  ← Tillbaka till konversationer
-                </button>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {(messages[activeConversation] || []).map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      msg.senderId === currentUserId
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}>
-                      {msg.senderId !== currentUserId && (
-                        <div className="flex items-center mb-1">
-                          <span className="text-xs font-medium">{msg.senderName}</span>
-                          {msg.senderType !== 'user' && (
-                            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${getSenderTypeColor(msg.senderType)}`}>
-                              {msg.senderType === 'support' ? 'Support' : 'Admin'}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <p className="text-sm">{msg.message}</p>
-                      <p className={`text-xs mt-1 ${
-                        msg.senderId === currentUserId ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {msg.timestamp}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Message Input */}
-              <div className="p-4 border-t">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Skriv ditt meddelande..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!message.trim()}
-                    className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-      
-      {/* New Chat Modal */}
-      {showNewChatModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ny konversation</h3>
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="fixed bottom-20 right-4 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+            <h3 className="font-semibold">
+              {activeConversation 
+                ? userConversations.find(c => c.id === activeConversation)?.title 
+                : 'Meddelanden'
+              }
+            </h3>
+            <div className="flex items-center space-x-2">
               <button
-                onClick={() => {
-                  setShowNewChatModal(false);
-                  setNewChatRecipient('');
-                  setNewChatMessage('');
-                }}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="p-1 hover:bg-white hover:bg-opacity-20 rounded"
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mottagare
-                </label>
-                <select
-                  value={newChatRecipient}
-                  onChange={(e) => setNewChatRecipient(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Välj mottagare...</option>
-                  <option value="support">Support</option>
-                  <option value="marketing">Marknadsföring</option>
-                  <option value="company">Kundjänst</option>
-                  {currentUserType === 'admin' && (
-                    <>
-                      <option value="user_anna">Anna Karlsson</option>
-                      <option value="user_erik">Erik Johansson</option>
-                    </>
-                  )}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meddelande
-                </label>
-                <textarea
-                  value={newChatMessage}
-                  onChange={(e) => setNewChatMessage(e.target.value)}
-                  rows={3}
-                  placeholder="Skriv ditt meddelande här..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowNewChatModal(false);
-                  setNewChatRecipient('');
-                  setNewChatMessage('');
-                }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                Avbryt
+                {isMinimized ? <Maximize className="w-4 h-4" /> : <Minimize className="w-4 h-4" />}
               </button>
               <button
-                onClick={() => {
-                  if (newChatRecipient && newChatMessage.trim()) {
-                    // Create new conversation
-                    const recipientNames = {
-                      support: 'Support',
-                      marketing: 'Marknadsföring',
-                      company: 'Kundjänst',
-                      user_anna: 'Anna Karlsson',
-                      user_erik: 'Erik Johansson'
-                    };
-                    
-                    const newConvId = `conv_new_${Date.now()}`;
-                    const recipientName = recipientNames[newChatRecipient as keyof typeof recipientNames] || 'Okänd användare';
-                    
-                    const newConversation: ChatConversation = {
-                      id: newConvId,
-                      participants: [currentUserId, newChatRecipient],
-                      participantNames: [currentUserName, recipientName],
-                      type: ['support', 'marketing', 'company'].includes(newChatRecipient) ? 'user_to_support' : 'user_to_user',
-                      title: `Chat med ${recipientName}`,
-                      lastMessage: newChatMessage.trim(),
-                      lastMessageTime: new Date().toLocaleString('sv-SE'),
-                      unreadCount: 0,
-                      online: true
-                    };
-                    
-                    const newMessage: ChatMessage = {
-                      id: `msg_${Date.now()}`,
-                      senderId: currentUserId,
-                      senderName: currentUserName,
-                      senderType: currentUserType,
-                      message: newChatMessage.trim(),
-                      timestamp: new Date().toLocaleString('sv-SE'),
-                      read: true
-                    };
-                    
-                    setConversations(prev => [newConversation, ...prev]);
-                    setMessages(prev => ({
-                      ...prev,
-                      [newConvId]: [newMessage]
-                    }));
-                    
-                    setActiveConversation(newConvId);
-                    setShowNewChatModal(false);
-                    setNewChatRecipient('');
-                    setNewChatMessage('');
-                    
-                    toast.success('Ny konversation skapad!');
-                  } else {
-                    toast.error('Välj mottagare och skriv ett meddelande');
-                  }
-                }}
-                disabled={!newChatRecipient || !newChatMessage.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:bg-white hover:bg-opacity-20 rounded"
               >
-                Skapa konversation
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
+
+          {!isMinimized && (
+            <>
+              {!activeConversation ? (
+                /* Conversation List */
+                <div className="flex-1 overflow-y-auto">
+                  {userConversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      onClick={() => openConversation(conversation.id)}
+                      className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                            <User className="w-5 h-5 text-gray-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">{conversation.title}</div>
+                            <div className="text-xs text-gray-500 truncate w-40">
+                              {conversation.lastMessage}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-400">
+                            {formatTime(conversation.lastMessageTime)}
+                          </div>
+                          {conversation.unreadCount > 0 && (
+                            <span className="bg-pink-500 text-white text-xs rounded-full px-2 py-1 mt-1 inline-block">
+                              {conversation.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Back Button */}
+                  <div className="p-2 border-b border-gray-200">
+                    <button
+                      onClick={() => setActiveConversation(null)}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      ← Tillbaka till konversationer
+                    </button>
+                  </div>
+
+                  {/* Messages */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {activeConversationMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs p-3 rounded-lg ${
+                            msg.senderId === currentUserId
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-200 text-gray-900'
+                          }`}
+                        >
+                          <div className="text-sm">{msg.content}</div>
+                          <div className={`text-xs mt-1 ${
+                            msg.senderId === currentUserId ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {formatTime(msg.timestamp)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Message Input */}
+                  <div className="p-4 border-t border-gray-200">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Skriv ett meddelande..."
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={!message.trim()}
+                        className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 
