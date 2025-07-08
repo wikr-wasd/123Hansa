@@ -153,6 +153,27 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const navigate = useNavigate();
 
+  // Company valuation state
+  const [revenue, setRevenue] = useState('');
+  const [profit, setProfit] = useState('');
+  const [selectedIndustry, setSelectedIndustry] = useState('tech');
+
+  // Industry multipliers for valuation
+  const industryMultipliers = {
+    tech: 10,
+    ecommerce: 7.5,
+    consulting: 5,
+    restaurant: 3,
+    manufacturing: 5.5
+  };
+
+  // Calculate company valuation in real-time
+  const calculatedValue = React.useMemo(() => {
+    const profitNumber = parseFloat(profit) || 0;
+    const multiplier = industryMultipliers[selectedIndustry];
+    return profitNumber * multiplier;
+  }, [profit, selectedIndustry]);
+
   // Get localized categories
   const getLocalizedCategories = () => {
     if (isEnglish) {
@@ -785,6 +806,8 @@ const HomePage: React.FC = () => {
                         <input
                           type="number"
                           placeholder="2,500,000"
+                          value={revenue}
+                          onChange={(e) => setRevenue(e.target.value)}
                           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -793,12 +816,16 @@ const HomePage: React.FC = () => {
                         <label className="block text-sm font-semibold text-slate-700 mb-2">
                           Bransch
                         </label>
-                        <select className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                          <option>Teknik/IT - Hög multipel</option>
-                          <option>E-handel - Medelhög multipel</option>
-                          <option>Konsulting - Medel multipel</option>
-                          <option>Restaurang - Låg multipel</option>
-                          <option>Tillverkning - Medel multipel</option>
+                        <select 
+                          value={selectedIndustry} 
+                          onChange={(e) => setSelectedIndustry(e.target.value)}
+                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="tech">Teknik/IT - Hög multipel</option>
+                          <option value="ecommerce">E-handel - Medelhög multipel</option>
+                          <option value="consulting">Konsulting - Medel multipel</option>
+                          <option value="restaurant">Restaurang - Låg multipel</option>
+                          <option value="manufacturing">Tillverkning - Medel multipel</option>
                         </select>
                       </div>
                       
@@ -809,6 +836,8 @@ const HomePage: React.FC = () => {
                         <input
                           type="number"
                           placeholder="500,000"
+                          value={profit}
+                          onChange={(e) => setProfit(e.target.value)}
                           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -816,8 +845,12 @@ const HomePage: React.FC = () => {
                       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
                         <div className="text-center">
                           <p className="text-sm font-semibold text-blue-700 mb-2">Uppskattat företagsvärde:</p>
-                          <p className="text-3xl font-bold text-blue-600">3,750,000 SEK</p>
-                          <p className="text-sm text-blue-600">Baserat på 7.5x vinst-multipel</p>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {calculatedValue.toLocaleString('sv-SE')} SEK
+                          </p>
+                          <p className="text-sm text-blue-600">
+                            Baserat på {industryMultipliers[selectedIndustry]}x vinst-multipel
+                          </p>
                         </div>
                       </div>
                       

@@ -233,10 +233,27 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
     };
     
     const listing = customer.listings.find(l => l.id === listingId);
-    toast.success(`${packageNames[packageType as keyof typeof packageNames]} valt för "${listing?.title}"`);
     
-    // Här skulle man normalt göra ett API-anrop för att beställa paketet
-    console.log(`Ordering ${packageType} package for listing ${listingId}`);
+    // Store package selection data for payment
+    const packageData = {
+      packageType,
+      listingId,
+      listingTitle: listing?.title,
+      customerName: customer.name,
+      customerId: customerId,
+      packagePrice: packageType === 'premium' ? 995 : packageType === 'featured' ? 1995 : 2995,
+      packageName: packageNames[packageType as keyof typeof packageNames]
+    };
+    
+    // Store in localStorage for payment process
+    localStorage.setItem('promotionPackageData', JSON.stringify(packageData));
+    
+    toast.success(`${packageNames[packageType as keyof typeof packageNames]} valt för "${listing?.title}". Fortsätt till betalning.`);
+    
+    // Redirect to payment page
+    setTimeout(() => {
+      setActiveTab('payment');
+    }, 1000);
   };
 
   const formatPrice = (price: number) => {

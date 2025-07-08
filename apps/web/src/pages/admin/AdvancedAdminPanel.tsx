@@ -209,15 +209,18 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       seller: 'Anna Karlsson', 
       sellerId: '1',
       status: 'PENDING', 
-      views: 45, 
+      views: 245, 
       reports: 0,
-      description: 'Innovativt teknikföretag med stark tillväxt',
+      description: 'Innovativt teknikföretag med stark tillväxt och AI-fokus',
       location: 'Stockholm',
       createdAt: '2024-06-25',
       featured: false,
       riskScore: 15,
       starred: false,
-      promotionStatus: 'normal'
+      promotionStatus: 'normal',
+      phone: '+46 70 123 4567',
+      email: 'anna@techstartup.se',
+      inquiries: 18
     },
     { 
       id: '2', 
@@ -227,7 +230,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       seller: 'Erik Johansson', 
       sellerId: '2',
       status: 'ACTIVE', 
-      views: 78, 
+      views: 189, 
       reports: 1,
       description: 'Välbesökt restaurang i hjärtat av Stockholm',
       location: 'Stockholm',
@@ -235,7 +238,10 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       featured: true,
       riskScore: 25,
       starred: true,
-      promotionStatus: 'premium'
+      promotionStatus: 'premium',
+      phone: '+46 70 987 6543',
+      email: 'erik@restaurangoldtown.se',
+      inquiries: 12
     },
     { 
       id: '3', 
@@ -245,7 +251,7 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       seller: 'Maria Svensson', 
       sellerId: '3',
       status: 'PENDING', 
-      views: 23, 
+      views: 167, 
       reports: 0,
       description: 'Online modebutik med stor potential',
       location: 'Malmö',
@@ -253,7 +259,199 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
       featured: false,
       riskScore: 35,
       starred: false,
-      promotionStatus: 'hot_sale'
+      promotionStatus: 'hot_sale',
+      phone: '+46 70 555 1234',
+      email: 'maria@fashionforward.se',
+      inquiries: 25
+    },
+    { 
+      id: '4', 
+      title: 'Konsultföretag Stockholm', 
+      category: 'Consulting', 
+      price: 1800000, 
+      seller: 'Lars Andersson', 
+      sellerId: '4',
+      status: 'ACTIVE', 
+      views: 134, 
+      reports: 0,
+      description: 'Etablerat konsultföretag inom IT med 15 års erfarenhet',
+      location: 'Stockholm',
+      createdAt: '2024-06-22',
+      featured: false,
+      riskScore: 10,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 777 8888',
+      email: 'lars@itkonsult.se',
+      inquiries: 8
+    },
+    { 
+      id: '5', 
+      title: 'Bygg & Anläggning Väst', 
+      category: 'Construction', 
+      price: 3200000, 
+      seller: 'Stefan Nilsson', 
+      sellerId: '5',
+      status: 'ACTIVE', 
+      views: 198, 
+      reports: 0,
+      description: 'Välbeläget byggföretag med starka kundrelationer',
+      location: 'Göteborg',
+      createdAt: '2024-06-18',
+      featured: true,
+      riskScore: 20,
+      starred: true,
+      promotionStatus: 'featured',
+      phone: '+46 70 999 0000',
+      email: 'stefan@byggvast.se',
+      inquiries: 15
+    },
+    { 
+      id: '6', 
+      title: 'Digital Marknadsföringsbyrå', 
+      category: 'Marketing', 
+      price: 2200000, 
+      seller: 'Emma Lindberg', 
+      sellerId: '6',
+      status: 'PENDING', 
+      views: 89, 
+      reports: 0,
+      description: 'Fullservice digitalbyrå med stora kunder och stabila intäkter',
+      location: 'Stockholm',
+      createdAt: '2024-06-26',
+      featured: false,
+      riskScore: 18,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 111 2222',
+      email: 'emma@digitalbyra.se',
+      inquiries: 22
+    },
+    { 
+      id: '7', 
+      title: 'Frisörsalong Centrum', 
+      category: 'Beauty', 
+      price: 450000, 
+      seller: 'Lisa Persson', 
+      sellerId: '7',
+      status: 'ACTIVE', 
+      views: 76, 
+      reports: 0,
+      description: 'Välbelägen frisörsalong med lojala kunder',
+      location: 'Malmö',
+      createdAt: '2024-06-21',
+      featured: false,
+      riskScore: 30,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 333 4444',
+      email: 'lisa@saloncentrum.se',
+      inquiries: 6
+    },
+    { 
+      id: '8', 
+      title: 'Cafe & Bageri Söder', 
+      category: 'Food & Beverage', 
+      price: 650000, 
+      seller: 'Magnus Holm', 
+      sellerId: '8',
+      status: 'ACTIVE', 
+      views: 123, 
+      reports: 1,
+      description: 'Mysigt cafe med hembakat bröd och stark morgonrusning',
+      location: 'Stockholm',
+      createdAt: '2024-06-19',
+      featured: false,
+      riskScore: 25,
+      starred: false,
+      promotionStatus: 'premium',
+      phone: '+46 70 555 6666',
+      email: 'magnus@cafesoder.se',
+      inquiries: 9
+    },
+    { 
+      id: '9', 
+      title: 'Verkstad & Bilservice', 
+      category: 'Automotive', 
+      price: 1500000, 
+      seller: 'Patrik Svensson', 
+      sellerId: '9',
+      status: 'PENDING', 
+      views: 67, 
+      reports: 0,
+      description: 'Välutrustad bilverkstad med auktoriserade mekaniker',
+      location: 'Göteborg',
+      createdAt: '2024-06-23',
+      featured: false,
+      riskScore: 22,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 777 9999',
+      email: 'patrik@verkstadservice.se',
+      inquiries: 11
+    },
+    { 
+      id: '10', 
+      title: 'SaaS Plattform B2B', 
+      category: 'Software', 
+      price: 4500000, 
+      seller: 'Johan Eriksson', 
+      sellerId: '10',
+      status: 'ACTIVE', 
+      views: 234, 
+      reports: 0,
+      description: 'Prenumerationsbaserad mjukvarulösning för små företag',
+      location: 'Stockholm',
+      createdAt: '2024-06-15',
+      featured: true,
+      riskScore: 12,
+      starred: true,
+      promotionStatus: 'vip',
+      phone: '+46 70 888 7777',
+      email: 'johan@saasplatform.se',
+      inquiries: 28
+    },
+    { 
+      id: '11', 
+      title: 'Redovisningsbyrå Syd', 
+      category: 'Accounting', 
+      price: 980000, 
+      seller: 'Ingrid Karlsson', 
+      sellerId: '11',
+      status: 'ACTIVE', 
+      views: 98, 
+      reports: 0,
+      description: 'Välrenommerad redovisningsbyrå med 25 års erfarenhet',
+      location: 'Malmö',
+      createdAt: '2024-06-17',
+      featured: false,
+      riskScore: 8,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 444 5555',
+      email: 'ingrid@redovisningsyd.se',
+      inquiries: 14
+    },
+    { 
+      id: '12', 
+      title: 'Transportföretag Nord', 
+      category: 'Logistics', 
+      price: 2800000, 
+      seller: 'Mikael Lindström', 
+      sellerId: '12',
+      status: 'PENDING', 
+      views: 145, 
+      reports: 2,
+      description: 'Åkerifirma med egen fordonsflotta och etablerade rutter',
+      location: 'Umeå',
+      createdAt: '2024-06-27',
+      featured: false,
+      riskScore: 40,
+      starred: false,
+      promotionStatus: 'normal',
+      phone: '+46 70 666 7777',
+      email: 'mikael@transportnord.se',
+      inquiries: 7
     }
   ]);
 
@@ -1406,28 +1604,154 @@ const AdvancedAdminPanel: React.FC<AdvancedAdminPanelProps> = ({ onLogout }) => 
           </div>
         )}
 
-        {/* Listings Tab */}
+        {/* Unified Listings & Marketing Management */}
         {activeTab === 'listings' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Content Moderation</h2>
-                <p className="text-gray-600">Granska, godkänn och hantera annonser</p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Sök annonser..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
+          <div className="space-y-8">
+            {/* Premium Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl p-8 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">🏢 Annonser & Marknadsföring</h2>
+                  <p className="text-blue-100 text-lg">Professionell hantering av alla annonser med avancerade marknadsföringsverktyg</p>
+                  <div className="flex items-center mt-4 space-x-6 text-white">
+                    <div className="flex items-center">
+                      <Building2 className="w-5 h-5 mr-2" />
+                      <span className="font-medium">{listings.length} Totala annonser</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 mr-2" />
+                      <span className="font-medium">{listings.filter(l => l.status === 'PENDING').length} Väntar granskning</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="w-5 h-5 mr-2" />
+                      <span className="font-medium">{listings.filter(l => l.promotionStatus !== 'normal').length} Promoverade</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {listings.filter(l => l.status === 'PENDING').length} väntar på granskning
-                </span>
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white w-5 h-5" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Sök annonser, säljare, kategorier..."
+                      className="pl-10 pr-4 py-3 w-80 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:ring-2 focus:ring-white focus:border-white focus:bg-white/30"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleBulkAction('export_listings')}
+                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-3 rounded-lg border border-white/30 font-medium transition-all duration-200 flex items-center"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Exportera
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistics Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Totala Annonser</p>
+                    <p className="text-3xl font-bold text-gray-900">{listings.length}</p>
+                    <p className="text-xs text-green-600 flex items-center mt-2">
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                      +{listings.filter(l => l.createdAt.includes('2024-06-2')).length} senaste veckan
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-blue-100">
+                    <Building2 className="w-8 h-8 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-yellow-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Väntar Granskning</p>
+                    <p className="text-3xl font-bold text-gray-900">{listings.filter(l => l.status === 'PENDING').length}</p>
+                    <p className="text-xs text-yellow-600 flex items-center mt-2">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Kräver uppmärksamhet
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-yellow-100">
+                    <Clock className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-purple-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Promoverade</p>
+                    <p className="text-3xl font-bold text-gray-900">{listings.filter(l => l.promotionStatus !== 'normal').length}</p>
+                    <p className="text-xs text-purple-600 flex items-center mt-2">
+                      <Star className="w-3 h-3 mr-1" />
+                      Aktiva kampanjer
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-purple-100">
+                    <Star className="w-8 h-8 text-purple-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Totalt Värde</p>
+                    <p className="text-3xl font-bold text-gray-900">{formatPrice(listings.reduce((sum, l) => sum + l.price, 0))}</p>
+                    <p className="text-xs text-green-600 flex items-center mt-2">
+                      <DollarSign className="w-3 h-3 mr-1" />
+                      ⌀ {formatPrice(listings.reduce((sum, l) => sum + l.price, 0) / listings.length)}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-green-100">
+                    <TrendingUp className="w-8 h-8 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Panel */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <Settings className="w-6 h-6 mr-2 text-blue-600" />
+                Snabbåtgärder & Masshantering
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button
+                  onClick={() => handleBulkAction('approve_all_pending')}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-4 rounded-xl transition-all duration-200 font-medium flex items-center justify-center shadow-lg"
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Godkänn alla väntande
+                </button>
+                <button
+                  onClick={() => handleBulkAction('star_high_value')}
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-4 rounded-xl transition-all duration-200 font-medium flex items-center justify-center shadow-lg"
+                >
+                  <Star className="w-5 h-5 mr-2" />
+                  Stjärnmärk högt värde
+                </button>
+                <button
+                  onClick={() => handleBulkAction('promote_recent')}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-4 rounded-xl transition-all duration-200 font-medium flex items-center justify-center shadow-lg"
+                >
+                  <Award className="w-5 h-5 mr-2" />
+                  Promota senaste
+                </button>
+                <button
+                  onClick={() => handleBulkAction('contact_pending_sellers')}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-4 rounded-xl transition-all duration-200 font-medium flex items-center justify-center shadow-lg"
+                >
+                  <Mail className="w-5 h-5 mr-2" />
+                  Kontakta säljare
+                </button>
               </div>
             </div>
 
