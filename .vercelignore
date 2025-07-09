@@ -83,3 +83,6 @@ demo-server.js
 enhanced-demo-server.js
 simple-server.js
 test-server.js
+
+# Explicitly keep apps/web (should not be needed, but adding for clarity)
+!apps/web/
