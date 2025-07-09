@@ -1,11 +1,10 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "npm run build", 
-  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist", 
   "installCommand": "npm install",
   "rootDirectory": "apps/web",
-  "framework": null,
   "env": {
     "NODE_ENV": "staging",
     "VITE_API_URL": "https://staging-123hansa.vercel.app/api"

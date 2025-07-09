@@ -37,8 +37,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '@123hansa/shared': resolve(__dirname, '../../packages/shared/src'),
-      '@123hansa/ui': resolve(__dirname, '../../packages/ui/src'),
     },
   },
   server: {
