@@ -86,3 +86,10 @@ test-server.js
 
 # Explicitly keep apps/web (should not be needed, but adding for clarity)
 !apps/web/
+
+# Keep backup directory structure
+!apps-backup/
+!apps-backup/web/
+
+# Keep symbolic link
+!web
