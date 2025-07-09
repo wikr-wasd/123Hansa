@@ -2,7 +2,7 @@
   "version": 2,
   "name": "123hansa-staging",
   "outputDirectory": "dist",
-  "buildCommand": "bash build.sh",
+  "buildCommand": "npm run vercel:build",
   "installCommand": "npm install",
   "env": {
     "NODE_ENV": "staging",
