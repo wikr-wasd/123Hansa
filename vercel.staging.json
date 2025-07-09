@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "ls -la; find . -name 'apps' -type d; find . -name 'web' -type d; if [ -d apps/web ]; then cd apps/web && npm install && npm run build; else echo 'ERROR: apps/web not found'; exit 1; fi",
+  "buildCommand": "bash vercel-ultimate-build.sh",
   "outputDirectory": "apps/web/dist",
   "installCommand": "npm install",
   "env": {
