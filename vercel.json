@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "mkdir -p packages/shared/src packages/ui/src && echo 'export {};' > packages/shared/src/index.ts && echo 'export {};' > packages/ui/src/index.ts && echo '{\"name\":\"@gohansa/shared\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/shared/package.json && echo '{\"name\":\"@gohansa/ui\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/ui/package.json && cd apps/web && npm install --include=dev && npm run build",
+  "buildCommand": "npm run vercel:build",
   "outputDirectory": "apps/web/dist",
   "installCommand": "npm install",
   "env": {
