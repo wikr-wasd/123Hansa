@@ -8,12 +8,12 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "bash postinstall-fix.sh && bash debug-directory.sh",
+    "postinstall": "mkdir -p packages/shared/src packages/ui/src && echo 'export {};' > packages/shared/src/index.ts && echo 'export {};' > packages/ui/src/index.ts && echo '{\"name\":\"@gohansa/shared\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/shared/package.json && echo '{\"name\":\"@gohansa/ui\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/ui/package.json",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:admin": "npm run dev --workspace=apps/admin",
-    "build": "npm run build --workspace=apps/web",
+    "build": "cd apps/web && npm install --include=dev && npm run build",
     "build:web": "bash verify-structure.sh && cd apps/web && npm install && npm run build",
     "vercel:build": "mkdir -p packages/shared/src packages/ui/src && echo 'export {};' > packages/shared/src/index.ts && echo 'export {};' > packages/ui/src/index.ts && echo '{\"name\":\"@gohansa/shared\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/shared/package.json && echo '{\"name\":\"@gohansa/ui\",\"version\":\"1.0.0\",\"main\":\"src/index.ts\"}' > packages/ui/package.json && cd apps/web && npm install --include=dev && npm run build",
     "build:development": "NODE_ENV=development npm run build --workspaces",
