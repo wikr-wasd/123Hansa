@@ -4,6 +4,11 @@
   "outputDirectory": "dist",
   "buildCommand": "node build.cjs",
   "installCommand": "npm install",
+  "functions": {
+    "apps/web/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "env": {
     "NODE_ENV": "staging",
     "VITE_API_URL": "https://staging-123hansa.vercel.app/api",
@@ -86,6 +91,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
     {
       "source": "/((?!api).*)",
       "destination": "/index.html"
