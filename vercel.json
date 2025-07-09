@@ -2,7 +2,7 @@
   "version": 2,
   "name": "123hansa-staging",
   "outputDirectory": "dist",
-  "buildCommand": "node build.js",
+  "buildCommand": "node build.cjs",
   "installCommand": "npm install",
   "env": {
     "NODE_ENV": "staging",
