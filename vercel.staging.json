@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "bash final-build-solution.sh",
+  "buildCommand": "bash vercel-build-fix.sh",
   "outputDirectory": "apps/web/dist",
   "installCommand": "npm install",
   "env": {
