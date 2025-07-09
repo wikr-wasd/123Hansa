@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "bash vercel-ultimate-build.sh",
+  "buildCommand": "bash verify-structure.sh && cd apps/web && npm install && npm run build",
   "outputDirectory": "apps/web/dist",
   "installCommand": "npm install",
   "env": {
