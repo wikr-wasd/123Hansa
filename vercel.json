@@ -1,9 +1,9 @@
 {
   "version": 2,
   "name": "123hansa-staging",
-  "buildCommand": "npm install --include=dev && cd apps/web && npm install --include=dev && npm run build",
+  "buildCommand": "bash vercel-build.sh",
   "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install --include=dev",
+  "installCommand": "npm install",
   "env": {
     "NODE_ENV": "staging",
     "VITE_API_URL": "https://staging-123hansa.vercel.app/api",

@@ -4,6 +4,9 @@ set -e
 echo "=== FINAL BUILD SOLUTION ==="
 echo "Working directory: $(pwd)"
 echo "Arguments: $@"
+echo "User: $(whoami)"
+echo "Node version: $(node --version)"
+echo "NPM version: $(npm --version)"
 
 # Function to ensure apps/web exists and is accessible
 ensure_apps_web() {
@@ -66,11 +69,21 @@ build_web() {
     
     # Install dependencies
     echo "Installing dependencies..."
-    npm install
+    npm install --production=false
     
     # Build the application
     echo "Building application..."
     npm run build
+    
+    # Verify build output
+    echo "Verifying build output..."
+    if [ -d "dist" ]; then
+        echo "✓ Build output directory exists"
+        ls -la dist/
+    else
+        echo "✗ Build output directory missing"
+        exit 1
+    fi
     
     echo "✓ Build completed successfully"
 }
