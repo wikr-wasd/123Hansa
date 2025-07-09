@@ -4,6 +4,9 @@ import { notificationService } from '../notificationService';
 
 const prisma = new PrismaClient();
 
+// FEATURE FLAG: Disable escrow functionality
+const ESCROW_ENABLED = process.env.ESCROW_ENABLED === 'true' || false;
+
 interface CreateEscrowParams {
   transactionId: string;
   userId: string;
@@ -35,6 +38,10 @@ class EscrowService {
   }
 
   async createEscrowAccount(params: CreateEscrowParams): Promise<EscrowAccount> {
+    if (!ESCROW_ENABLED) {
+      throw new Error('Escrow functionality is currently disabled');
+    }
+    
     const { transactionId, userId, amount, currency, autoReleaseAfterDays = 14, releaseConditions } = params;
 
     try {

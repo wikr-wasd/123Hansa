@@ -14,6 +14,9 @@ import {
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
 
+// FEATURE FLAG: Hide escrow functionality
+const ESCROW_ENABLED = process.env.VITE_ESCROW_ENABLED === 'true' || false;
+
 interface Contract {
   id: string;
   title: string;

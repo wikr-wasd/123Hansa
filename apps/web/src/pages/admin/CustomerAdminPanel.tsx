@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { BarChart3, Building2, DollarSign, Eye, Calendar, TrendingUp, Package, MessageSquare, LogOut, User, Mail, Phone, MapPin, Star, Clock, Settings, CreditCard, FileText, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ChatSystem from '../../components/chat/ChatSystem';
+import InvoiceCreator from '../../components/invoice/InvoiceCreator';
+import ElegantMessaging from '../../components/messaging/ElegantMessaging';
 
 interface CustomerAdminPanelProps {
   customerId: string;
@@ -12,6 +14,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedListingForPromotion, setSelectedListingForPromotion] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -211,6 +214,87 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
 
   const customer = getCustomerData(customerId);
 
+  // Mock conversation data
+  const mockConversations = [
+    {
+      id: '1',
+      name: 'Erik Johansson',
+      avatar: undefined,
+      lastMessage: 'Hej Anna, jag är intresserad av att veta mer om TechStartup AB...',
+      lastMessageTime: '2024-06-26T14:30:00Z',
+      unreadCount: 2,
+      isOnline: true,
+      isTyping: false,
+      isPinned: true,
+      isArchived: false,
+      listingId: '1',
+      listingTitle: 'TechStartup AB'
+    },
+    {
+      id: '2',
+      name: 'Maria Svensson',
+      avatar: undefined,
+      lastMessage: 'Kan du berätta mer om omsättningen för E-handel Nisch?',
+      lastMessageTime: '2024-06-25T16:45:00Z',
+      unreadCount: 0,
+      isOnline: false,
+      isTyping: false,
+      isPinned: false,
+      isArchived: false,
+      listingId: '7',
+      listingTitle: 'E-handel Nisch'
+    },
+    {
+      id: '3',
+      name: 'Peter Andersson',
+      avatar: undefined,
+      lastMessage: 'Tack för informationen! Jag återkommer inom kort.',
+      lastMessageTime: '2024-06-24T10:20:00Z',
+      unreadCount: 0,
+      isOnline: true,
+      isTyping: false,
+      isPinned: false,
+      isArchived: false,
+      listingId: '4',
+      listingTitle: 'Konsultföretag Stockholm'
+    }
+  ];
+
+  const mockMessages = [
+    {
+      id: '1',
+      senderId: '2',
+      senderName: 'Erik Johansson',
+      content: 'Hej Anna! Jag såg din annons för TechStartup AB och är mycket intresserad.',
+      timestamp: '2024-06-26T14:25:00Z',
+      status: 'read' as const
+    },
+    {
+      id: '2',
+      senderId: customerId,
+      senderName: customer.name,
+      content: 'Hej Erik! Kul att höra. Vad skulle du vilja veta mer om?',
+      timestamp: '2024-06-26T14:27:00Z',
+      status: 'read' as const
+    },
+    {
+      id: '3',
+      senderId: '2',
+      senderName: 'Erik Johansson',
+      content: 'Främst om de finansiella siffrorna och team-sammansättningen. Finns det möjlighet till en telefonkonferens?',
+      timestamp: '2024-06-26T14:30:00Z',
+      status: 'delivered' as const
+    },
+    {
+      id: '4',
+      senderId: '2',
+      senderName: 'Erik Johansson',
+      content: 'Jag är redo att gå vidare snabbt om allt stämmer.',
+      timestamp: '2024-06-26T14:31:00Z',
+      status: 'sent' as const
+    }
+  ];
+
   // Handler functions
   const handleSettingToggle = (setting: keyof typeof settings) => {
     setSettings(prev => ({
@@ -254,6 +338,19 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
     setTimeout(() => {
       setActiveTab('payment');
     }, 1000);
+  };
+
+  const handleConversationSelect = (conversationId: string) => {
+    setActiveConversationId(conversationId);
+  };
+
+  const handleMessageSend = (conversationId: string, content: string) => {
+    toast.success('Meddelande skickat!');
+    // In real app, this would send the message via API
+  };
+
+  const handleMessageRead = (messageId: string) => {
+    // In real app, this would mark the message as read via API
   };
 
   const formatPrice = (price: number) => {
@@ -303,6 +400,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
               { id: 'listings', label: 'Mina Annonser', icon: Building2 },
               { id: 'messages', label: 'Meddelanden', icon: MessageSquare },
               { id: 'finance', label: 'Ekonomi', icon: DollarSign },
+              { id: 'invoices', label: 'Fakturor', icon: FileText },
               { id: 'promotions', label: 'Marknadsföring', icon: Star },
               { id: 'settings', label: 'Inställningar', icon: Settings },
               { id: 'profile', label: 'Min Profil', icon: User }
@@ -334,94 +432,256 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Min Översikt</h2>
-              <p className="text-gray-600">Här är en sammanfattning av din aktivitet på Hansa</p>
+            {/* Welcome Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Välkommen tillbaka, {customer.name.split(' ')[0]}! 👋</h2>
+                  <p className="text-blue-100 text-lg">Här är en översikt av din verksamhet på 123hansa</p>
+                  <div className="flex items-center mt-4 text-blue-100">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Medlem sedan {new Date(customer.joinedDate).toLocaleDateString('sv-SE')}</span>
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <div className="w-20 h-20 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-2xl font-bold">
+                    {customer.avatar}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Stats Cards */}
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <button 
+                onClick={() => setActiveTab('listings')}
+                className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <Building2 className="w-6 h-6 mx-auto mb-2" />
+                <span className="text-sm font-medium">Hantera Annonser</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('messages')}
+                className="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <MessageSquare className="w-6 h-6 mx-auto mb-2" />
+                <span className="text-sm font-medium">Meddelanden</span>
+                {mockConversations.reduce((sum, conv) => sum + conv.unreadCount, 0) > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {mockConversations.reduce((sum, conv) => sum + conv.unreadCount, 0)}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={() => setActiveTab('invoices')}
+                className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <FileText className="w-6 h-6 mx-auto mb-2" />
+                <span className="text-sm font-medium">Skapa Faktura</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('promotions')}
+                className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <Star className="w-6 h-6 mx-auto mb-2" />
+                <span className="text-sm font-medium">Marknadsföring</span>
+              </button>
+            </div>
+
+            {/* Enhanced Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <Building2 className="w-8 h-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Aktiva annonser</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.activeListings}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <Eye className="w-8 h-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Totala visningar</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.totalViews}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <MessageSquare className="w-8 h-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Förfrågningar</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.totalInquiries}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <DollarSign className="w-8 h-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total intäkt</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue)}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <TrendingUp className="w-8 h-8 text-orange-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Genomförda försäljningar</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.completedSales}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <Clock className="w-8 h-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Genomsnittlig svarstid</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.avgResponseTime}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Senaste aktivitet</h3>
-              <div className="space-y-3">
-                {customer.listings.slice(0, 3).map((listing) => (
-                  <div key={listing.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
                     <div className="flex items-center">
-                      <Building2 className="w-4 h-4 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{listing.title}</p>
-                        <p className="text-xs text-gray-500">{listing.views} visningar • {listing.inquiries} förfrågningar</p>
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Aktiva annonser</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.activeListings}</p>
                       </div>
                     </div>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(listing.status)}`}>
-                      {listing.status === 'ACTIVE' ? 'Aktiv' : listing.status === 'PENDING' ? 'Väntar' : listing.status}
-                    </span>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +12%
+                  </div>
+                </div>
+                <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs text-blue-700">🎯 Bra! Du har fler aktiva annonser än genomsnittet</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <Eye className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Totala visningar</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.totalViews.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +34%
+                  </div>
+                </div>
+                <div className="mt-4 bg-green-50 rounded-lg p-3">
+                  <p className="text-xs text-green-700">🚀 Fantastiskt! Dina annonser får mycket uppmärksamhet</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <MessageSquare className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Förfrågningar</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.totalInquiries}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +18%
+                  </div>
+                </div>
+                <div className="mt-4 bg-purple-50 rounded-lg p-3">
+                  <p className="text-xs text-purple-700">💬 Bra konvertering från visningar till förfrågningar!</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Total intäkt</p>
+                        <p className="text-3xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +85%
+                  </div>
+                </div>
+                <div className="mt-4 bg-emerald-50 rounded-lg p-3">
+                  <p className="text-xs text-emerald-700">💰 Utmärkt! Du har genererat betydande intäkter</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <CheckCircle className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Genomförda försäljningar</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.completedSales}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +100%
+                  </div>
+                </div>
+                <div className="mt-4 bg-orange-50 rounded-lg p-3">
+                  <p className="text-xs text-orange-700">🎉 Grattis till dina lyckade affärer!</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <Clock className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Genomsnittlig svarstid</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.avgResponseTime}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    Snabb
+                  </div>
+                </div>
+                <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs text-blue-700">⚡ Utmärkt! Snabba svar ökar förtroendet</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Recent Activity */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Senaste aktivitet</h3>
+                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Visa alla →
+                </button>
+              </div>
+              <div className="space-y-4">
+                {customer.listings.slice(0, 3).map((listing, index) => (
+                  <div key={listing.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        index === 0 ? 'bg-blue-100' : index === 1 ? 'bg-green-100' : 'bg-purple-100'
+                      }`}>
+                        <Building2 className={`w-5 h-5 ${
+                          index === 0 ? 'text-blue-600' : index === 1 ? 'text-green-600' : 'text-purple-600'
+                        }`} />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-semibold text-gray-900">{listing.title}</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span className="flex items-center">
+                            <Eye className="w-3 h-3 mr-1" />
+                            {listing.views} visningar
+                          </span>
+                          <span className="flex items-center">
+                            <MessageSquare className="w-3 h-3 mr-1" />
+                            {listing.inquiries} förfrågningar
+                          </span>
+                          <span className="flex items-center">
+                            <DollarSign className="w-3 h-3 mr-1" />
+                            {formatPrice(listing.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(listing.status)}`}>
+                        {listing.status === 'ACTIVE' ? 'Aktiv' : listing.status === 'PENDING' ? 'Väntar' : listing.status}
+                      </span>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {customer.listings.length === 0 && (
-                  <p className="text-gray-500 text-center py-4">Inga annonser ännu</p>
+                  <div className="text-center py-8">
+                    <Building2 className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500 font-medium">Inga annonser ännu</p>
+                    <p className="text-gray-400 text-sm">Skapa din första annons för att komma igång</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -489,50 +749,17 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
 
         {/* Messages Tab */}
         {activeTab === 'messages' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Meddelanden</h2>
-              <div className="text-sm text-gray-600">
-                {customer.messages.filter(m => m.unread).length} olästa meddelanden
-              </div>
-            </div>
-
-            {customer.messages.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="divide-y divide-gray-200">
-                  {customer.messages.map((message) => (
-                    <div key={message.id} className={`p-6 hover:bg-gray-50 ${message.unread ? 'bg-blue-50' : ''}`}>
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600">{message.from.charAt(0)}</span>
-                          </div>
-                        </div>
-                        <div className="ml-4 flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium text-gray-900">{message.from}</h4>
-                            <p className="text-sm text-gray-500">{message.timestamp}</p>
-                          </div>
-                          <p className="text-sm font-medium text-gray-900 mt-1">{message.subject}</p>
-                          <p className="text-sm text-gray-600 mt-1">{message.preview}</p>
-                          {message.unread && (
-                            <span className="inline-flex mt-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                              Nytt
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Inga meddelanden</h3>
-                <p className="mt-1 text-sm text-gray-500">Du har inte fått några meddelanden ännu.</p>
-              </div>
-            )}
+          <div className="h-[800px]">
+            <ElegantMessaging
+              currentUserId={customerId}
+              currentUserName={customer.name}
+              conversations={mockConversations}
+              messages={activeConversationId === '1' ? mockMessages : []}
+              activeConversationId={activeConversationId}
+              onConversationSelect={handleConversationSelect}
+              onMessageSend={handleMessageSend}
+              onMessageRead={handleMessageRead}
+            />
           </div>
         )}
 
@@ -609,6 +836,17 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Invoices Tab */}
+        {activeTab === 'invoices' && (
+          <div className="space-y-6">
+            <InvoiceCreator 
+              customerId={customerId}
+              customerName={customer.name}
+              listings={customer.listings}
+            />
           </div>
         )}
 
