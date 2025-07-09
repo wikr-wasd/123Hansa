@@ -2,8 +2,9 @@
   "version": 2,
   "name": "123hansa-staging",
   "outputDirectory": "dist",
-  "buildCommand": "node build-simple.js",
+  "buildCommand": "node build-vercel.js",
   "installCommand": "npm install",
+  "framework": null,
   "env": {
     "NODE_ENV": "staging",
     "VITE_API_URL": "https://staging-123hansa.vercel.app/api",
