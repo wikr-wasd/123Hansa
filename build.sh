@@ -15,6 +15,9 @@ cd apps/web
 npm install --include=dev
 npm run build
 
+# Copy dist to root for Vercel
+cp -r dist ../../dist
+
 # Verify output
-ls -la dist/
+ls -la ../../dist/
 echo "Build completed successfully"
