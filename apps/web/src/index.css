@@ -160,6 +160,98 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  /* Mobile-specific styles */
+  @media (max-width: 768px) {
+    /* Prevent auto-scroll issues on mobile */
+    html {
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Fix viewport for mobile */
+    body {
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    
+    /* Mobile touch optimization */
+    button, a, input, textarea, select {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    input, textarea, select {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    /* Improved touch targets */
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Mobile-specific animations */
+    .mobile-slide-up {
+      animation: mobile-slide-up 0.3s ease-out;
+    }
+    
+    .mobile-fade-in {
+      animation: mobile-fade-in 0.2s ease-out;
+    }
+  }
+  
+  /* Tablet-specific styles */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet optimizations */
+    .tablet-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Prevent zoom on double-tap for iOS */
+  @media (max-width: 768px) {
+    input[type="search"],
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+  
+  /* Mobile app-like experience */
+  @media (max-width: 768px) {
+    /* Hide scrollbars but keep functionality */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Smooth scrolling for mobile */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* App-like status bar area */
+    .mobile-safe-area {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+  }
   
   .hansa123-logo {
     background: linear-gradient(45deg, #2563eb 0%, #3b82f6 50%, #1d4ed8 100%);
@@ -307,6 +399,26 @@
   }
   100% {
     transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+@keyframes mobile-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
