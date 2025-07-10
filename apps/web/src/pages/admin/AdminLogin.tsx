@@ -149,11 +149,16 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <Shield className="h-8 w-8 text-blue-600" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Hansa Admin Portal
+            Hansa Admin Portal v2.0
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Logga in för att komma åt din admin-panel
+            Logga in för att komma åt din uppdaterade admin-panel
           </p>
+          <div className="mt-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              🆕 Nyligen uppdaterad med full funktionalitet
+            </span>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

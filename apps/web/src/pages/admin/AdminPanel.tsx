@@ -272,8 +272,17 @@ const AdminPanel: React.FC = () => {
       return;
     }
     
-    // Check admin access - allow both email and username 'willi'
-    if (user && !(user.email === 'william.krakic@gmail.com' || user.name === 'willi' || user.email === 'willi' || user.email === 'willi@admin.com' || user.role === 'ADMIN')) {
+    // Check admin access - allow demo admin accounts
+    if (user && !(
+      user.email === 'william.krakic@gmail.com' || 
+      user.name === 'willi' || 
+      user.name === 'Willi' ||
+      user.email === 'willi' || 
+      user.email === 'willi@admin.com' || 
+      user.role === 'ADMIN' ||
+      user.firstName === 'Willi' ||
+      (user.name && user.name.toLowerCase() === 'willi')
+    )) {
       toast.error('Access denied. Admin privileges required.');
       navigate('/');
       return;
@@ -284,9 +293,12 @@ const AdminPanel: React.FC = () => {
   const hasAdminAccess = user && (
     user.email === 'william.krakic@gmail.com' || 
     user.name === 'willi' || 
+    user.name === 'Willi' ||
     user.email === 'willi' || 
     user.email === 'willi@admin.com' ||
-    user.role === 'ADMIN'
+    user.role === 'ADMIN' ||
+    user.firstName === 'Willi' ||
+    (user.name && user.name.toLowerCase() === 'willi')
   );
 
   // Prevent rendering if not admin (but allow development access)
