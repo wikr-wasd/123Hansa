@@ -46,6 +46,7 @@ import messageRoutes from '@/routes/messages';
 // import kycAmlRoutes from '@/routes/kyc-aml';
 // import analyticsRoutes from '@/routes/analytics';
 import adminRoutes from '@/routes/admin';
+import testSentryRoutes from '@/routes/test-sentry';
 
 // Load environment variables
 dotenv.config();
@@ -288,6 +289,7 @@ app.use('/api/messages', messageRoutes);
 // app.use('/api/kyc-aml', kycAmlRoutes);
 // app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/test-sentry', testSentryRoutes);
 
 // Initialize Socket.IO service for real-time messaging
 initializeSocketService(io);
