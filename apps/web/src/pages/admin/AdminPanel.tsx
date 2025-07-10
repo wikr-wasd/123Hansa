@@ -1208,7 +1208,7 @@ const AdminPanel: React.FC = () => {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <Settings className="w-6 h-6 text-blue-600 mr-3" />
-                <h1 className="text-xl font-bold text-gray-900">123hansa CMS</h1>
+                <h1 className="text-xl font-bold text-gray-900">123hansa CMS v2.0</h1>
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">
@@ -1260,7 +1260,9 @@ const AdminPanel: React.FC = () => {
             <div className="space-y-8">
               {/* Dashboard Header with Controls */}
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Dashboard Översikt</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Dashboard Översikt 
+                  <span className="ml-3 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">🆕 Uppdaterad</span>
+                </h2>
                 <div className="flex items-center space-x-3">
                   <select 
                     value={refreshInterval} 
