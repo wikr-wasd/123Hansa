@@ -1,0 +1,264 @@
+{
+  "serverStatus": {
+    "frontend": {
+      "url": "http://localhost:3002",
+      "status": 200,
+      "running": true
+    },
+    "api": {
+      "url": "http://localhost:3001",
+      "status": 200,
+      "running": true
+    }
+  },
+  "pageTests": [
+    {
+      "page": "Homepage",
+      "path": "/",
+      "url": "http://localhost:3002/",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.040Z"
+    },
+    {
+      "page": "Listings",
+      "path": "/listings",
+      "url": "http://localhost:3002/listings",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.062Z"
+    },
+    {
+      "page": "Crowdfunding",
+      "path": "/crowdfunding",
+      "url": "http://localhost:3002/crowdfunding",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.072Z"
+    },
+    {
+      "page": "Valuation",
+      "path": "/valuation",
+      "url": "http://localhost:3002/valuation",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.081Z"
+    },
+    {
+      "page": "Professional Services",
+      "path": "/professionals",
+      "url": "http://localhost:3002/professionals",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.091Z"
+    },
+    {
+      "page": "Login",
+      "path": "/login",
+      "url": "http://localhost:3002/login",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.101Z"
+    },
+    {
+      "page": "Register",
+      "path": "/register",
+      "url": "http://localhost:3002/register",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.111Z"
+    },
+    {
+      "page": "Help",
+      "path": "/help",
+      "url": "http://localhost:3002/help",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.121Z"
+    },
+    {
+      "page": "Contact",
+      "path": "/contact",
+      "url": "http://localhost:3002/contact",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.131Z"
+    },
+    {
+      "page": "Legal",
+      "path": "/legal",
+      "url": "http://localhost:3002/legal",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.141Z"
+    },
+    {
+      "page": "Heart",
+      "path": "/heart",
+      "url": "http://localhost:3002/heart",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.151Z"
+    },
+    {
+      "page": "Dashboard",
+      "path": "/dashboard",
+      "url": "http://localhost:3002/dashboard",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.160Z"
+    },
+    {
+      "page": "Admin",
+      "path": "/admin",
+      "url": "http://localhost:3002/admin",
+      "status": 200,
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.169Z"
+    }
+  ],
+  "apiTests": [
+    {
+      "endpoint": "Health Check",
+      "path": "/health",
+      "url": "http://localhost:3001/health",
+      "status": 200,
+      "expected": [
+        200
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.176Z"
+    },
+    {
+      "endpoint": "Metrics",
+      "path": "/metrics",
+      "url": "http://localhost:3001/metrics",
+      "status": 200,
+      "expected": [
+        200
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.183Z"
+    },
+    {
+      "endpoint": "Auth Login",
+      "path": "/api/auth/login",
+      "url": "http://localhost:3001/api/auth/login",
+      "status": 404,
+      "expected": [
+        405,
+        400
+      ],
+      "success": false,
+      "timestamp": "2025-07-10T20:22:05.189Z"
+    },
+    {
+      "endpoint": "Auth Register",
+      "path": "/api/auth/register",
+      "url": "http://localhost:3001/api/auth/register",
+      "status": 404,
+      "expected": [
+        405,
+        400
+      ],
+      "success": false,
+      "timestamp": "2025-07-10T20:22:05.196Z"
+    },
+    {
+      "endpoint": "Listings API",
+      "path": "/api/listings",
+      "url": "http://localhost:3001/api/listings",
+      "status": 401,
+      "expected": [
+        200,
+        401
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.202Z"
+    },
+    {
+      "endpoint": "Users API",
+      "path": "/api/users",
+      "url": "http://localhost:3001/api/users",
+      "status": 401,
+      "expected": [
+        200,
+        401
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.209Z"
+    },
+    {
+      "endpoint": "Messages API",
+      "path": "/api/messages",
+      "url": "http://localhost:3001/api/messages",
+      "status": 401,
+      "expected": [
+        200,
+        401
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.215Z"
+    },
+    {
+      "endpoint": "Admin API",
+      "path": "/api/admin",
+      "url": "http://localhost:3001/api/admin",
+      "status": 403,
+      "expected": [
+        200,
+        401,
+        403
+      ],
+      "success": true,
+      "timestamp": "2025-07-10T20:22:05.221Z"
+    }
+  ],
+  "sentryTests": [
+    {
+      "test": "sentry_status",
+      "success": true,
+      "data": {
+        "message": "Sentry API integration is active",
+        "project": "123hansa-api",
+        "dsn": "missing",
+        "timestamp": "2025-07-10T20:22:05.227Z"
+      }
+    },
+    {
+      "test": "sentry_error_trigger",
+      "success": true,
+      "data": {
+        "error": "Test error sent to Sentry API project",
+        "message": "Check your 123hansa-api Sentry project for this error",
+        "timestamp": "2025-07-10T20:22:05.235Z"
+      }
+    }
+  ],
+  "linkTests": [],
+  "buttonTests": [],
+  "errors": [
+    {
+      "type": "api_unexpected_status",
+      "endpoint": "Auth Login",
+      "status": 404,
+      "expected": [
+        405,
+        400
+      ],
+      "url": "http://localhost:3001/api/auth/login"
+    },
+    {
+      "type": "api_unexpected_status",
+      "endpoint": "Auth Register",
+      "status": 404,
+      "expected": [
+        405,
+        400
+      ],
+      "url": "http://localhost:3001/api/auth/register"
+    }
+  ],
+  "warnings": [],
+  "timestamp": "2025-07-10T20:22:04.952Z"
+}

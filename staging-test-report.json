@@ -1,0 +1,559 @@
+{
+  "tests": [
+    {
+      "test": "Deployment Status Check",
+      "status": "PASS",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/plain; charset=utf-8",
+        "date": "Thu, 10 Jul 2025 18:28:32 GMT",
+        "server": "Vercel",
+        "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+        "x-vercel-error": "DEPLOYMENT_NOT_FOUND",
+        "x-vercel-id": "arn1::v57mc-1752172112736-3d3e56721638",
+        "content-length": "107"
+      },
+      "timestamp": "2025-07-10T18:28:32.652Z"
+    },
+    {
+      "test": "Homepage",
+      "url": "https://staging-123hansa.vercel.app/",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:32.736Z"
+    },
+    {
+      "test": "Listings Page",
+      "url": "https://staging-123hansa.vercel.app/listings",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:32.818Z"
+    },
+    {
+      "test": "Crowdfunding Page",
+      "url": "https://staging-123hansa.vercel.app/crowdfunding",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:32.913Z"
+    },
+    {
+      "test": "Valuation Page",
+      "url": "https://staging-123hansa.vercel.app/valuation",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.002Z"
+    },
+    {
+      "test": "Professional Services",
+      "url": "https://staging-123hansa.vercel.app/professionals",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.084Z"
+    },
+    {
+      "test": "Login Page",
+      "url": "https://staging-123hansa.vercel.app/login",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.173Z"
+    },
+    {
+      "test": "Register Page",
+      "url": "https://staging-123hansa.vercel.app/register",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.261Z"
+    },
+    {
+      "test": "Help Page",
+      "url": "https://staging-123hansa.vercel.app/help",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.349Z"
+    },
+    {
+      "test": "Contact Page",
+      "url": "https://staging-123hansa.vercel.app/contact",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.438Z"
+    },
+    {
+      "test": "Legal Page",
+      "url": "https://staging-123hansa.vercel.app/legal",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.517Z"
+    },
+    {
+      "test": "Heart Page",
+      "url": "https://staging-123hansa.vercel.app/heart",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.599Z"
+    },
+    {
+      "test": "Dashboard Page (may redirect)",
+      "url": "https://staging-123hansa.vercel.app/dashboard",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.686Z"
+    },
+    {
+      "test": "Admin Panel (may redirect)",
+      "url": "https://staging-123hansa.vercel.app/admin",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.770Z"
+    },
+    {
+      "test": "Auth Login API",
+      "url": "https://staging-123hansa.vercel.app/api/auth/login",
+      "expected": [
+        405,
+        400
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.852Z"
+    },
+    {
+      "test": "Auth Register API",
+      "url": "https://staging-123hansa.vercel.app/api/auth/register",
+      "expected": [
+        405,
+        400
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:33.942Z"
+    },
+    {
+      "test": "Listings API",
+      "url": "https://staging-123hansa.vercel.app/api/listings",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.030Z"
+    },
+    {
+      "test": "Users API",
+      "url": "https://staging-123hansa.vercel.app/api/users",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.110Z"
+    },
+    {
+      "test": "Messages API",
+      "url": "https://staging-123hansa.vercel.app/api/messages",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.190Z"
+    },
+    {
+      "test": "Admin API",
+      "url": "https://staging-123hansa.vercel.app/api/admin",
+      "expected": [
+        200,
+        401,
+        403
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.270Z"
+    },
+    {
+      "test": "Health Check",
+      "url": "https://staging-123hansa.vercel.app/health",
+      "expected": [
+        200
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.353Z"
+    },
+    {
+      "test": "Metrics Endpoint",
+      "url": "https://staging-123hansa.vercel.app/metrics",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.433Z"
+    },
+    {
+      "test": "Sentry Status Check",
+      "url": "https://staging-123hansa.vercel.app/api/test-sentry/status",
+      "expected": [
+        200
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.512Z"
+    },
+    {
+      "test": "Sentry Error Test",
+      "url": "https://staging-123hansa.vercel.app/api/test-sentry/error",
+      "expected": [
+        500
+      ],
+      "actual": 404,
+      "status": "FAIL",
+      "timestamp": "2025-07-10T18:28:34.594Z"
+    },
+    {
+      "test": "404 Page",
+      "url": "https://staging-123hansa.vercel.app/nonexistent-page",
+      "expected": [
+        404
+      ],
+      "actual": 404,
+      "status": "PASS",
+      "timestamp": "2025-07-10T18:28:34.774Z"
+    },
+    {
+      "test": "404 API Endpoint",
+      "url": "https://staging-123hansa.vercel.app/api/nonexistent-endpoint",
+      "expected": [
+        404
+      ],
+      "actual": 404,
+      "status": "PASS",
+      "timestamp": "2025-07-10T18:28:34.863Z"
+    },
+    {
+      "test": "Admin Redirect Test",
+      "finalUrl": "https://staging-123hansa.vercel.app/admin",
+      "statusCode": 404,
+      "status": "INFO"
+    },
+    {
+      "test": "CORS Headers Test",
+      "hasCors": false,
+      "status": "WARN"
+    }
+  ],
+  "errors": [
+    {
+      "type": "status_code_mismatch",
+      "test": "Homepage",
+      "url": "https://staging-123hansa.vercel.app/",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Listings Page",
+      "url": "https://staging-123hansa.vercel.app/listings",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Crowdfunding Page",
+      "url": "https://staging-123hansa.vercel.app/crowdfunding",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Valuation Page",
+      "url": "https://staging-123hansa.vercel.app/valuation",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Professional Services",
+      "url": "https://staging-123hansa.vercel.app/professionals",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Login Page",
+      "url": "https://staging-123hansa.vercel.app/login",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Register Page",
+      "url": "https://staging-123hansa.vercel.app/register",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Help Page",
+      "url": "https://staging-123hansa.vercel.app/help",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Contact Page",
+      "url": "https://staging-123hansa.vercel.app/contact",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Legal Page",
+      "url": "https://staging-123hansa.vercel.app/legal",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Heart Page",
+      "url": "https://staging-123hansa.vercel.app/heart",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Dashboard Page (may redirect)",
+      "url": "https://staging-123hansa.vercel.app/dashboard",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Admin Panel (may redirect)",
+      "url": "https://staging-123hansa.vercel.app/admin",
+      "expected": [
+        200,
+        302,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Auth Login API",
+      "url": "https://staging-123hansa.vercel.app/api/auth/login",
+      "expected": [
+        405,
+        400
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Auth Register API",
+      "url": "https://staging-123hansa.vercel.app/api/auth/register",
+      "expected": [
+        405,
+        400
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Listings API",
+      "url": "https://staging-123hansa.vercel.app/api/listings",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Users API",
+      "url": "https://staging-123hansa.vercel.app/api/users",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Messages API",
+      "url": "https://staging-123hansa.vercel.app/api/messages",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Admin API",
+      "url": "https://staging-123hansa.vercel.app/api/admin",
+      "expected": [
+        200,
+        401,
+        403
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Health Check",
+      "url": "https://staging-123hansa.vercel.app/health",
+      "expected": [
+        200
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Metrics Endpoint",
+      "url": "https://staging-123hansa.vercel.app/metrics",
+      "expected": [
+        200,
+        401
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Sentry Status Check",
+      "url": "https://staging-123hansa.vercel.app/api/test-sentry/status",
+      "expected": [
+        200
+      ],
+      "actual": 404
+    },
+    {
+      "type": "status_code_mismatch",
+      "test": "Sentry Error Test",
+      "url": "https://staging-123hansa.vercel.app/api/test-sentry/error",
+      "expected": [
+        500
+      ],
+      "actual": 404
+    }
+  ],
+  "warnings": [],
+  "timestamp": "2025-07-10T18:28:32.526Z"
+}

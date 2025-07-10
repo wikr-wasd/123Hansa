@@ -1,0 +1,20 @@
+{
+  "sentryTests": [],
+  "errors": [
+    {
+      "type": "status_endpoint_failed",
+      "status": 404,
+      "response": "The deployment could not be found on Vercel.\n\nDEPLOYMENT_NOT_FOUND\n\narn1::d5fkq-1752172105907-a7e54f255878\n"
+    },
+    {
+      "type": "backend_error_failed",
+      "status": 404,
+      "response": "The deployment could not be found on Vercel.\n\nDEPLOYMENT_NOT_FOUND\n\narn1::l8gsv-1752172105991-f30396d0d4a0\n"
+    },
+    {
+      "type": "frontend_load_failed",
+      "status": 404
+    }
+  ],
+  "timestamp": "2025-07-10T18:28:25.688Z"
+}
