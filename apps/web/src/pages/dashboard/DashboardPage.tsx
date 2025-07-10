@@ -740,7 +740,7 @@ const DashboardPage: React.FC = () => {
                 { id: 'listings', name: 'Mina annonser', icon: Building2 },
                 { id: 'favorites', name: 'Favoriter', icon: Heart },
                 { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
-                { id: 'purchases', name: 'Köp', icon: ShoppingCart },
+                { id: 'purchases', name: 'Fakturor', icon: CreditCard },
                 { id: 'heart', name: 'Heart Avtal', icon: Shield },
                 { id: 'profile', name: 'Profil', icon: User },
                 { id: 'settings', name: 'Inställningar', icon: Settings }
@@ -1386,19 +1386,309 @@ const DashboardPage: React.FC = () => {
           {activeTab === 'purchases' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Mina köp</h2>
-                <span className="text-sm text-gray-500">{userStats.completedPurchases} genomförda köp</span>
+                <h2 className="text-2xl font-bold text-gray-900">Fakturor & Betalningar</h2>
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-500">{userStats.completedPurchases} genomförda köp</span>
+                  <button
+                    onClick={() => {
+                      // Download all invoices as ZIP
+                      toast.success('Laddar ner alla fakturor...');
+                    }}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Ladda ner alla
+                  </button>
+                </div>
               </div>
               
+              {/* Invoice Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Betalda fakturor</p>
+                      <p className="text-2xl font-bold text-gray-900">12</p>
+                      <p className="text-sm text-green-600">{formatPrice(145600)} totalt</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-yellow-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Väntande betalning</p>
+                      <p className="text-2xl font-bold text-gray-900">1</p>
+                      <p className="text-sm text-yellow-600">{formatPrice(5000)} förfaller 2024-07-15</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Nästa betalning</p>
+                      <p className="text-lg font-bold text-gray-900">15 Jul</p>
+                      <p className="text-sm text-blue-600">Premium-prenumeration</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoice List */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900">Fakturor</h3>
+                    <div className="flex items-center space-x-3">
+                      <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                        <option value="all">Alla fakturor</option>
+                        <option value="paid">Betalda</option>
+                        <option value="pending">Väntande</option>
+                        <option value="overdue">Försenade</option>
+                      </select>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                          type="text"
+                          placeholder="Sök fakturor..."
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faktura</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belopp</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Förfaller</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Åtgärder</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {[
+                        {
+                          id: 'INV-2024-001',
+                          number: '#123456',
+                          date: '2024-06-15',
+                          amount: 5000,
+                          status: 'pending',
+                          statusText: 'Väntande',
+                          dueDate: '2024-07-15',
+                          description: 'Premium-prenumeration - Juli 2024',
+                          downloadUrl: '/invoices/INV-2024-001.pdf'
+                        },
+                        {
+                          id: 'INV-2024-002',
+                          number: '#123455',
+                          date: '2024-05-15',
+                          amount: 5000,
+                          status: 'paid',
+                          statusText: 'Betald',
+                          dueDate: '2024-06-15',
+                          paidDate: '2024-06-10',
+                          description: 'Premium-prenumeration - Juni 2024',
+                          downloadUrl: '/invoices/INV-2024-002.pdf'
+                        },
+                        {
+                          id: 'INV-2024-003',
+                          number: '#123454',
+                          date: '2024-04-15',
+                          amount: 7500,
+                          status: 'paid',
+                          statusText: 'Betald',
+                          dueDate: '2024-05-15',
+                          paidDate: '2024-05-12',
+                          description: 'Annonstaxa - TechStartup AB',
+                          downloadUrl: '/invoices/INV-2024-003.pdf'
+                        },
+                        {
+                          id: 'INV-2024-004',
+                          number: '#123453',
+                          date: '2024-03-15',
+                          amount: 15000,
+                          status: 'paid',
+                          statusText: 'Betald',
+                          dueDate: '2024-04-15',
+                          paidDate: '2024-04-08',
+                          description: 'Företagsvärdering - Detaljerad analys',
+                          downloadUrl: '/invoices/INV-2024-004.pdf'
+                        }
+                      ].map((invoice) => (
+                        <tr key={invoice.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{invoice.number}</div>
+                              <div className="text-sm text-gray-500">{invoice.description}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{formatDate(invoice.date)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{formatPrice(invoice.amount)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              invoice.status === 'paid' 
+                                ? 'bg-green-100 text-green-800' 
+                                : invoice.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {invoice.statusText}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {invoice.status === 'paid' && invoice.paidDate ? (
+                                <span className="text-green-600">Betald {formatDate(invoice.paidDate)}</span>
+                              ) : (
+                                formatDate(invoice.dueDate)
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => {
+                                  // Generate and download PDF invoice
+                                  const invoiceData = `
+Faktura ${invoice.number}
+                                  
+Datum: ${formatDate(invoice.date)}
+Förfallodatum: ${formatDate(invoice.dueDate)}
+${invoice.paidDate ? `Betald: ${formatDate(invoice.paidDate)}` : ''}
+
+Beskrivning: ${invoice.description}
+Belopp: ${formatPrice(invoice.amount)}
+
+Status: ${invoice.statusText}
+
+123hansa.se
+Org.nr: 556123-4567
+support@123hansa.se
+                                  `.trim();
+                                  
+                                  const blob = new Blob([invoiceData], { type: 'text/plain' });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = `faktura-${invoice.number.replace('#', '')}.txt`;
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                  toast.success('Faktura nedladdad');
+                                }}
+                                className="text-blue-600 hover:text-blue-900 flex items-center"
+                                title="Ladda ner faktura"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(invoice.number);
+                                  toast.success('Fakturanummer kopierat');
+                                }}
+                                className="text-gray-600 hover:text-gray-900 flex items-center"
+                                title="Kopiera fakturanummer"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </button>
+                              {invoice.status === 'pending' && (
+                                <button
+                                  onClick={() => {
+                                    // Simulate payment
+                                    toast.success('Omdirigerar till betalning...');
+                                    setTimeout(() => {
+                                      toast.success('Betalning genomförd!');
+                                    }, 2000);
+                                  }}
+                                  className="text-green-600 hover:text-green-900 flex items-center"
+                                  title="Betala nu"
+                                >
+                                  <CreditCard className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <div className="text-center py-12">
-                  <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Köphistorik</h3>
-                  <p className="text-gray-600">
-                    Du har genomfört {userStats.completedPurchases} köp för totalt {formatPrice(userStats.totalSpent)}.
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Betalningsmetoder</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <CreditCard className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-900">Visa ****1234</p>
+                        <p className="text-sm text-gray-500">Förfaller 12/25</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Standard</span>
+                      <button
+                        onClick={() => toast.success('Redigerar betalningsmetod...')}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        Redigera
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={() => toast.success('Lägger till ny betalningsmetod...')}
+                    className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center justify-center"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Lägg till betalningsmetod
+                  </button>
+                </div>
+              </div>
+
+              {/* Billing Address */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Faktureringsadress</h3>
+                  <button
+                    onClick={() => toast.success('Redigerar faktureringsadress...')}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    Redigera
+                  </button>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p className="font-medium text-gray-900">{user.name}</p>
+                  <p>Storgatan 123</p>
+                  <p>111 22 Stockholm</p>
+                  <p>Sverige</p>
+                  <p className="mt-2">
+                    <span className="font-medium">Email:</span> {user.email}
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Detaljerad köphistorik kommer snart...
+                  <p>
+                    <span className="font-medium">Telefon:</span> {user.phone}
                   </p>
                 </div>
               </div>
