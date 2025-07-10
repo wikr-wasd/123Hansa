@@ -444,7 +444,11 @@ const HomePage: React.FC = () => {
                 <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   {t('homepage.hero.title.line2')}
                 </span>
-                <span className="block">{t('homepage.hero.title.line3')}</span>
+                <div className="mt-4">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    🚀 Version 2.0 - Uppdaterad Admin Portal
+                  </span>
+                </div>
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-600 mb-8 leading-relaxed">
