@@ -2248,64 +2248,64 @@ const AdminPanel: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Crowdfunding Management</h2>
                 <div className="flex items-center space-x-3">
                   <select 
-                    value={paymentFilter} 
-                    onChange={(e) => setPaymentFilter(e.target.value)}
+                    value={campaignFilter} 
+                    onChange={(e) => setCampaignFilter(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-1 text-sm"
                   >
-                    <option value="all">Alla transaktioner</option>
-                    <option value="completed">Genomförda</option>
-                    <option value="pending_payout">Väntar utbetalning</option>
-                    <option value="pending">Pågående</option>
-                    <option value="failed">Misslyckade</option>
+                    <option value="all">Alla kampanjer</option>
+                    <option value="ACTIVE">Aktiva</option>
+                    <option value="FUNDED">Finansierade</option>
+                    <option value="URGENT">Brådskande</option>
+                    <option value="pending">Väntar godkännande</option>
                   </select>
                   <span className="text-sm text-gray-600">
-                    {filteredTransactions.length} av {transactions.length} transaktioner
+                    {campaigns.filter(c => campaignFilter === 'all' || c.status === campaignFilter).length} av {campaigns.length} kampanjer
                   </span>
                 </div>
               </div>
 
-              {/* Financial Overview */}
+              {/* Crowdfunding Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
                     <TrendingUp className="w-8 h-8 text-green-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Omsättning</p>
+                      <p className="text-sm font-medium text-gray-600">Totalt insamlat</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.totalRevenue || 0)}
+                        {crowdfundingStats ? `${(crowdfundingStats.totalRaised / 1000000).toFixed(1)}M SEK` : '0 SEK'}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <Calendar className="w-8 h-8 text-blue-600" />
+                    <BarChart3 className="w-8 h-8 text-blue-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Månadsintäkt</p>
+                      <p className="text-sm font-medium text-gray-600">Aktiva kampanjer</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.monthlyRevenue || 0)}
+                        {crowdfundingStats?.activeCampaigns || 0}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <AlertTriangle className="w-8 h-8 text-orange-600" />
+                    <Users className="w-8 h-8 text-purple-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Väntande Utbetalningar</p>
+                      <p className="text-sm font-medium text-gray-600">Totala backers</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.pendingPayouts || 0)}
+                        {crowdfundingStats?.totalBackers || 0}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <ShoppingCart className="w-8 h-8 text-purple-600" />
+                    <Award className="w-8 h-8 text-yellow-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Escrow Saldo</p>
+                      <p className="text-sm font-medium text-gray-600">Framgångsgrad</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.escrowBalance || 0)}
+                        {crowdfundingStats?.successRate || 0}%
                       </p>
                     </div>
                   </div>
@@ -2316,33 +2316,33 @@ const AdminPanel: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <Activity className="w-8 h-8 text-gray-600" />
+                    <DollarSign className="w-8 h-8 text-green-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Behandlingsavgifter</p>
+                      <p className="text-sm font-medium text-gray-600">Plattformsavgifter</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.processingFees || 0)}
+                        {crowdfundingStats ? `${(crowdfundingStats.totalFees / 1000).toFixed(0)}k SEK` : '0 SEK'}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <XCircle className="w-8 h-8 text-red-600" />
+                    <AlertTriangle className="w-8 h-8 text-orange-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Återbetalningar</p>
+                      <p className="text-sm font-medium text-gray-600">Väntar godkännande</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.refundsIssued || 0)}
+                        {crowdfundingStats?.pendingApproval || 0}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center">
-                    <BarChart3 className="w-8 h-8 text-indigo-600" />
+                    <Activity className="w-8 h-8 text-indigo-600" />
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Genomsnittsvärde</p>
+                      <p className="text-sm font-medium text-gray-600">Månadstillväxt</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(financialData?.averageTransactionValue || 0)}
+                        +{crowdfundingStats?.monthlyGrowth || 0}%
                       </p>
                     </div>
                   </div>
