@@ -36,8 +36,8 @@ export default defineConfig({
     }),
     // Only include Sentry plugin if auth token is available
     ...(process.env.SENTRY_AUTH_TOKEN ? [sentryVitePlugin({
-      org: "4509641117728768",
-      project: "4509643505795152",
+      org: "123ab",
+      project: "123hansa-web",
       authToken: process.env.SENTRY_AUTH_TOKEN,
     })] : [])
   ],

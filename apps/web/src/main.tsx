@@ -4,14 +4,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
+import * as Sentry from '@sentry/react';
 
 import App from './App';
 import { AuthProvider } from './stores/authStore';
 import './i18n/config';
 import './index.css';
 
-// Initialize Sentry
-Sentry.init({
+// Initialize Sentry only if DSN is available
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
   integrations: [
@@ -22,7 +24,8 @@ Sentry.init({
   replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
   replaysOnErrorSampleRate: 1.0,
   sendDefaultPii: true,
-});
+  });
+}
 
 // Create a client
 const queryClient = new QueryClient({

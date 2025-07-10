@@ -16,6 +16,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
     "@prisma/client": "^5.22.0",
+    "@sentry/react": "^7.99.0",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.2.2",
     "@tailwindcss/aspect-ratio": "^0.4.2",

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import CategoryIcons from '../components/search/CategoryIcons';
 import { useTranslation } from '../hooks/useTranslation';
+import SentryTest from '../components/SentryTest';
 
 // Enhanced asset category definitions with new digital categories
 const ASSET_CATEGORIES = [
@@ -425,6 +426,13 @@ const HomePage: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        {/* Sentry Test Component - Development Only */}
+        {import.meta.env.DEV && (
+          <div className="container mx-auto px-4 pt-4">
+            <SentryTest />
+          </div>
+        )}
+        
         {/* Hero Section */}
         <section className="relative overflow-hidden py-20 sm:py-32">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-500/5 to-purple-600/5"></div>
