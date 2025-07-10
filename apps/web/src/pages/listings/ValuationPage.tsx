@@ -16,15 +16,33 @@ import {
   AlertCircle,
   Zap,
   Target,
-  Shield
+  Shield,
+  Lock,
+  CreditCard,
+  X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { validateEmail } from '../../utils/emailValidation';
+import { useAuthStore } from '../../stores/authStore';
 import BusinessValuationTool from '../../components/analytics/BusinessValuationTool';
 
 const ValuationPage: React.FC = () => {
-  const [evaluationType, setEvaluationType] = useState<'quick' | 'detailed' | null>(null);
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
+  const [evaluationType, setEvaluationType] = useState<'quick' | 'detailed' | 'professional' | null>(null);
   const [step, setStep] = useState(1);
+
+  // Handle URL parameters for direct links
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+    if (type === 'detailed' && isAuthenticated) {
+      setEvaluationType('detailed');
+    } else if (type === 'professional') {
+      setEvaluationType('professional');
+    }
+  }, [isAuthenticated]);
   const [formData, setFormData] = useState({
     companyType: '',
     industry: '',
@@ -188,40 +206,114 @@ const ValuationPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                 Välj typ av utvärdering
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <button
-                  onClick={() => setEvaluationType('quick')}
-                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
-                >
-                  <div className="flex items-center mb-4">
-                    <Zap className="w-8 h-8 text-blue-600 mr-3" />
-                    <h3 className="text-xl font-semibold text-gray-900">Snabb utvärdering</h3>
-                  </div>
-                  <p className="text-gray-600 mb-4">
-                    Få en snabb uppskattning av ditt företags värde på bara 2 minuter.
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="w-4 h-4 mr-1" />
-                    2 minuter
-                  </div>
-                </button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Tier 1: Free Quick Valuation */}
+                <div className="relative">
+                  <button
+                    onClick={() => setEvaluationType('quick')}
+                    className="w-full p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        <Zap className="w-8 h-8 text-blue-600 mr-3" />
+                        <h3 className="text-xl font-semibold text-gray-900">Snabb utvärdering</h3>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        GRATIS
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Få en snabb uppskattning av ditt företags värde på bara 2 minuter.
+                    </p>
+                    <ul className="text-sm text-gray-500 mb-4 space-y-1">
+                      <li>• Grundläggande värderingsintervall</li>
+                      <li>• Branschbaserade multiplar</li>
+                      <li>• Ingen registrering krävs</li>
+                    </ul>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Clock className="w-4 h-4 mr-1" />
+                      2 minuter
+                    </div>
+                  </button>
+                </div>
                 
-                <button
-                  onClick={() => setEvaluationType('detailed')}
-                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all text-left"
-                >
-                  <div className="flex items-center mb-4">
-                    <Target className="w-8 h-8 text-green-600 mr-3" />
-                    <h3 className="text-xl font-semibold text-gray-900">Detaljerad utvärdering</h3>
-                  </div>
-                  <p className="text-gray-600 mb-4">
-                    Omfattande analys med professionell värdering från våra experter.
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="w-4 h-4 mr-1" />
-                    10-15 minuter
-                  </div>
-                </button>
+                {/* Tier 2: Detailed Analysis (Login Required) */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        toast.error('Du måste logga in för detaljerad analys');
+                        navigate('/login', { state: { returnTo: '/valuation?type=detailed' } });
+                        return;
+                      }
+                      setEvaluationType('detailed');
+                    }}
+                    className="w-full p-6 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all text-left"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        <Target className="w-8 h-8 text-green-600 mr-3" />
+                        <h3 className="text-xl font-semibold text-gray-900">Detaljerad analys</h3>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {!isAuthenticated && <Lock className="w-4 h-4 text-gray-400" />}
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          KONTO KRÄVS
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Omfattande analys med marknadsjämförelser och rekommendationer.
+                    </p>
+                    <ul className="text-sm text-gray-500 mb-4 space-y-1">
+                      <li>• Marknadsjämförelser & benchmarks</li>
+                      <li>• Detaljerad metodikanalys</li>
+                      <li>• Värderingsfaktorer & rekommendationer</li>
+                      <li>• Sparad historik</li>
+                    </ul>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Clock className="w-4 h-4 mr-1" />
+                      10-15 minuter
+                    </div>
+                  </button>
+                </div>
+
+                {/* Tier 3: Professional Valuation (Paid) */}
+                <div className="relative">
+                  <button
+                    onClick={() => setEvaluationType('professional')}
+                    className="w-full p-6 border-2 border-purple-200 bg-purple-50 rounded-xl hover:border-purple-400 hover:bg-purple-100 transition-all text-left"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        <Award className="w-8 h-8 text-purple-600 mr-3" />
+                        <h3 className="text-xl font-semibold text-gray-900">Professionell värdering</h3>
+                      </div>
+                      <span className="px-2 py-1 bg-purple-200 text-purple-800 text-xs font-medium rounded-full">
+                        PREMIUM
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Expertanalys med personlig konsultation och omfattande rapport.
+                    </p>
+                    <ul className="text-sm text-gray-500 mb-4 space-y-1">
+                      <li>• Personlig konsultation</li>
+                      <li>• Due diligence-rapport</li>
+                      <li>• Värderingsförbättringar</li>
+                      <li>• Professionell PDF-rapport</li>
+                    </ul>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-gray-500">
+                        <Clock className="w-4 h-4 mr-1" />
+                        2-3 dagar
+                      </div>
+                      <div className="flex items-center text-purple-600 font-semibold">
+                        <CreditCard className="w-4 h-4 mr-1" />
+                        2.500 SEK
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -290,6 +382,24 @@ const ValuationPage: React.FC = () => {
                   <Zap className="w-5 h-5 mr-2" />
                   Beräkna snabb värdering
                 </button>
+                
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Tips:</strong> För mer detaljerad analys med marknadsjämförelser och rekommendationer, 
+                    <button 
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          navigate('/login', { state: { returnTo: '/valuation?type=detailed' } });
+                        } else {
+                          setEvaluationType('detailed');
+                        }
+                      }}
+                      className="text-blue-600 underline ml-1"
+                    >
+                      prova vår detaljerade analys
+                    </button>
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -298,7 +408,10 @@ const ValuationPage: React.FC = () => {
           {evaluationType === 'detailed' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Detaljerad utvärdering</h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Detaljerad utvärdering</h2>
+                  <p className="text-sm text-gray-600 mt-1">Välkommen {user?.name}! Din analys sparas automatiskt.</p>
+                </div>
                 <button
                   onClick={() => setEvaluationType(null)}
                   className="text-gray-500 hover:text-gray-700"
@@ -307,6 +420,170 @@ const ValuationPage: React.FC = () => {
                 </button>
               </div>
               <BusinessValuationTool />
+            </div>
+          )}
+
+          {/* Professional Valuation */}
+          {evaluationType === 'professional' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Professionell värdering</h2>
+                <button
+                  onClick={() => setEvaluationType(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Service Description */}
+                <div>
+                  <div className="bg-purple-50 rounded-lg p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-purple-900 mb-3">
+                      Vad ingår i den professionella värderingen?
+                    </h3>
+                    <ul className="space-y-2 text-sm text-purple-800">
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Personlig konsultation med våra M&A-experter (60 min)
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Omfattande due diligence-analys
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Detaljerad marknads- och konkurrentanalys
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Rekommendationer för värderingsförbättringar
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Professionell värderingsrapport (PDF)
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-purple-600 flex-shrink-0" />
+                        Uppföljning och support i 30 dagar
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">Våra experter</h4>
+                    <p className="text-sm text-gray-600">
+                      Vårt team består av certifierade företagsvärderare med över 15 års erfarenhet 
+                      från M&A-transaktioner värda över 2 miljarder SEK.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contact Form & Payment */}
+                <div>
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Beställ professionell värdering
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Företagsnamn <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="Ditt Företag AB"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Ditt namn <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={user?.name || ''}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="Förnamn Efternamn"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          E-post <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          defaultValue={user?.email || ''}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="din@email.se"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Telefon <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="+46 70 123 45 67"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Årsomsättning (SEK)
+                        </label>
+                        <input
+                          type="number"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="5000000"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Önskad tidpunkt för konsultation
+                        </label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                          <option>Inom 1 vecka</option>
+                          <option>Inom 2 veckor</option>
+                          <option>Inom 1 månad</option>
+                          <option>Flexibel</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-semibold text-gray-900">Total kostnad:</span>
+                        <span className="text-2xl font-bold text-purple-600">2.500 SEK</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Inkl. moms. Pengarna återbetalas om du inte är nöjd.
+                      </p>
+                      
+                      <button
+                        onClick={() => {
+                          toast.success('Beställning mottagen! Vi kontaktar dig inom 24 timmar.');
+                        }}
+                        className="w-full px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+                      >
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Beställ och betala
+                      </button>
+                      
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        Säker betalning via Stripe
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -557,36 +834,63 @@ const ValuationPage: React.FC = () => {
                   För en mer detaljerad analys rekommenderar vi en professionell värdering.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="space-y-4">
                   {evaluationType === 'quick' && (
-                    <button
-                      onClick={() => {
-                        setEvaluationType('detailed');
-                        setStep(1);
-                        setValuationResult(null);
-                      }}
-                      className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      Få detaljerad värdering
-                    </button>
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">🚀 Få mer detaljerad analys</h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Denna snabbvärdering ger en grundläggande uppskattning. För marknadsjämförelser, 
+                        detaljerad metodikanalys och professionella rekommendationer:
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              navigate('/login', { state: { returnTo: '/valuation?type=detailed' } });
+                            } else {
+                              setEvaluationType('detailed');
+                              setStep(1);
+                              setValuationResult(null);
+                            }
+                          }}
+                          className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+                        >
+                          <Target className="w-4 h-4 mr-2" />
+                          {!isAuthenticated ? 'Logga in för detaljerad analys' : 'Få detaljerad analys'}
+                        </button>
+                        <button
+                          onClick={() => setEvaluationType('professional')}
+                          className="px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+                        >
+                          <Award className="w-4 h-4 mr-2" />
+                          Professionell värdering (2.500 SEK)
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  <button
-                    onClick={requestDetailedValuation}
-                    className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Begär professionell värdering
-                  </button>
-                  <button
-                    onClick={() => { 
-                      setStep(1); 
-                      setValuationResult(null); 
-                      setEvaluationType(null);
-                      setQuickEvaluationData({ revenue: '', industry: '', employees: '' });
-                    }}
-                    className="px-8 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Ny värdering
-                  </button>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {evaluationType !== 'quick' && (
+                      <button
+                        onClick={() => setEvaluationType('professional')}
+                        className="px-8 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+                      >
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Begär professionell värdering
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { 
+                        setStep(1); 
+                        setValuationResult(null); 
+                        setEvaluationType(null);
+                        setQuickEvaluationData({ revenue: '', industry: '', employees: '' });
+                      }}
+                      className="px-8 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Ny värdering
+                    </button>
+                  </div>
                 </div>
               </div>
 

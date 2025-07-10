@@ -26,6 +26,9 @@ import CategoryIcons from '../../components/search/CategoryIcons';
 import HotDealsSection from '../../components/listings/HotDealsSection';
 import { HotDealBanner } from '../../components/listings/HotDealBanner';
 import { PremiumEmblem, PremiumEmblemType } from '../../components/listings/PremiumEmblem';
+import { useListingInterestAuthGate } from '../../hooks/useAuthGate';
+import MobileAuthModal from '../../components/mobile/MobileAuthModal';
+import { useDeviceDetection } from '../../utils/deviceDetection';
 
 // Types
 interface Listing {
@@ -96,6 +99,16 @@ const ListingsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Mobile authentication
+  const { 
+    handleShowInterest, 
+    isAuthModalOpen, 
+    closeAuthModal, 
+    authModalType, 
+    setAuthModalType 
+  } = useListingInterestAuthGate();
+  const { isMobile, isTablet } = useDeviceDetection();
 
   // Current filters from URL
   const currentFilters = {
@@ -420,12 +433,24 @@ const ListingsPage: React.FC = () => {
                   <div className="text-2xl font-bold text-gray-900 mb-3">
                     {formatPrice(listing.askingPrice, listing.currency)}
                   </div>
-                  <Link 
-                    to={`/listings/${listing.id}`}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Visa detaljer
-                  </Link>
+                  {(isMobile || isTablet) ? (
+                    <button 
+                      onClick={() => handleShowInterest(listing.id, () => {
+                        // After auth success, navigate to listing
+                        window.location.href = `/listings/${listing.id}`;
+                      })}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Visa intresse
+                    </button>
+                  ) : (
+                    <Link 
+                      to={`/listings/${listing.id}`}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Visa detaljer
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -522,12 +547,24 @@ const ListingsPage: React.FC = () => {
               </div>
             </div>
             
-            <Link 
-              to={`/listings/${listing.id}`}
-              className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              Visa detaljer
-            </Link>
+            {(isMobile || isTablet) ? (
+              <button 
+                onClick={() => handleShowInterest(listing.id, () => {
+                  // After auth success, navigate to listing
+                  window.location.href = `/listings/${listing.id}`;
+                })}
+                className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Visa intresse
+              </button>
+            ) : (
+              <Link 
+                to={`/listings/${listing.id}`}
+                className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Visa detaljer
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -877,6 +914,18 @@ const ListingsPage: React.FC = () => {
             </section>
           </>
         )}
+
+        {/* Mobile Authentication Modal */}
+        <MobileAuthModal
+          isOpen={isAuthModalOpen}
+          onClose={closeAuthModal}
+          type={authModalType}
+          onTypeChange={setAuthModalType}
+          onSuccess={() => {
+            // Auth successful, user can now interact with listings
+            closeAuthModal();
+          }}
+        />
       </div>
     </>
   );

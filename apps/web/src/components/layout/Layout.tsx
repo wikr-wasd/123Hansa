@@ -5,6 +5,10 @@ import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import ChatSystem from '../chat/ChatSystem';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDeviceDetection } from '../../utils/deviceDetection';
+import MobileCrowdfundingFAB from '../mobile/MobileCrowdfundingFAB';
+import PWAInstallPrompt from '../mobile/PWAInstallPrompt';
+import { useMobileScrollControl } from '../../utils/mobileScrollController';
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,6 +17,10 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, isAuthenticated, logout, isLoading } = useAuthStore();
   const { t } = useTranslation();
+  const { isMobile, isTablet } = useDeviceDetection();
+  
+  // Initialize mobile scroll control to prevent auto-scroll issues
+  useMobileScrollControl();
 
   const handleLogout = async () => {
     await logout();
@@ -57,15 +65,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
               </div>
               
-              {/* Crowdfunding Section - Separate & Unique */}
+              {/* Crowdfunding Section - Enhanced for Mobile */}
               <div className="relative">
                 <div className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-xl opacity-30"></div>
                 <Link 
                   to="/crowdfunding" 
-                  className="relative bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                  className={`relative bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center ${
+                    (isMobile || isTablet) ? 'ring-2 ring-emerald-300 ring-opacity-50 animate-pulse' : ''
+                  }`}
                 >
                   <span className="mr-2 text-lg">🚀</span>
                   {t('crowdfunding')}
+                  {(isMobile || isTablet) && (
+                    <span className="ml-2 bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-bold">
+                      NY!
+                    </span>
+                  )}
                 </Link>
               </div>
               
@@ -108,8 +123,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               )}
             </nav>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden">
+            {/* Mobile menu and enhanced crowdfunding for mobile */}
+            <div className="md:hidden flex items-center space-x-3">
+              {/* Mobile Crowdfunding Button - Always Visible */}
+              <Link
+                to="/crowdfunding"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg flex items-center space-x-1 transform hover:scale-105 transition-all duration-200"
+              >
+                <span className="text-base">🚀</span>
+                <span>Crowdfunding</span>
+              </Link>
+              
+              {/* Mobile menu button */}
               <button className="text-nordic-gray-700 hover:text-nordic-blue-600">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -174,6 +199,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           currentUserType="user"
         />
       )}
+
+      {/* Mobile Crowdfunding FAB - Only on mobile/tablet */}
+      <MobileCrowdfundingFAB />
+
+      {/* PWA Install Prompt - Only on mobile/tablet */}
+      <PWAInstallPrompt />
 
     </div>
   );
