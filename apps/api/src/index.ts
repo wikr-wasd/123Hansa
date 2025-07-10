@@ -1,20 +1,7 @@
 import dotenv from 'dotenv';
-import * as Sentry from '@sentry/node';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
 // Load environment variables first
 dotenv.config();
-
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV || 'development',
-  integrations: [
-    nodeProfilingIntegration(),
-  ],
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-  profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-});
 
 import express from 'express';
 import cors from 'cors';
@@ -358,13 +345,11 @@ startServer();
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught exception:', error);
-  Sentry.captureException(error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled rejection at:', promise, 'reason:', reason);
-  Sentry.captureException(reason);
   process.exit(1);
 });
 
