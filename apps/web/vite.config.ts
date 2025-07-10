@@ -34,11 +34,12 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       }
     }),
-    sentryVitePlugin({
-      org: "123hansa",
-      project: "123hansa-web",
+    // Only include Sentry plugin if auth token is available
+    ...(process.env.SENTRY_AUTH_TOKEN ? [sentryVitePlugin({
+      org: "4509641117728768",
+      project: "4509643505795152",
       authToken: process.env.SENTRY_AUTH_TOKEN,
-    })
+    })] : [])
   ],
   resolve: {
     alias: {
