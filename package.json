@@ -84,6 +84,10 @@
   "author": "123hansa Team",
   "license": "UNLICENSED",
   "dependencies": {
+    "@sentry/node": "^9.36.0",
+    "@sentry/profiling-node": "^9.36.0",
+    "@sentry/react": "^9.36.0",
+    "@sentry/vite-plugin": "^3.5.0",
     "cors": "^2.8.5",
     "express": "^4.21.2"
   }

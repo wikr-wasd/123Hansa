@@ -28,7 +28,16 @@ import {
   Briefcase,
   ShoppingCart,
   MessageSquare,
-  Star
+  Star,
+  HeartHandshake,
+  Award,
+  Clock,
+  Shield,
+  Zap,
+  Phone,
+  Mail,
+  User,
+  Timer
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -1360,223 +1369,361 @@ const AdminPanel: React.FC = () => {
 
           {/* Support Tab */}
           {activeTab === 'support' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Support Ticket Management</h2>
-                <div className="flex items-center space-x-3">
-                  <select 
-                    value={ticketFilter} 
-                    onChange={(e) => setTicketFilter(e.target.value)}
-                    className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-                  >
-                    <option value="all">Alla tickets</option>
-                    <option value="open">Öppna</option>
-                    <option value="in_progress">Pågående</option>
-                    <option value="resolved">Lösta</option>
-                    <option value="closed">Stängda</option>
-                  </select>
-                  <span className="text-sm text-gray-600">
-                    {filteredTickets.length} av {supportTickets.length} tickets
-                  </span>
-                </div>
-              </div>
-
-              {/* Support Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex items-center">
-                    <MessageSquare className="w-8 h-8 text-blue-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Öppna tickets</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {supportTickets.filter(t => t.status === 'open').length}
-                      </p>
+            <div className="space-y-8">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-bold mb-2">Support & Kundservice 🎯</h2>
+                    <p className="text-blue-100 text-lg">Professionell support för alla våra användare</p>
+                    <div className="flex items-center mt-4 text-blue-100">
+                      <HeartHandshake className="w-5 h-5 mr-2" />
+                      <span className="text-sm">Vi hjälper dig att lyckas</span>
                     </div>
                   </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex items-center">
-                    <AlertTriangle className="w-8 h-8 text-yellow-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Hög prioritet</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {supportTickets.filter(t => t.priority === 'high').length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex items-center">
-                    <Activity className="w-8 h-8 text-orange-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Pågående</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {supportTickets.filter(t => t.status === 'in_progress').length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex items-center">
-                    <CheckCircle className="w-8 h-8 text-green-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Lösta</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {supportTickets.filter(t => t.status === 'resolved').length}
-                      </p>
+                  <div className="hidden md:block">
+                    <div className="w-20 h-20 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                      <MessageSquare className="w-10 h-10 text-white" />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Tickets Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Ticket List */}
-                <div className="lg:col-span-2">
-                  <div className="bg-white rounded-lg shadow-sm">
-                    <div className="p-6 border-b border-gray-200">
-                      <h3 className="text-lg font-medium text-gray-900">Support Tickets</h3>
+              {/* Support Stats with Beautiful Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                          <MessageSquare className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">Öppna Tickets</p>
+                          <p className="text-3xl font-bold text-gray-900">{supportTickets.filter(t => t.status === 'open').length}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="divide-y divide-gray-200">
-                      {filteredTickets.map((ticket) => (
-                        <div 
-                          key={ticket.id} 
-                          className={`p-6 hover:bg-gray-50 cursor-pointer ${selectedTicket?.id === ticket.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
-                          onClick={() => setSelectedTicket(ticket)}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTicketStatusColor(ticket.status)}`}>
-                                  {ticket.status}
-                                </span>
-                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTicketPriorityColor(ticket.priority)}`}>
-                                  {ticket.priority}
-                                </span>
-                                <span className="text-xs text-gray-500">#{ticket.id}</span>
-                              </div>
-                              <h4 className="text-lg font-medium text-gray-900 mb-1">{ticket.subject}</h4>
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{ticket.description}</p>
-                              <div className="flex items-center space-x-4 text-xs text-gray-500">
-                                <span>Från: {ticket.user.name}</span>
-                                <span>•</span>
-                                <span>Kategori: {ticket.category}</span>
-                                <span>•</span>
-                                <span>{formatDate(ticket.createdAt)}</span>
-                              </div>
-                            </div>
-                            <div className="ml-4 flex-shrink-0">
-                              {ticket.assignedTo && (
-                                <span className="text-xs text-gray-500">Tilldelad</span>
-                              )}
-                            </div>
+                    <div className="text-blue-600 text-sm font-medium">
+                      <Activity className="w-4 h-4 inline mr-1" />
+                      Aktiv
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                    <p className="text-xs text-blue-700">📨 Nya förfrågningar från kunder</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                          <AlertTriangle className="w-6 h-6 text-yellow-600" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">Hög Prioritet</p>
+                          <p className="text-3xl font-bold text-gray-900">{supportTickets.filter(t => t.priority === 'high').length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-yellow-600 text-sm font-medium">
+                      <Zap className="w-4 h-4 inline mr-1" />
+                      Brådskande
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-yellow-50 rounded-lg p-3">
+                    <p className="text-xs text-yellow-700">⚡ Kräver omedelbar uppmärksamhet</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                          <Clock className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">Pågående</p>
+                          <p className="text-3xl font-bold text-gray-900">{supportTickets.filter(t => t.status === 'in_progress').length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-orange-600 text-sm font-medium">
+                      <Timer className="w-4 h-4 inline mr-1" />
+                      Arbetar
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-orange-50 rounded-lg p-3">
+                    <p className="text-xs text-orange-700">🔄 Aktivt bearbetas av teamet</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                          <CheckCircle className="w-6 h-6 text-green-600" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">Lösta</p>
+                          <p className="text-3xl font-bold text-gray-900">{supportTickets.filter(t => t.status === 'resolved').length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-green-600 text-sm font-medium">
+                      <Award className="w-4 h-4 inline mr-1" />
+                      Klart
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-green-50 rounded-lg p-3">
+                    <p className="text-xs text-green-700">✅ Framgångsrikt hanterade ärenden</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Section */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                    <Users className="w-6 h-6 mr-2 text-blue-600" />
+                    Support Team
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Alla teammedlemmar</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-600">Online</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    {
+                      id: 'team-001',
+                      name: 'Anna Lindberg',
+                      role: 'Senior Support Manager',
+                      avatar: 'AL',
+                      status: 'online',
+                      activeTickets: 12,
+                      resolvedToday: 8,
+                      responseTime: '2 min',
+                      expertise: ['Teknisk Support', 'Betalningar', 'Premium Accounts'],
+                      contact: { email: 'anna@123hansa.se', phone: '+46 70 123 4567' }
+                    },
+                    {
+                      id: 'team-002',
+                      name: 'Erik Johansson',
+                      role: 'Technical Support Specialist',
+                      avatar: 'EJ',
+                      status: 'online',
+                      activeTickets: 8,
+                      resolvedToday: 5,
+                      responseTime: '3 min',
+                      expertise: ['API Integration', 'Tekniska Problem', 'Utvecklarstöd'],
+                      contact: { email: 'erik@123hansa.se', phone: '+46 70 987 6543' }
+                    },
+                    {
+                      id: 'team-003',
+                      name: 'Sofia Andersson',
+                      role: 'Customer Success Agent',
+                      avatar: 'SA',
+                      status: 'online',
+                      activeTickets: 6,
+                      resolvedToday: 11,
+                      responseTime: '1 min',
+                      expertise: ['Kundframgång', 'Onboarding', 'Marknadsföring'],
+                      contact: { email: 'sofia@123hansa.se', phone: '+46 70 555 9876' }
+                    }
+                  ].map((member, index) => (
+                    <div key={member.id} className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="relative">
+                          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${
+                            index === 0 ? 'from-blue-500 to-purple-600' : 
+                            index === 1 ? 'from-green-500 to-teal-600' : 
+                            'from-purple-500 to-pink-600'
+                          } flex items-center justify-center text-white font-bold text-lg`}>
+                            {member.avatar}
+                          </div>
+                          {member.status === 'online' && (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{member.name}</h4>
+                          <p className="text-sm text-gray-600">{member.role}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="bg-white rounded-lg p-2">
+                            <div className="text-lg font-bold text-blue-600">{member.activeTickets}</div>
+                            <div className="text-xs text-gray-500">Aktiva</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-2">
+                            <div className="text-lg font-bold text-green-600">{member.resolvedToday}</div>
+                            <div className="text-xs text-gray-500">Lösta idag</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-2">
+                            <div className="text-lg font-bold text-orange-600">{member.responseTime}</div>
+                            <div className="text-xs text-gray-500">Svarstid</div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
 
-                {/* Ticket Detail */}
-                <div className="lg:col-span-1">
-                  {selectedTicket ? (
-                    <div className="bg-white rounded-lg shadow-sm">
-                      <div className="p-6 border-b border-gray-200">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-medium text-gray-900">Ticket Detaljer</h3>
-                          <button 
-                            onClick={() => setSelectedTicket(null)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <XCircle className="w-5 h-5" />
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-700 mb-2">Specialområden:</h5>
+                          <div className="flex flex-wrap gap-1">
+                            {member.expertise.map((skill, skillIndex) => (
+                              <span key={skillIndex} className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                          <button className="flex items-center text-blue-600 hover:text-blue-700">
+                            <Mail className="w-4 h-4 mr-1" />
+                            <span className="text-sm">E-post</span>
+                          </button>
+                          <button className="flex items-center text-green-600 hover:text-green-700">
+                            <Phone className="w-4 h-4 mr-1" />
+                            <span className="text-sm">Ring</span>
+                          </button>
+                          <button className="flex items-center text-purple-600 hover:text-purple-700">
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            <span className="text-sm">Chatta</span>
                           </button>
                         </div>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select 
-                              value={selectedTicket.status}
-                              onChange={(e) => handleTicketStatusChange(selectedTicket.id, e.target.value)}
-                              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                            >
-                              <option value="open">Öppen</option>
-                              <option value="in_progress">Pågående</option>
-                              <option value="resolved">Löst</option>
-                              <option value="closed">Stängd</option>
-                            </select>
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tilldelning</label>
-                            <select 
-                              value={selectedTicket.assignedTo || ''}
-                              onChange={(e) => handleAssignTicket(selectedTicket.id, e.target.value)}
-                              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                            >
-                              <option value="">Ej tilldelad</option>
-                              <option value="admin-001">Support Agent 1</option>
-                              <option value="admin-002">Support Agent 2</option>
-                              <option value="admin-003">Senior Support</option>
-                            </select>
-                          </div>
-                        </div>
                       </div>
-                      
-                      {/* Conversation */}
-                      <div className="p-6 border-b border-gray-200 max-h-64 overflow-y-auto">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3">Konversation</h4>
-                        <div className="space-y-3">
-                          <div className="bg-gray-100 rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium text-gray-900">{selectedTicket.user.name}</span>
-                              <span className="text-xs text-gray-500">{formatDate(selectedTicket.createdAt)}</span>
-                            </div>
-                            <p className="text-sm text-gray-700">{selectedTicket.description}</p>
-                          </div>
-                          
-                          {selectedTicket.responses.map((response: any) => (
-                            <div key={response.id} className="bg-blue-50 rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-medium text-blue-900">{response.author}</span>
-                                <span className="text-xs text-blue-600">{formatDate(response.timestamp)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tickets Management */}
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-900">Support Tickets</h3>
+                    <div className="flex items-center space-x-3">
+                      <select 
+                        value={ticketFilter} 
+                        onChange={(e) => setTicketFilter(e.target.value)}
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="all">Alla tickets</option>
+                        <option value="open">Öppna</option>
+                        <option value="in_progress">Pågående</option>
+                        <option value="resolved">Lösta</option>
+                        <option value="closed">Stängda</option>
+                      </select>
+                      <span className="text-sm text-gray-600">
+                        {filteredTickets.length} av {supportTickets.length} tickets
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ticket</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kund</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Prioritet</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tilldelad</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Åtgärder</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredTickets.map((ticket) => (
+                        <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-4">
+                                <MessageSquare className="w-5 h-5 text-white" />
                               </div>
-                              <p className="text-sm text-blue-800">{response.message}</p>
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-gray-900 truncate">#{ticket.id}</div>
+                                <div className="text-sm text-gray-600 mt-1">{ticket.subject}</div>
+                                <div className="text-xs text-gray-400 mt-1">{formatDate(ticket.createdAt)}</div>
+                              </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {/* Response Form */}
-                      <div className="p-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Svar till kund</label>
-                        <textarea
-                          value={ticketResponse}
-                          onChange={(e) => setTicketResponse(e.target.value)}
-                          rows={4}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                          placeholder="Skriv ditt svar här..."
-                        />
-                        <button
-                          onClick={() => handleTicketResponse(selectedTicket.id)}
-                          disabled={!ticketResponse.trim()}
-                          className="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          Skicka svar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                      <div className="text-center py-12">
-                        <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Välj en ticket</h3>
-                        <p className="text-gray-600">
-                          Klicka på en ticket till vänster för att visa detaljer och hantera konversationen.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                <User className="w-4 h-4 text-gray-600" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{ticket.user.name}</div>
+                                <div className="text-xs text-gray-500">{ticket.category}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getTicketStatusColor(ticket.status)}`}>
+                              {ticket.status === 'open' ? 'Öppen' : 
+                               ticket.status === 'in_progress' ? 'Pågående' : 
+                               ticket.status === 'resolved' ? 'Löst' : 'Stängd'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getTicketPriorityColor(ticket.priority)}`}>
+                              {ticket.priority === 'high' ? 'Hög' : ticket.priority === 'medium' ? 'Medium' : 'Låg'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {ticket.assignedTo ? 'Tilldelad' : 'Ej tilldelad'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={() => setSelectedTicket(ticket)}
+                                className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                title="Visa detaljer"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => toast.success('Redigerar ticket...')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Redigera"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => toast.success('Markerar som löst...')}
+                                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                title="Markera som löst"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span>Visar {filteredTickets.length} av {supportTickets.length} tickets</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700">Föregående</button>
+                    <span className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded">1</span>
+                    <button className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700">Nästa</button>
+                  </div>
                 </div>
               </div>
             </div>

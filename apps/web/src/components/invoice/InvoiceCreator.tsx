@@ -48,6 +48,10 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
     notes: 'Tack för ditt förtroende! Betalning ska ske inom 30 dagar.',
     vatRate: 25 // 25% Swedish VAT
   });
+  
+  const [savedInvoices, setSavedInvoices] = useState<any[]>([]);
+  const [showInvoiceHistory, setShowInvoiceHistory] = useState(false);
+  const [currentInvoiceId, setCurrentInvoiceId] = useState<string | null>(null);
 
   const addInvoiceItem = () => {
     const newItem: InvoiceItem = {
@@ -122,13 +126,8 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
   };
 
   const generateInvoice = () => {
-    if (!selectedListing || !buyerInfo.name || !buyerInfo.email) {
-      toast.error('Vänligen fyll i all obligatorisk information');
-      return;
-    }
-
     const invoiceData = {
-      id: `INV-${Date.now()}`,
+      id: currentInvoiceId || `INV-${Date.now()}`,
       customerId,
       customerName,
       listingId: selectedListing,
@@ -144,12 +143,23 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
       status: 'draft'
     };
 
-    // Save invoice (in real app, this would be an API call)
+    // Save invoice to both localStorage and state
     localStorage.setItem(`invoice-${invoiceData.id}`, JSON.stringify(invoiceData));
+    setSavedInvoices(prev => {
+      const existingIndex = prev.findIndex(inv => inv.id === invoiceData.id);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = invoiceData;
+        return updated;
+      }
+      return [...prev, invoiceData];
+    });
     
-    toast.success('Faktura skapad! Du kan nu ladda ner eller skicka den.');
-    
-    // Reset form
+    setCurrentInvoiceId(invoiceData.id);
+    toast.success('Faktura sparad! Du kan nu ladda ner eller skicka den.');
+  };
+
+  const createNewInvoice = () => {
     setBuyerInfo({
       name: '',
       email: '',
@@ -167,20 +177,72 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
       price: 0,
       total: 0
     }]);
+    setCurrentInvoiceId(null);
+    toast.success('Ny ren faktura skapad');
   };
 
   const downloadInvoice = () => {
-    toast.success('Faktura laddas ner...');
-    // In real app, this would generate and download a PDF
+    if (!currentInvoiceId) {
+      toast.error('Spara fakturen först');
+      return;
+    }
+    
+    // Simulate PDF generation and download
+    const invoiceData = savedInvoices.find(inv => inv.id === currentInvoiceId);
+    if (invoiceData) {
+      const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentInvoiceId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Faktura nedladdad som JSON (i produktionsmiljö skulle detta vara en PDF)');
+    }
   };
 
   const sendInvoice = () => {
+    if (!currentInvoiceId) {
+      toast.error('Spara fakturen först');
+      return;
+    }
+    
     if (!buyerInfo.email) {
       toast.error('Vänligen ange köparens e-postadress');
       return;
     }
-    toast.success(`Faktura skickas till ${buyerInfo.email}`);
-    // In real app, this would send the invoice via email
+    
+    // Simulate email sending
+    setTimeout(() => {
+      toast.success(`Faktura ${currentInvoiceId} skickad till ${buyerInfo.email}`);
+      
+      // Update invoice status to sent
+      setSavedInvoices(prev => prev.map(inv => 
+        inv.id === currentInvoiceId 
+          ? { ...inv, status: 'sent', sentAt: new Date().toISOString() }
+          : inv
+      ));
+    }, 1000);
+  };
+
+  const loadInvoice = (invoiceId: string) => {
+    const invoice = savedInvoices.find(inv => inv.id === invoiceId);
+    if (invoice) {
+      setBuyerInfo(invoice.buyerInfo);
+      setSelectedListing(invoice.listingId);
+      setInvoiceItems(invoice.items);
+      setInvoiceSettings({
+        dueDate: invoice.dueDate,
+        currency: invoice.currency,
+        notes: invoice.notes,
+        vatRate: 25
+      });
+      setCurrentInvoiceId(invoice.id);
+      toast.success('Faktura laddad');
+    }
   };
 
   return (
@@ -189,10 +251,28 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Skapa Faktura</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              {currentInvoiceId ? `Redigera Faktura ${currentInvoiceId}` : 'Skapa Faktura'}
+            </h2>
             <p className="text-blue-100">Skapa och skicka professionella fakturor för dina affärer</p>
           </div>
-          <FileText className="w-12 h-12 text-blue-200" />
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={createNewInvoice}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors flex items-center"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Ny ren faktura
+            </button>
+            <button
+              onClick={() => setShowInvoiceHistory(!showInvoiceHistory)}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors flex items-center"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Tidigare fakturor ({savedInvoices.length})
+            </button>
+            <FileText className="w-12 h-12 text-blue-200" />
+          </div>
         </div>
       </div>
 
@@ -456,30 +536,99 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
             <div className="space-y-3">
               <button
                 onClick={generateInvoice}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
               >
-                Skapa Faktura
+                <FileText className="w-4 h-4 mr-2" />
+                {currentInvoiceId ? 'Uppdatera Faktura' : 'Spara Faktura'}
               </button>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={downloadInvoice}
-                  className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                  disabled={!currentInvoiceId}
+                  className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Ladda ner
                 </button>
                 <button
                   onClick={sendInvoice}
-                  className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  disabled={!currentInvoiceId || !buyerInfo.email}
+                  className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Skicka
                 </button>
               </div>
+              {currentInvoiceId && (
+                <div className="text-center pt-2">
+                  <span className="text-sm text-gray-500">Faktura ID: {currentInvoiceId}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Invoice History */}
+      {showInvoiceHistory && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <FileText className="w-5 h-5 mr-2 text-blue-600" />
+            Sparade Fakturor ({savedInvoices.length})
+          </h3>
+          {savedInvoices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p>Inga sparade fakturor ännu</p>
+              <p className="text-sm">Skapa din första faktura för att se den här</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {savedInvoices.map((invoice) => (
+                <div key={invoice.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-medium text-gray-900">{invoice.id}</h4>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          invoice.status === 'sent' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {invoice.status === 'sent' ? 'Skickad' : 'Utkast'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        <p>Köpare: {invoice.buyerInfo.name}</p>
+                        <p>Total: {formatCurrency(invoice.total)}</p>
+                        <p>Skapad: {new Date(invoice.createdAt).toLocaleDateString('sv-SE')}</p>
+                        {invoice.sentAt && (
+                          <p>Skickad: {new Date(invoice.sentAt).toLocaleDateString('sv-SE')}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => loadInvoice(invoice.id)}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Ladda
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCurrentInvoiceId(invoice.id);
+                          downloadInvoice();
+                        }}
+                        className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                      >
+                        Ladda ner
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

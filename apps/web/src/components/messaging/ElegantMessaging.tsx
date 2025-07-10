@@ -85,9 +85,10 @@ const ElegantMessaging: React.FC<ElegantMessagingProps> = ({
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Remove auto-scroll on conversation change - let users control scroll position
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -120,6 +121,8 @@ const ElegantMessaging: React.FC<ElegantMessagingProps> = ({
     if (newMessage.trim() && activeConversationId) {
       onMessageSend(activeConversationId, newMessage.trim());
       setNewMessage('');
+      // Scroll to bottom after sending message
+      setTimeout(() => scrollToBottom(), 100);
     }
   };
 

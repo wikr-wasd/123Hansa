@@ -20,6 +20,13 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
     smsNotifications: false,
     publicContact: false
   });
+  const [editingListing, setEditingListing] = useState<string | null>(null);
+  const [deletedListings, setDeletedListings] = useState<Array<{
+    id: string;
+    listing: any;
+    deletedAt: number;
+  }>>([]);
+  const [showDeletedListings, setShowDeletedListings] = useState(false);
 
   // Mock customer data based on customerId
   const getCustomerData = (id: string) => {
@@ -217,6 +224,48 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
   // Mock conversation data
   const mockConversations = [
     {
+      id: 'support',
+      name: '🛠️ 123hansa Support',
+      avatar: undefined,
+      lastMessage: 'Hej! Hur kan vi hjälpa dig idag?',
+      lastMessageTime: '2024-06-26T16:00:00Z',
+      unreadCount: 0,
+      isOnline: true,
+      isTyping: false,
+      isPinned: true,
+      isArchived: false,
+      listingId: undefined,
+      listingTitle: 'Support Chat'
+    },
+    {
+      id: 'marketing',
+      name: '📈 123hansa Marketing',
+      avatar: undefined,
+      lastMessage: 'Vi hjälper dig optimera dina annonser för bästa resultat',
+      lastMessageTime: '2024-06-26T15:30:00Z',
+      unreadCount: 0,
+      isOnline: true,
+      isTyping: false,
+      isPinned: true,
+      isArchived: false,
+      listingId: undefined,
+      listingTitle: 'Marketing Support'
+    },
+    {
+      id: 'sales',
+      name: '💼 123hansa Försäljning',
+      avatar: undefined,
+      lastMessage: 'Låt oss hjälpa dig med din försäljningsprocess',
+      lastMessageTime: '2024-06-26T15:00:00Z',
+      unreadCount: 0,
+      isOnline: true,
+      isTyping: false,
+      isPinned: true,
+      isArchived: false,
+      listingId: undefined,
+      listingTitle: 'Sales Support'
+    },
+    {
       id: '1',
       name: 'Erik Johansson',
       avatar: undefined,
@@ -225,7 +274,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
       unreadCount: 2,
       isOnline: true,
       isTyping: false,
-      isPinned: true,
+      isPinned: false,
       isArchived: false,
       listingId: '1',
       listingTitle: 'TechStartup AB'
@@ -366,6 +415,49 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const handleEditListing = (listingId: string) => {
+    setEditingListing(listingId);
+    toast.success('Redigering aktiverad');
+  };
+
+  const handleDeleteListing = (listingId: string) => {
+    const listing = customer.listings.find(l => l.id === listingId);
+    if (listing) {
+      setDeletedListings(prev => [...prev, {
+        id: listingId,
+        listing: listing,
+        deletedAt: Date.now()
+      }]);
+      toast.success('Annons raderad. Du kan ångra inom 1 timme.');
+    }
+  };
+
+  const handleRestoreListing = (listingId: string) => {
+    const deletedListing = deletedListings.find(dl => dl.id === listingId);
+    if (deletedListing) {
+      setDeletedListings(prev => prev.filter(dl => dl.id !== listingId));
+      toast.success('Annons återställd!');
+    }
+  };
+
+  const handleSaveListing = (listingId: string) => {
+    setEditingListing(null);
+    toast.success('Ändringar sparade');
+  };
+
+  const canRestoreListing = (deletedAt: number) => {
+    const oneHourInMs = 60 * 60 * 1000;
+    return (Date.now() - deletedAt) < oneHourInMs;
+  };
+
+  const activeListings = customer.listings.filter(listing => 
+    !deletedListings.some(dl => dl.id === listing.id)
+  );
+
+  const restorableListings = deletedListings.filter(dl => 
+    canRestoreListing(dl.deletedAt)
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -690,8 +782,17 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-600">
-                  {customer.stats.activeListings} aktiva annonser
+                  {activeListings.length} aktiva annonser
                 </div>
+                {restorableListings.length > 0 && (
+                  <button 
+                    onClick={() => setShowDeletedListings(!showDeletedListings)}
+                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center"
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    {restorableListings.length} kan återställas
+                  </button>
+                )}
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                   <Building2 className="w-4 h-4 mr-2" />
                   Ny Annons
@@ -699,7 +800,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
               </div>
             </div>
 
-            {customer.listings.length > 0 ? (
+            {activeListings.length > 0 ? (
               <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -714,7 +815,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {customer.listings.map((listing) => (
+                      {activeListings.map((listing) => (
                         <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center">
@@ -771,9 +872,7 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => {
-                                  toast.success(`Redigerar: ${listing.title}`);
-                                }}
+                                onClick={() => handleEditListing(listing.id)}
                                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 title="Redigera annons"
                               >
@@ -781,8 +880,8 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                               </button>
                               <button 
                                 onClick={() => {
-                                  if (confirm(`Är du säker på att du vill ta bort "${listing.title}"?`)) {
-                                    toast.success(`${listing.title} har tagits bort`);
+                                  if (confirm(`Är du säker på att du vill ta bort "${listing.title}"? Du kan ångra detta inom 1 timme.`)) {
+                                    handleDeleteListing(listing.id);
                                   }
                                 }}
                                 className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
@@ -838,6 +937,45 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                 </button>
               </div>
             )}
+
+            {/* Deleted Listings - Can be restored within 1 hour */}
+            {showDeletedListings && restorableListings.length > 0 && (
+              <div className="bg-orange-50 rounded-xl border border-orange-200 p-6">
+                <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center">
+                  <Clock className="w-5 h-5 mr-2" />
+                  Raderade annonser (kan återställas inom 1 timme)
+                </h3>
+                <div className="space-y-3">
+                  {restorableListings.map((deletedListing) => {
+                    const timeLeft = Math.ceil((60 * 60 * 1000 - (Date.now() - deletedListing.deletedAt)) / (60 * 1000));
+                    return (
+                      <div key={deletedListing.id} className="bg-white rounded-lg p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                            <Building2 className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{deletedListing.listing.title}</p>
+                            <p className="text-sm text-gray-500">
+                              {timeLeft > 0 ? `${timeLeft} minuter kvar att återställa` : 'Återställningstid utgången'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleRestoreListing(deletedListing.id)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Återställ
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -861,71 +999,244 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
         {activeTab === 'finance' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Ekonomi</h2>
-              <div className="text-sm text-gray-600">
-                Hantera dina transaktioner och betalningar
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Ekonomi & Analys</h2>
+                <p className="text-gray-600 mt-1">Hantera dina transaktioner och följ din ekonomiska utveckling</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exportera data
+                </button>
+                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Begär utbetalning
+                </button>
               </div>
             </div>
 
-            {/* Transaction Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <DollarSign className="w-8 h-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total intäkt</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue)}</p>
+            {/* Enhanced Financial Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Total intäkt</p>
+                        <p className="text-3xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue)}</p>
+                      </div>
+                    </div>
                   </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +25%
+                  </div>
+                </div>
+                <div className="mt-4 bg-emerald-50 rounded-lg p-3">
+                  <p className="text-xs text-emerald-700">💰 Fantastisk! Din intäkt har ökat med 25% denna månad</p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <CreditCard className="w-8 h-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pågående transaktioner</p>
-                    <p className="text-2xl font-bold text-gray-900">2</p>
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <CreditCard className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Pågående transaktioner</p>
+                        <p className="text-3xl font-bold text-gray-900">2</p>
+                      </div>
+                    </div>
                   </div>
+                  <div className="text-blue-600 text-sm font-medium">
+                    <Clock className="w-4 h-4 inline mr-1" />
+                    Aktiv
+                  </div>
+                </div>
+                <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs text-blue-700">🔄 Värde: {formatPrice(3450000)} väntar på slutförande</p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Genomförda försäljningar</p>
-                    <p className="text-2xl font-bold text-gray-900">{customer.stats.completedSales}</p>
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Genomförda försäljningar</p>
+                        <p className="text-3xl font-bold text-gray-900">{customer.stats.completedSales}</p>
+                      </div>
+                    </div>
                   </div>
+                  <div className="text-green-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    +100%
+                  </div>
+                </div>
+                <div className="mt-4 bg-green-50 rounded-lg p-3">
+                  <p className="text-xs text-green-700">🎉 Utmärkt! Alla dina affärer har gått igenom framgångsrikt</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <BarChart3 className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-gray-600">Genomsnittlig affär</p>
+                        <p className="text-3xl font-bold text-gray-900">{formatPrice(customer.stats.totalRevenue / customer.stats.completedSales)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-purple-600 text-sm font-medium">
+                    <Star className="w-4 h-4 inline mr-1" />
+                    Högt
+                  </div>
+                </div>
+                <div className="mt-4 bg-purple-50 rounded-lg p-3">
+                  <p className="text-xs text-purple-700">⭐ Imponerande! Dina affärer har högt genomsnittligt värde</p>
                 </div>
               </div>
             </div>
 
-            {/* Recent Transactions */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Senaste transaktioner</h3>
+            {/* Enhanced Transaction History */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-gray-900">Transaktionshistorik</h3>
+                  <div className="flex items-center space-x-3">
+                    <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                      <option>Alla transaktioner</option>
+                      <option>Genomförda</option>
+                      <option>Pågående</option>
+                      <option>Avbrutna</option>
+                    </select>
+                    <span className="text-sm text-gray-600">Senaste 30 dagarna</span>
+                  </div>
+                </div>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                      <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Betalning mottagen - TechStartup AB</p>
-                        <p className="text-xs text-gray-500">2024-06-25 14:30</p>
+                        <p className="text-sm font-semibold text-gray-900">Betalning mottagen - TechStartup AB</p>
+                        <p className="text-xs text-gray-500">2024-06-25 14:30 • Slutförd</p>
+                        <div className="flex items-center mt-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                          <span className="text-xs text-green-600 font-medium">Bekräftad</span>
+                        </div>
                       </div>
                     </div>
-                    <span className="text-green-600 font-medium">+{formatPrice(2500000)}</span>
+                    <div className="text-right">
+                      <span className="text-green-600 font-bold text-lg">+{formatPrice(2500000)}</span>
+                      <p className="text-xs text-gray-500">Provisionsavdrag: {formatPrice(125000)}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b last:border-b-0">
+                  
+                  <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors">
                     <div className="flex items-center">
-                      <Clock className="w-5 h-5 text-yellow-600 mr-3" />
+                      <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                        <Clock className="w-6 h-6 text-yellow-600" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Pågående - E-handel Nisch</p>
-                        <p className="text-xs text-gray-500">2024-06-26 09:15</p>
+                        <p className="text-sm font-semibold text-gray-900">Pågående - E-handel Nisch</p>
+                        <p className="text-xs text-gray-500">2024-06-26 09:15 • Väntar på bekräftelse</p>
+                        <div className="flex items-center mt-1">
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                          <span className="text-xs text-yellow-600 font-medium">Kontrolleras</span>
+                        </div>
                       </div>
                     </div>
-                    <span className="text-yellow-600 font-medium">Väntar</span>
+                    <div className="text-right">
+                      <span className="text-yellow-600 font-bold text-lg">{formatPrice(950000)}</span>
+                      <p className="text-xs text-gray-500">Beräknad provision: {formatPrice(47500)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                        <DollarSign className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Escrow - Digital Marknadsföringsbyrå</p>
+                        <p className="text-xs text-gray-500">2024-06-24 16:20 • Säker betalning</p>
+                        <div className="flex items-center mt-1">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                          <span className="text-xs text-blue-600 font-medium">Säker förvar</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-blue-600 font-bold text-lg">{formatPrice(3200000)}</span>
+                      <p className="text-xs text-gray-500">Escrow-avgift: {formatPrice(16000)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Financial Insights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+                  Intäktsanalys
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Denna månad</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(2500000)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Förra månaden</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(2000000)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Tillväxt</span>
+                    <span className="font-semibold text-green-600">+25%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <Star className="w-5 h-5 mr-2 text-purple-600" />
+                  Prestanda
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Genomsnittlig affärstid</span>
+                    <span className="font-semibold text-gray-900">14 dagar</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Lyckad affärsfrekvens</span>
+                    <span className="font-semibold text-green-600">100%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Ranking denna månad</span>
+                    <span className="font-semibold text-blue-600">#3 av 234</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '95%' }}></div>
                   </div>
                 </div>
               </div>
@@ -1014,16 +1325,6 @@ const CustomerAdminPanel: React.FC<CustomerAdminPanelProps> = ({ customerId, onL
                 <h3 className="text-lg font-medium text-gray-900">Sekretess</h3>
               </div>
               <div className="p-6 space-y-4">
-                <button className="w-full text-left py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Ladda ner mina data</h4>
-                      <p className="text-sm text-gray-500">Få en kopia av all din data</p>
-                    </div>
-                    <FileText className="w-5 h-5 text-gray-400" />
-                  </div>
-                </button>
-                
                 <button className="w-full text-left py-3 px-4 border border-red-300 rounded-lg hover:bg-red-50 transition-colors text-red-600">
                   <div className="flex items-center justify-between">
                     <div>
