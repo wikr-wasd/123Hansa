@@ -126,6 +126,30 @@ const AdminPanel: React.FC = () => {
   const [campaignFilter, setCampaignFilter] = useState('all');
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [crowdfundingStats, setCrowdfundingStats] = useState<any>(null);
+  const [selectedListing, setSelectedListing] = useState<AdminListing | null>(null);
+  const [showListingModal, setShowListingModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [showUserEditModal, setShowUserEditModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  // Delete listing function
+  const handleDeleteListing = async (listingId: string) => {
+    try {
+      setLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setListings(prev => prev.filter(listing => listing.id !== listingId));
+      toast.success('Annonsen har tagits bort');
+    } catch (error) {
+      toast.error('Fel vid borttagning av annons');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Customer notification service
   const sendCustomerNotification = async (listingId: string, sellerId: string, sellerEmail: string, notificationType: string, listingTitle: string) => {
@@ -852,7 +876,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleSelectAllListings = () => {
-    const filteredListingIds = filteredListings.map(listing => listing.id);
+    const filteredListingIds = allFilteredListings.map(listing => listing.id);
     setSelectedListings(prev => 
       prev.length === filteredListingIds.length 
         ? [] 
@@ -1096,29 +1120,40 @@ const AdminPanel: React.FC = () => {
 
   // Quick Actions for specific scenarios
   const quickApproveAll = () => {
-    const pendingListings = filteredListings.filter(l => l.status === 'PENDING').map(l => l.id);
+    const pendingListings = allFilteredListings.filter(l => l.status === 'PENDING').map(l => l.id);
     setSelectedListings(pendingListings);
     setTimeout(() => initiateQuickAction('approve'), 100);
   };
 
   const quickRejectReported = () => {
-    const reportedListings = filteredListings.filter(l => l.reports && l.reports > 0).map(l => l.id);
+    const reportedListings = allFilteredListings.filter(l => l.reports && l.reports > 0).map(l => l.id);
     setSelectedListings(reportedListings);
     setTimeout(() => initiateQuickAction('reject'), 100);
   };
 
   const quickFeatureHighPerforming = () => {
-    const highPerformingListings = filteredListings.filter(l => l.views > 100 && l.inquiries > 10).map(l => l.id);
+    const highPerformingListings = allFilteredListings.filter(l => l.views > 100 && l.inquiries > 10).map(l => l.id);
     setSelectedListings(highPerformingListings);
     setTimeout(() => initiateQuickAction('feature'), 100);
   };
 
-  const filteredListings = listings.filter(listing => {
+  const allFilteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          listing.seller.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = listingFilter === 'all' || listing.status === listingFilter;
     return matchesSearch && matchesFilter;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(allFilteredListings.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const filteredListings = allFilteredListings.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, listingFilter]);
 
   const rejectedListings = listings.filter(listing => listing.status === 'REJECTED');
   const rejectedCount = rejectedListings.length;
@@ -1435,29 +1470,29 @@ const AdminPanel: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <button
                     onClick={quickApproveAll}
-                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.status === 'PENDING').length === 0}
+                    disabled={bulkOperationInProgress || allFilteredListings.filter(l => l.status === 'PENDING').length === 0}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    Godkänn alla väntande ({filteredListings.filter(l => l.status === 'PENDING').length})
+                    Godkänn alla väntande ({allFilteredListings.filter(l => l.status === 'PENDING').length})
                   </button>
                   
                   <button
                     onClick={quickRejectReported}
-                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.reports && l.reports > 0).length === 0}
+                    disabled={bulkOperationInProgress || allFilteredListings.filter(l => l.reports && l.reports > 0).length === 0}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
                   >
                     <XCircle className="w-5 h-5 mr-2" />
-                    Avslå rapporterade ({filteredListings.filter(l => l.reports && l.reports > 0).length})
+                    Avslå rapporterade ({allFilteredListings.filter(l => l.reports && l.reports > 0).length})
                   </button>
                   
                   <button
                     onClick={quickFeatureHighPerforming}
-                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.views > 100 && l.inquiries > 10).length === 0}
+                    disabled={bulkOperationInProgress || allFilteredListings.filter(l => l.views > 100 && l.inquiries > 10).length === 0}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
                   >
                     <Star className="w-5 h-5 mr-2" />
-                    Framhäv högpresterande ({filteredListings.filter(l => l.views > 100 && l.inquiries > 10).length})
+                    Framhäv högpresterande ({allFilteredListings.filter(l => l.views > 100 && l.inquiries > 10).length})
                   </button>
                 </div>
               </div>
@@ -1568,7 +1603,7 @@ const AdminPanel: React.FC = () => {
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Väntar granskning</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {filteredListings.filter(l => l.status === 'PENDING').length}
+                        {allFilteredListings.filter(l => l.status === 'PENDING').length}
                       </p>
                     </div>
                   </div>
@@ -1579,7 +1614,7 @@ const AdminPanel: React.FC = () => {
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Godkända idag</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {filteredListings.filter(l => l.status === 'ACTIVE').length}
+                        {allFilteredListings.filter(l => l.status === 'ACTIVE').length}
                       </p>
                     </div>
                   </div>
@@ -1590,7 +1625,7 @@ const AdminPanel: React.FC = () => {
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Högrisk annonser</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {filteredListings.filter(l => getRiskScore(l) >= 70).length}
+                        {allFilteredListings.filter(l => getRiskScore(l) >= 70).length}
                       </p>
                     </div>
                   </div>
@@ -1600,7 +1635,7 @@ const AdminPanel: React.FC = () => {
                     <Activity className="w-8 h-8 text-purple-600" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Totalt annonser</p>
-                      <p className="text-2xl font-bold text-gray-900">{filteredListings.length}</p>
+                      <p className="text-2xl font-bold text-gray-900">{allFilteredListings.length}</p>
                     </div>
                   </div>
                 </div>
@@ -1615,7 +1650,7 @@ const AdminPanel: React.FC = () => {
                         <th className="px-6 py-3 text-left">
                           <input
                             type="checkbox"
-                            checked={selectedListings.length === filteredListings.length && filteredListings.length > 0}
+                            checked={selectedListings.length === allFilteredListings.length && allFilteredListings.length > 0}
                             onChange={handleSelectAllListings}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
@@ -1741,18 +1776,31 @@ const AdminPanel: React.FC = () => {
                                 {listing.status !== 'PENDING' && (
                                   <div className="flex items-center space-x-1">
                                     <button 
+                                      onClick={() => {
+                                        setSelectedListing(listing);
+                                        setShowListingModal(true);
+                                      }}
                                       className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-100 rounded"
                                       title="Visa detaljer"
                                     >
                                       <Eye className="w-4 h-4" />
                                     </button>
                                     <button 
+                                      onClick={() => {
+                                        setSelectedListing(listing);
+                                        setShowEditModal(true);
+                                      }}
                                       className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
                                       title="Redigera"
                                     >
                                       <Edit className="w-4 h-4" />
                                     </button>
                                     <button 
+                                      onClick={() => {
+                                        if (window.confirm(`Är du säker på att du vill ta bort annonsen "${listing.title}"?`)) {
+                                          handleDeleteListing(listing.id);
+                                        }
+                                      }}
                                       className="p-1 text-red-600 hover:text-red-900 hover:bg-red-100 rounded"
                                       title="Ta bort"
                                     >
@@ -1765,7 +1813,7 @@ const AdminPanel: React.FC = () => {
                           </tr>
                         );
                       })}
-                      {filteredListings.length === 0 && (
+                      {filteredListings.length === 0 && allFilteredListings.length === 0 && (
                         <tr>
                           <td colSpan={8} className="px-6 py-12 text-center">
                             <div className="text-gray-500">
@@ -1779,6 +1827,98 @@ const AdminPanel: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                
+                {/* Pagination */}
+                {allFilteredListings.length > itemsPerPage && (
+                  <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                    <div className="flex-1 flex justify-between sm:hidden">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Föregående
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(allFilteredListings.length / itemsPerPage)))}
+                        disabled={currentPage === Math.ceil(allFilteredListings.length / itemsPerPage)}
+                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        Nästa
+                      </button>
+                    </div>
+                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm text-gray-700">
+                          Visar{' '}
+                          <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>
+                          {' '}till{' '}
+                          <span className="font-medium">
+                            {Math.min(currentPage * itemsPerPage, allFilteredListings.length)}
+                          </span>
+                          {' '}av{' '}
+                          <span className="font-medium">{allFilteredListings.length}</span>
+                          {' '}resultat
+                        </p>
+                      </div>
+                      <div>
+                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            <span className="sr-only">Föregående</span>
+                            <span className="h-5 w-5" aria-hidden="true">‹</span>
+                          </button>
+                          
+                          {Array.from({ length: Math.ceil(allFilteredListings.length / itemsPerPage) }, (_, i) => i + 1)
+                            .filter(page => {
+                              const totalPages = Math.ceil(allFilteredListings.length / itemsPerPage);
+                              return (
+                                page === 1 ||
+                                page === totalPages ||
+                                (page >= currentPage - 2 && page <= currentPage + 2)
+                              );
+                            })
+                            .map((page, index, filteredPages) => {
+                              const prevPage = filteredPages[index - 1];
+                              const showEllipsis = prevPage && page - prevPage > 1;
+                              
+                              return (
+                                <React.Fragment key={page}>
+                                  {showEllipsis && (
+                                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                      ...
+                                    </span>
+                                  )}
+                                  <button
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                      currentPage === page
+                                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                </React.Fragment>
+                              );
+                            })}
+                          
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(allFilteredListings.length / itemsPerPage)))}
+                            disabled={currentPage === Math.ceil(allFilteredListings.length / itemsPerPage)}
+                            className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            <span className="sr-only">Nästa</span>
+                            <span className="h-5 w-5" aria-hidden="true">›</span>
+                          </button>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1837,10 +1977,24 @@ const AdminPanel: React.FC = () => {
                             <span className="text-sm text-gray-900">{formatDate(user.lastLogin)}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button 
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowUserModal(true);
+                              }}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Visa användardetaljer"
+                            >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button className="text-gray-600 hover:text-gray-900">
+                            <button 
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowUserEditModal(true);
+                              }}
+                              className="text-gray-600 hover:text-gray-900"
+                              title="Redigera användare"
+                            >
                               <Edit className="w-4 h-4" />
                             </button>
                             {user.status === 'ACTIVE' && (
@@ -2079,15 +2233,27 @@ const AdminPanel: React.FC = () => {
                         </div>
 
                         <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                          <button className="flex items-center text-blue-600 hover:text-blue-700">
+                          <button 
+                            onClick={() => window.open(`mailto:${member.email}?subject=Support%20Ärende`, '_blank')}
+                            className="flex items-center text-blue-600 hover:text-blue-700"
+                          >
                             <Mail className="w-4 h-4 mr-1" />
                             <span className="text-sm">E-post</span>
                           </button>
-                          <button className="flex items-center text-green-600 hover:text-green-700">
+                          <button 
+                            onClick={() => window.open(`tel:${member.phone}`, '_blank')}
+                            className="flex items-center text-green-600 hover:text-green-700"
+                          >
                             <Phone className="w-4 h-4 mr-1" />
                             <span className="text-sm">Ring</span>
                           </button>
-                          <button className="flex items-center text-purple-600 hover:text-purple-700">
+                          <button 
+                            onClick={() => {
+                              setSelectedCustomer(member);
+                              setShowSupportChat(true);
+                            }}
+                            className="flex items-center text-purple-600 hover:text-purple-700"
+                          >
                             <MessageSquare className="w-4 h-4 mr-1" />
                             <span className="text-sm">Chatta</span>
                           </button>
@@ -2205,14 +2371,25 @@ const AdminPanel: React.FC = () => {
                                 <MessageSquare className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => toast.success('Redigerar ticket...')}
+                                onClick={() => {
+                                  setSelectedTicket(ticket);
+                                  setTicketResponse('');
+                                }}
                                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                title="Redigera"
+                                title="Redigera ticket"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => toast.success('Markerar som löst...')}
+                                onClick={() => {
+                                  setSupportTickets(prev => 
+                                    prev.map(t => t.id === ticket.id 
+                                      ? { ...t, status: 'resolved', resolvedAt: new Date().toISOString() }
+                                      : t
+                                    )
+                                  );
+                                  toast.success('Ticket markerat som löst');
+                                }}
                                 className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
                                 title="Markera som löst"
                               >
@@ -2444,13 +2621,42 @@ const AdminPanel: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <button className="text-emerald-600 hover:text-emerald-900">
-                              Framhäv
+                            <button 
+                              onClick={() => {
+                                setCampaigns(prev => 
+                                  prev.map(c => c.id === campaign.id 
+                                    ? { ...c, featured: !c.featured }
+                                    : c
+                                  )
+                                );
+                                toast.success(campaign.featured ? 'Kampanj inte längre framhävd' : 'Kampanj framhävd');
+                              }}
+                              className="text-emerald-600 hover:text-emerald-900"
+                            >
+                              {campaign.featured ? 'Ta bort framhävning' : 'Framhäv'}
                             </button>
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button 
+                              onClick={() => {
+                                window.open(`/crowdfunding/campaigns/${campaign.id}/edit`, '_blank');
+                              }}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
                               Redigera
                             </button>
-                            <button className="text-red-600 hover:text-red-900">
+                            <button 
+                              onClick={() => {
+                                if (window.confirm('Vill du pausa denna kampanj?')) {
+                                  setCampaigns(prev => 
+                                    prev.map(c => c.id === campaign.id 
+                                      ? { ...c, status: 'paused' }
+                                      : c
+                                    )
+                                  );
+                                  toast.success('Kampanj pausad');
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-900"
+                            >
                               Pausa
                             </button>
                           </td>
@@ -2466,15 +2672,73 @@ const AdminPanel: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Crowdfunding-rapporter</h3>
                   <div className="space-y-3">
-                    <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
+                    <button 
+                      onClick={() => {
+                        const data = JSON.stringify(crowdfundingStats, null, 2);
+                        const blob = new Blob([data], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `crowdfunding-monthly-report-${new Date().toISOString().slice(0, 7)}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Rapport nedladdad');
+                      }}
+                      className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between"
+                    >
                       <span className="text-sm font-medium text-gray-900">Månadsrapport Crowdfunding</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
-                    <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
+                    <button 
+                      onClick={() => {
+                        const data = campaigns.map(c => ({
+                          id: c.id,
+                          title: c.title,
+                          goal: c.fundingGoal,
+                          raised: c.currentAmount,
+                          progress: ((c.currentAmount / c.fundingGoal) * 100).toFixed(1),
+                          backers: c.backers,
+                          daysLeft: c.daysLeft
+                        }));
+                        const csv = [['ID', 'Title', 'Goal', 'Raised', 'Progress%', 'Backers', 'Days Left'], ...data.map(Object.values)].map(row => row.join(',')).join('\n');
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `campaign-statistics-${new Date().toISOString().slice(0, 10)}.csv`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Kampanjstatistik nedladdad');
+                      }}
+                      className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between"
+                    >
                       <span className="text-sm font-medium text-gray-900">Kampanjstatistik</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
-                    <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
+                    <button 
+                      onClick={() => {
+                        const creators = [...new Set(campaigns.map(c => c.creator.name))];
+                        const data = creators.map(name => {
+                          const creatorCampaigns = campaigns.filter(c => c.creator.name === name);
+                          return {
+                            name,
+                            campaigns: creatorCampaigns.length,
+                            totalRaised: creatorCampaigns.reduce((sum, c) => sum + c.currentAmount, 0),
+                            avgBackers: Math.round(creatorCampaigns.reduce((sum, c) => sum + c.backers, 0) / creatorCampaigns.length)
+                          };
+                        });
+                        const report = JSON.stringify(data, null, 2);
+                        const blob = new Blob([report], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `creator-analysis-${new Date().toISOString().slice(0, 10)}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Skaparanalys nedladdad');
+                      }}
+                      className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between"
+                    >
                       <span className="text-sm font-medium text-gray-900">Skaparanalys</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
@@ -2688,6 +2952,415 @@ const AdminPanel: React.FC = () => {
         customer={selectedCustomer}
         ticketId={selectedCustomer?.ticketId}
       />
+
+      {/* Listing Details Modal */}
+      {showListingModal && selectedListing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Annonsdetaljer</h3>
+                <button
+                  onClick={() => {
+                    setShowListingModal(false);
+                    setSelectedListing(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">{selectedListing.title}</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Pris:</span>
+                      <span className="text-sm font-medium">{formatPrice(selectedListing.price)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Kategori:</span>
+                      <span className="text-sm font-medium">{selectedListing.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Status:</span>
+                      <span className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(selectedListing.status)}`}>
+                        {selectedListing.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Visningar:</span>
+                      <span className="text-sm font-medium">{selectedListing.views}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Förfrågningar:</span>
+                      <span className="text-sm font-medium">{selectedListing.inquiries || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Rapporter:</span>
+                      <span className="text-sm font-medium">{selectedListing.reports}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Säljare</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Namn:</span>
+                      <span className="text-sm font-medium">{selectedListing.seller}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Email:</span>
+                      <span className="text-sm font-medium">{selectedListing.sellerEmail}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Skapad:</span>
+                      <span className="text-sm font-medium">{formatDate(selectedListing.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    handleApproveListing(selectedListing.id);
+                    setShowListingModal(false);
+                  }}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Godkänn
+                </button>
+                <button
+                  onClick={() => {
+                    handleRejectListing(selectedListing.id);
+                    setShowListingModal(false);
+                  }}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center justify-center"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Avslå
+                </button>
+                <button
+                  onClick={() => {
+                    setShowListingModal(false);
+                    setShowEditModal(true);
+                  }}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Redigera
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Details Modal */}
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Användardetaljer</h3>
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Grundinformation</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Namn:</span>
+                      <span className="text-sm font-medium">{selectedUser.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Email:</span>
+                      <span className="text-sm font-medium">{selectedUser.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Provider:</span>
+                      <span className="text-sm font-medium">{selectedUser.provider}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Status:</span>
+                      <span className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(selectedUser.status)}`}>
+                        {selectedUser.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Verifierad:</span>
+                      <span className="text-sm font-medium">
+                        {selectedUser.verified ? (
+                          <span className="text-green-600 flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Ja
+                          </span>
+                        ) : (
+                          <span className="text-red-600">Nej</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Aktivitet</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Annonser:</span>
+                      <span className="text-sm font-medium">{selectedUser.listingsCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Medlem sedan:</span>
+                      <span className="text-sm font-medium">{formatDate(selectedUser.joinedDate)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Senast inloggad:</span>
+                      <span className="text-sm font-medium">{formatDate(selectedUser.lastLogin)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    setShowUserEditModal(true);
+                  }}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Redigera användare
+                </button>
+                <button
+                  onClick={() => {
+                    // Send message to user
+                    window.open(`mailto:${selectedUser.email}?subject=Meddelande från 123hansa Admin`);
+                  }}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Skicka email
+                </button>
+                {selectedUser.status === 'ACTIVE' && (
+                  <button
+                    onClick={() => {
+                      handleSuspendUser(selectedUser.id);
+                      setShowUserModal(false);
+                    }}
+                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center justify-center"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Stäng av
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Edit Modal */}
+      {showUserEditModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Redigera användare</h3>
+                <button
+                  onClick={() => {
+                    setShowUserEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Namn</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedUser.name}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    defaultValue={selectedUser.email}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    defaultValue={selectedUser.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="ACTIVE">Aktiv</option>
+                    <option value="SUSPENDED">Avstängd</option>
+                    <option value="BANNED">Bannlyst</option>
+                  </select>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="verified"
+                    defaultChecked={selectedUser.verified}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="verified" className="ml-2 text-sm text-gray-700">Verifierad användare</label>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    toast.success('Användarinformation uppdaterad');
+                    setShowUserEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Spara ändringar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowUserEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                >
+                  Avbryt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Listing Edit Modal */}
+      {showEditModal && selectedListing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Redigera annons</h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedListing(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Titel</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedListing.title}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pris (SEK)</label>
+                  <input
+                    type="number"
+                    defaultValue={selectedListing.price}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                  <select
+                    defaultValue={selectedListing.category}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="companies">Företag</option>
+                    <option value="ecommerce">E-handel</option>
+                    <option value="domains">Domäner</option>
+                    <option value="social">Sociala medier</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    defaultValue={selectedListing.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="PENDING">Väntar granskning</option>
+                    <option value="ACTIVE">Aktiv</option>
+                    <option value="REJECTED">Avslågen</option>
+                    <option value="SOLD">Såld</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      defaultChecked={selectedListing.featured}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="featured" className="ml-2 text-sm text-gray-700">Utvald annons</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="priority"
+                      defaultChecked={selectedListing.priority}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="priority" className="ml-2 text-sm text-gray-700">Prioriterad</label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    toast.success('Annons uppdaterad');
+                    setShowEditModal(false);
+                    setSelectedListing(null);
+                  }}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Spara ändringar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedListing(null);
+                  }}
+                  className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                >
+                  Avbryt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
