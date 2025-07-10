@@ -44,6 +44,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import EnhancedSupportChat from '../../components/admin/EnhancedSupportChat';
+import { demoCampaigns, campaignCategories } from '../../data/crowdfundingData';
+import type { Campaign } from '../../components/crowdfunding/CampaignCard';
 
 // Types
 interface AdminStats {
@@ -120,6 +122,10 @@ const AdminPanel: React.FC = () => {
   const [adminInitialized, setAdminInitialized] = useState(false);
   const [showSupportChat, setShowSupportChat] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaignFilter, setCampaignFilter] = useState('all');
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
+  const [crowdfundingStats, setCrowdfundingStats] = useState<any>(null);
 
   // Customer notification service
   const sendCustomerNotification = async (listingId: string, sellerId: string, sellerEmail: string, notificationType: string, listingTitle: string) => {
@@ -559,6 +565,38 @@ const AdminPanel: React.FC = () => {
         averageTransactionValue: 125000,
         totalTransactions: 1247,
         conversionRate: 3.2
+      });
+
+      // Load crowdfunding data
+      setCampaigns(demoCampaigns.map(campaign => ({
+        ...campaign,
+        status: campaign.currentAmount >= campaign.fundingGoal ? 'FUNDED' : 
+                campaign.daysLeft <= 7 ? 'URGENT' : 'ACTIVE',
+        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        adminNotes: '',
+        approved: true,
+        featured: campaign.featured || false
+      })));
+
+      // Calculate crowdfunding statistics
+      const totalCampaigns = demoCampaigns.length;
+      const activeCampaigns = demoCampaigns.filter(c => c.daysLeft > 0).length;
+      const fundedCampaigns = demoCampaigns.filter(c => c.currentAmount >= c.fundingGoal).length;
+      const totalRaised = demoCampaigns.reduce((sum, c) => sum + c.currentAmount, 0);
+      const totalBackers = demoCampaigns.reduce((sum, c) => sum + c.backers, 0);
+      const averageFunding = totalRaised / totalCampaigns;
+
+      setCrowdfundingStats({
+        totalCampaigns,
+        activeCampaigns,
+        fundedCampaigns,
+        totalRaised,
+        totalBackers,
+        averageFunding,
+        successRate: Math.round((fundedCampaigns / totalCampaigns) * 100),
+        pendingApproval: Math.floor(Math.random() * 5) + 2,
+        totalFees: totalRaised * 0.05, // 5% platform fee
+        monthlyGrowth: 23.5
       });
 
       setLoading(false);
@@ -1156,7 +1194,7 @@ const AdminPanel: React.FC = () => {
                 { id: 'overview', name: 'Dashboard', icon: BarChart3, roles: ['SUPER_ADMIN', 'CONTENT_MODERATOR', 'CUSTOMER_SUPPORT', 'FINANCIAL_ADMIN', 'ANALYTICS_TEAM'] },
                 { id: 'listings', name: 'Moderation', icon: Building2, roles: ['SUPER_ADMIN', 'CONTENT_MODERATOR'] },
                 { id: 'users', name: 'Användare', icon: Users, roles: ['SUPER_ADMIN'] },
-                { id: 'finance', name: 'Finanser', icon: DollarSign, roles: ['SUPER_ADMIN', 'FINANCIAL_ADMIN'] },
+                { id: 'crowdfunding', name: 'Crowdfunding', icon: TrendingUp, roles: ['SUPER_ADMIN', 'CONTENT_MODERATOR'] },
                 { id: 'support', name: 'Support', icon: MessageSquare, roles: ['SUPER_ADMIN', 'CUSTOMER_SUPPORT'] },
                 { id: 'settings', name: 'Inställningar', icon: Settings, roles: ['SUPER_ADMIN'] }
               ].filter(tab => tab.roles.includes(user.adminProfile?.role || '')).map((tab) => {
@@ -2203,11 +2241,11 @@ const AdminPanel: React.FC = () => {
             </div>
           )}
 
-          {/* Finance Tab */}
-          {activeTab === 'finance' && (
+          {/* Crowdfunding Tab */}
+          {activeTab === 'crowdfunding' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Finansiell Hantering</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Crowdfunding Management</h2>
                 <div className="flex items-center space-x-3">
                   <select 
                     value={paymentFilter} 
