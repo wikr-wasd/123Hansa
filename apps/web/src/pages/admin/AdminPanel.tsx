@@ -37,9 +37,13 @@ import {
   Phone,
   Mail,
   User,
-  Timer
+  Timer,
+  Archive,
+  Send,
+  X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import EnhancedSupportChat from '../../components/admin/EnhancedSupportChat';
 
 // Types
 interface AdminStats {
@@ -57,10 +61,22 @@ interface AdminListing {
   category: string;
   price: number;
   seller: string;
+  sellerId?: string;
+  sellerEmail?: string;
   status: 'ACTIVE' | 'PENDING' | 'REJECTED' | 'SOLD';
   createdAt: string;
   views: number;
   reports: number;
+  inquiries?: number;
+  featured?: boolean;
+  priority?: boolean;
+  archived?: boolean;
+  approvedAt?: string;
+  rejectedAt?: string;
+  featuredAt?: string;
+  priorityAt?: string;
+  archivedAt?: string;
+  rejectionScheduledDeletion?: string; // ISO string for when rejected listing should be deleted
 }
 
 interface AdminUser {
@@ -98,7 +114,102 @@ const AdminPanel: React.FC = () => {
   const [selectedListings, setSelectedListings] = useState<string[]>([]);
   const [bulkAction, setBulkAction] = useState('');
   const [listingFilter, setListingFilter] = useState('all');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingBulkAction, setPendingBulkAction] = useState('');
+  const [bulkOperationInProgress, setBulkOperationInProgress] = useState(false);
   const [adminInitialized, setAdminInitialized] = useState(false);
+  const [showSupportChat, setShowSupportChat] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+
+  // Customer notification service
+  const sendCustomerNotification = async (listingId: string, sellerId: string, sellerEmail: string, notificationType: string, listingTitle: string) => {
+    try {
+      const notifications = {
+        'approve': {
+          title: '✅ Din annons har godkänts!',
+          message: `Din annons "${listingTitle}" har godkänts och är nu aktiv på 123hansa.se. Kunder kan nu hitta och kontakta dig genom din annons.`,
+          type: 'success'
+        },
+        'reject': {
+          title: '❌ Din annons har avslås',
+          message: `Din annons "${listingTitle}" har tyvärr avslås. Den kommer att tas bort från systemet inom 12 timmar. Kontakta support om du har frågor.`,
+          type: 'error'
+        },
+        'feature': {
+          title: '⭐ Din annons har markerats som utvald!',
+          message: `Grattis! Din annons "${listingTitle}" har markerats som utvald och kommer att få extra synlighet på 123hansa.se.`,
+          type: 'success'
+        },
+        'priority': {
+          title: '🚀 Din annons har prioriterats!',
+          message: `Din annons "${listingTitle}" har fått prioriterad status och kommer att visas högre upp i sökresultaten.`,
+          type: 'success'
+        },
+        'archive': {
+          title: '📦 Din annons har arkiverats',
+          message: `Din annons "${listingTitle}" har arkiverats och är inte längre synlig för kunder. Du kan återaktivera den när som helst.`,
+          type: 'info'
+        }
+      };
+
+      const notification = notifications[notificationType];
+      if (!notification) return;
+
+      // In a real application, this would send to your notification service
+      // For now, we'll simulate the API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log(`Notification sent to ${sellerEmail}:`, notification);
+      
+      // You could also send email notification here
+      // await sendEmail(sellerEmail, notification.title, notification.message);
+      
+    } catch (error) {
+      console.error('Failed to send customer notification:', error);
+    }
+  };
+
+  // Auto-delete rejected listings after 12 hours
+  const scheduleRejectedListingDeletion = (listingId: string) => {
+    const deletionTime = new Date(Date.now() + 12 * 60 * 60 * 1000); // 12 hours from now
+    
+    // In a real application, you would schedule this in your backend
+    // For demonstration, we'll use setTimeout (note: this won't survive page refresh)
+    setTimeout(() => {
+      setListings(prev => {
+        const updatedListings = prev.filter(listing => listing.id !== listingId);
+        console.log(`Auto-deleted rejected listing ${listingId}`);
+        return updatedListings;
+      });
+    }, 12 * 60 * 60 * 1000); // 12 hours
+    
+    return deletionTime.toISOString();
+  };
+
+  // Process rejected listings cleanup on load
+  useEffect(() => {
+    const cleanupRejectedListings = () => {
+      const now = new Date();
+      setListings(prev => prev.filter(listing => {
+        if (listing.status === 'REJECTED' && listing.rejectionScheduledDeletion) {
+          const scheduledTime = new Date(listing.rejectionScheduledDeletion);
+          if (now >= scheduledTime) {
+            console.log(`Cleaning up expired rejected listing: ${listing.id}`);
+            return false; // Remove from listings
+          }
+        }
+        return true; // Keep listing
+      }));
+    };
+
+    // Run cleanup on component mount
+    cleanupRejectedListings();
+    
+    // Set up interval to check for expired rejected listings every hour
+    const interval = setInterval(cleanupRejectedListings, 60 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Development admin auto-login
   useEffect(() => {
@@ -192,10 +303,16 @@ const AdminPanel: React.FC = () => {
           category: 'companies',
           price: 12500000,
           seller: 'Magnus Eriksson',
+          sellerId: 'user-001',
+          sellerEmail: 'magnus@techstartup.se',
           status: 'ACTIVE',
           createdAt: '2024-06-20T10:00:00Z',
           views: 247,
-          reports: 0
+          reports: 0,
+          inquiries: 23,
+          featured: true,
+          priority: false,
+          archived: false
         },
         {
           id: 'ecom-001',
@@ -203,10 +320,16 @@ const AdminPanel: React.FC = () => {
           category: 'ecommerce',
           price: 4500000,
           seller: 'Emma Johansson',
+          sellerId: 'user-002',
+          sellerEmail: 'emma@nordichome.se',
           status: 'ACTIVE',
           createdAt: '2024-06-19T14:30:00Z',
           views: 156,
-          reports: 0
+          reports: 0,
+          inquiries: 12,
+          featured: false,
+          priority: true,
+          archived: false
         },
         {
           id: 'domain-001',
@@ -214,10 +337,16 @@ const AdminPanel: React.FC = () => {
           category: 'domains',
           price: 850000,
           seller: 'International Domain Holdings',
+          sellerId: 'user-004',
+          sellerEmail: 'contact@domainholdings.com',
           status: 'PENDING',
           createdAt: '2024-06-21T09:15:00Z',
           views: 203,
-          reports: 0
+          reports: 0,
+          inquiries: 8,
+          featured: false,
+          priority: false,
+          archived: false
         },
         {
           id: 'social-001',
@@ -225,10 +354,16 @@ const AdminPanel: React.FC = () => {
           category: 'social',
           price: 650000,
           seller: 'Sofia Andersson',
+          sellerId: 'user-003',
+          sellerEmail: 'sofia@svenskmode.se',
           status: 'ACTIVE',
           createdAt: '2024-06-17T11:45:00Z',
           views: 167,
-          reports: 1
+          reports: 1,
+          inquiries: 5,
+          featured: false,
+          priority: false,
+          archived: false
         }
       ]);
 
@@ -687,46 +822,257 @@ const AdminPanel: React.FC = () => {
     );
   };
 
-  const handleBulkAction = async () => {
-    if (!bulkAction || selectedListings.length === 0) return;
+  const initiateQuickAction = (action: string) => {
+    if (!action || selectedListings.length === 0) {
+      toast.error('Välj åtminstone en annons först');
+      return;
+    }
+
+    // Destructive actions require confirmation
+    if (['delete', 'reject'].includes(action)) {
+      setPendingBulkAction(action);
+      setShowConfirmDialog(true);
+    } else {
+      setBulkAction(action);
+      handleBulkAction(action);
+    }
+  };
+
+  const handleBulkAction = async (actionType?: string) => {
+    const action = actionType || bulkAction;
+    if (!action || selectedListings.length === 0) return;
+    
+    setBulkOperationInProgress(true);
     
     try {
-      switch (bulkAction) {
+      // Get selected listings data for notifications
+      const selectedListingsData = listings.filter(listing => selectedListings.includes(listing.id));
+      
+      // Simulate API delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      switch (action) {
         case 'approve':
           setListings(prev => prev.map(listing => 
             selectedListings.includes(listing.id) 
-              ? { ...listing, status: 'ACTIVE' as const }
+              ? { ...listing, status: 'ACTIVE' as const, approvedAt: new Date().toISOString() }
               : listing
           ));
-          toast.success(`${selectedListings.length} annonser godkända!`);
+          
+          // Send notifications to customers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              await sendCustomerNotification(
+                listing.id,
+                listing.sellerId,
+                listing.sellerEmail,
+                'approve',
+                listing.title
+              );
+            }
+          }
+          
+          toast.success(`✅ ${selectedListings.length} annonser godkända! Kunder har notifierats.`);
           break;
+          
         case 'reject':
-          setListings(prev => prev.map(listing => 
-            selectedListings.includes(listing.id) 
-              ? { ...listing, status: 'REJECTED' as const }
-              : listing
-          ));
-          toast.success(`${selectedListings.length} annonser avslagna!`);
+          setListings(prev => prev.map(listing => {
+            if (selectedListings.includes(listing.id)) {
+              const scheduledDeletion = scheduleRejectedListingDeletion(listing.id);
+              return { 
+                ...listing, 
+                status: 'REJECTED' as const, 
+                rejectedAt: new Date().toISOString(),
+                rejectionScheduledDeletion: scheduledDeletion
+              };
+            }
+            return listing;
+          }));
+          
+          // Send notifications to customers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              await sendCustomerNotification(
+                listing.id,
+                listing.sellerId,
+                listing.sellerEmail,
+                'reject',
+                listing.title
+              );
+            }
+          }
+          
+          toast.success(`❌ ${selectedListings.length} annonser avslagna! Kunder har notifierats. Raderas automatiskt om 12h.`);
           break;
+          
         case 'feature':
           setListings(prev => prev.map(listing => 
             selectedListings.includes(listing.id) 
-              ? { ...listing, featured: true }
+              ? { ...listing, featured: true, featuredAt: new Date().toISOString() }
               : listing
           ));
-          toast.success(`${selectedListings.length} annonser utvalda!`);
+          
+          // Send notifications to customers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              await sendCustomerNotification(
+                listing.id,
+                listing.sellerId,
+                listing.sellerEmail,
+                'feature',
+                listing.title
+              );
+            }
+          }
+          
+          toast.success(`⭐ ${selectedListings.length} annonser markerade som utvalda! Kunder har notifierats.`);
           break;
+          
+        case 'unfeature':
+          setListings(prev => prev.map(listing => 
+            selectedListings.includes(listing.id) 
+              ? { ...listing, featured: false, featuredAt: undefined }
+              : listing
+          ));
+          toast.success(`📝 ${selectedListings.length} annonser avmarkerade som utvalda!`);
+          break;
+          
+        case 'priority':
+          setListings(prev => prev.map(listing => 
+            selectedListings.includes(listing.id) 
+              ? { ...listing, priority: true, priorityAt: new Date().toISOString() }
+              : listing
+          ));
+          
+          // Send notifications to customers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              await sendCustomerNotification(
+                listing.id,
+                listing.sellerId,
+                listing.sellerEmail,
+                'priority',
+                listing.title
+              );
+            }
+          }
+          
+          toast.success(`🚀 ${selectedListings.length} annonser prioriterade! Kunder har notifierats.`);
+          break;
+          
+        case 'archive':
+          setListings(prev => prev.map(listing => 
+            selectedListings.includes(listing.id) 
+              ? { ...listing, archived: true, archivedAt: new Date().toISOString() }
+              : listing
+          ));
+          
+          // Send notifications to customers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              await sendCustomerNotification(
+                listing.id,
+                listing.sellerId,
+                listing.sellerEmail,
+                'archive',
+                listing.title
+              );
+            }
+          }
+          
+          toast.success(`📦 ${selectedListings.length} annonser arkiverade! Kunder har notifierats.`);
+          break;
+          
         case 'delete':
           setListings(prev => prev.filter(listing => !selectedListings.includes(listing.id)));
-          toast.success(`${selectedListings.length} annonser borttagna!`);
+          toast.success(`🗑️ ${selectedListings.length} annonser permanent borttagna!`);
           break;
+          
+        case 'notify_sellers':
+          // Send custom notifications to sellers
+          for (const listing of selectedListingsData) {
+            if (listing.sellerId && listing.sellerEmail) {
+              // This would normally be a custom notification system
+              console.log(`Manual notification sent to ${listing.sellerEmail} for listing ${listing.title}`);
+            }
+          }
+          toast.success(`📧 Notifikationer skickade till ${selectedListings.length} säljare!`);
+          break;
+          
+        case 'export':
+          // Simulate data export
+          const selectedData = listings.filter(listing => selectedListings.includes(listing.id));
+          const exportData = JSON.stringify(selectedData, null, 2);
+          const blob = new Blob([exportData], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `selected_listings_${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success(`📊 ${selectedListings.length} annonser exporterade!`);
+          break;
+          
+        default:
+          toast.error('Okänd åtgärd');
+          return;
       }
+      
+      // Update stats after bulk operation
+      setTimeout(() => {
+        setStats(prev => {
+          const updatedListings = listings.filter(l => l.status !== 'REJECTED' || (l.rejectionScheduledDeletion && new Date(l.rejectionScheduledDeletion) > new Date()));
+          return {
+            ...prev,
+            pendingApprovals: updatedListings.filter(l => l.status === 'PENDING').length,
+            activeListings: updatedListings.filter(l => l.status === 'ACTIVE').length,
+            reportedListings: updatedListings.filter(l => l.reports && l.reports > 0).length
+          };
+        });
+      }, 1500);
       
       setSelectedListings([]);
       setBulkAction('');
+      setShowConfirmDialog(false);
+      setPendingBulkAction('');
+      
     } catch (error) {
-      toast.error('Bulk operation misslyckades');
+      console.error('Bulk operation failed:', error);
+      toast.error('Masshantering misslyckades. Försök igen.');
+    } finally {
+      setBulkOperationInProgress(false);
     }
+  };
+
+  const confirmBulkAction = () => {
+    setBulkAction(pendingBulkAction);
+    handleBulkAction(pendingBulkAction);
+  };
+
+  const cancelBulkAction = () => {
+    setShowConfirmDialog(false);
+    setPendingBulkAction('');
+  };
+
+  // Quick Actions for specific scenarios
+  const quickApproveAll = () => {
+    const pendingListings = filteredListings.filter(l => l.status === 'PENDING').map(l => l.id);
+    setSelectedListings(pendingListings);
+    setTimeout(() => initiateQuickAction('approve'), 100);
+  };
+
+  const quickRejectReported = () => {
+    const reportedListings = filteredListings.filter(l => l.reports && l.reports > 0).map(l => l.id);
+    setSelectedListings(reportedListings);
+    setTimeout(() => initiateQuickAction('reject'), 100);
+  };
+
+  const quickFeatureHighPerforming = () => {
+    const highPerformingListings = filteredListings.filter(l => l.views > 100 && l.inquiries > 10).map(l => l.id);
+    setSelectedListings(highPerformingListings);
+    setTimeout(() => initiateQuickAction('feature'), 100);
   };
 
   const filteredListings = listings.filter(listing => {
@@ -735,6 +1081,10 @@ const AdminPanel: React.FC = () => {
     const matchesFilter = listingFilter === 'all' || listing.status === listingFilter;
     return matchesSearch && matchesFilter;
   });
+
+  const rejectedListings = listings.filter(listing => listing.status === 'REJECTED');
+  const rejectedCount = rejectedListings.length;
+  const rejectedScheduledForDeletion = rejectedListings.filter(l => l.rejectionScheduledDeletion).length;
 
   const getListingStatusColor = (status: string) => {
     switch (status) {
@@ -1029,38 +1379,144 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
+              {/* Enhanced Snabbåtgärder & Masshantering Section */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">🚀 Snabbåtgärder & Masshantering</h3>
+                  <div className="flex items-center space-x-2">
+                    {bulkOperationInProgress && (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span className="text-sm">Bearbetar...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Quick Action Buttons */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <button
+                    onClick={quickApproveAll}
+                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.status === 'PENDING').length === 0}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Godkänn alla väntande ({filteredListings.filter(l => l.status === 'PENDING').length})
+                  </button>
+                  
+                  <button
+                    onClick={quickRejectReported}
+                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.reports && l.reports > 0).length === 0}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                  >
+                    <XCircle className="w-5 h-5 mr-2" />
+                    Avslå rapporterade ({filteredListings.filter(l => l.reports && l.reports > 0).length})
+                  </button>
+                  
+                  <button
+                    onClick={quickFeatureHighPerforming}
+                    disabled={bulkOperationInProgress || filteredListings.filter(l => l.views > 100 && l.inquiries > 10).length === 0}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+                  >
+                    <Star className="w-5 h-5 mr-2" />
+                    Framhäv högpresterande ({filteredListings.filter(l => l.views > 100 && l.inquiries > 10).length})
+                  </button>
+                </div>
+              </div>
+
               {/* Bulk Operations Bar */}
               {selectedListings.length > 0 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm font-medium text-blue-900">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 font-bold text-sm">{selectedListings.length}</span>
+                      </div>
+                      <span className="text-lg font-semibold text-gray-900">
                         {selectedListings.length} annonser valda
                       </span>
-                      <select 
-                        value={bulkAction} 
-                        onChange={(e) => setBulkAction(e.target.value)}
-                        className="border border-blue-300 rounded-md px-3 py-1 text-sm bg-white"
-                      >
-                        <option value="">Välj åtgärd</option>
-                        <option value="approve">Godkänn alla</option>
-                        <option value="reject">Avslå alla</option>
-                        <option value="feature">Gör till utvalda</option>
-                        <option value="delete">Ta bort alla</option>
-                      </select>
-                      <button
-                        onClick={handleBulkAction}
-                        disabled={!bulkAction}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                      >
-                        Utför åtgärd
-                      </button>
                     </div>
                     <button 
                       onClick={() => setSelectedListings([])}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
+                      className="text-gray-600 hover:text-gray-800 text-sm flex items-center"
                     >
+                      <X className="w-4 h-4 mr-1" />
                       Rensa urval
+                    </button>
+                  </div>
+                  
+                  {/* Enhanced Action Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                    <button
+                      onClick={() => initiateQuickAction('approve')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Godkänn
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('reject')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <XCircle className="w-4 h-4 mr-1" />
+                      Avslå
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('feature')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <Star className="w-4 h-4 mr-1" />
+                      Framhäv
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('priority')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                      Prioritera
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('archive')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <Archive className="w-4 h-4 mr-1" />
+                      Arkivera
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('notify_sellers')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <Send className="w-4 h-4 mr-1" />
+                      Meddela
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('export')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Exportera
+                    </button>
+                    
+                    <button
+                      onClick={() => initiateQuickAction('delete')}
+                      disabled={bulkOperationInProgress}
+                      className="bg-red-700 text-white px-4 py-3 rounded-lg hover:bg-red-800 disabled:opacity-50 text-sm flex items-center justify-center"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Radera
                     </button>
                   </div>
                 </div>
@@ -1693,6 +2149,24 @@ const AdminPanel: React.FC = () => {
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button 
+                                onClick={() => {
+                                  setSelectedCustomer({
+                                    id: ticket.user.id,
+                                    name: ticket.user.name,
+                                    email: ticket.user.email,
+                                    status: 'online',
+                                    priority: ticket.priority,
+                                    category: ticket.category,
+                                    ticketId: ticket.id
+                                  });
+                                  setShowSupportChat(true);
+                                }}
+                                className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+                                title="Starta chatt"
+                              >
+                                <MessageSquare className="w-4 h-4" />
+                              </button>
+                              <button 
                                 onClick={() => toast.success('Redigerar ticket...')}
                                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 title="Redigera"
@@ -2062,6 +2536,96 @@ const AdminPanel: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-mx-4 mx-4">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Bekräfta åtgärd</h3>
+                <p className="text-sm text-gray-600">
+                  {pendingBulkAction === 'delete' 
+                    ? 'Är du säker på att du vill ta bort dessa annonser permanent?' 
+                    : 'Är du säker på att du vill avslå dessa annonser?'
+                  }
+                </p>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-sm text-gray-700">
+                Denna åtgärd kommer att påverka <strong>{selectedListings.length}</strong> annonser:
+              </p>
+              <div className="max-h-32 overflow-y-auto mt-2 bg-gray-50 rounded-lg p-3">
+                {listings
+                  .filter(listing => selectedListings.includes(listing.id))
+                  .slice(0, 5)
+                  .map(listing => (
+                    <div key={listing.id} className="text-xs text-gray-600 py-1">
+                      • {listing.title}
+                    </div>
+                  ))
+                }
+                {selectedListings.length > 5 && (
+                  <div className="text-xs text-gray-500 py-1">
+                    ... och {selectedListings.length - 5} till
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={cancelBulkAction}
+                disabled={bulkOperationInProgress}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={confirmBulkAction}
+                disabled={bulkOperationInProgress}
+                className={`px-6 py-2 rounded-lg text-white font-medium disabled:opacity-50 ${
+                  pendingBulkAction === 'delete' 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-orange-600 hover:bg-orange-700'
+                } flex items-center`}
+              >
+                {bulkOperationInProgress && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                )}
+                {pendingBulkAction === 'delete' ? 'Ta bort permanent' : 'Avslå alla'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Support Chat Button */}
+      {!showSupportChat && (
+        <button
+          onClick={() => setShowSupportChat(true)}
+          className="fixed bottom-4 right-4 z-40 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+          title="Starta supportchatt"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Enhanced Support Chat */}
+      <EnhancedSupportChat
+        isOpen={showSupportChat}
+        onClose={() => {
+          setShowSupportChat(false);
+          setSelectedCustomer(null);
+        }}
+        customer={selectedCustomer}
+        ticketId={selectedCustomer?.ticketId}
+      />
     </>
   );
 };
