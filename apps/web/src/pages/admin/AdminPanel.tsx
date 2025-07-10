@@ -2349,29 +2349,29 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* Transaction Management */}
+              {/* Campaign Management */}
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Transaktioner & Utbetalningar</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Kampanjhantering</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Transaktion
+                          Kampanj
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Användare
+                          Skapare
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Belopp
+                          Finansieringsmål
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Datum
+                          Dagar kvar
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Åtgärder
@@ -2379,67 +2379,79 @@ const AdminPanel: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-gray-50">
+                      {campaigns.filter(campaign => {
+                        if (campaignFilter === 'all') return true;
+                        if (campaignFilter === 'active') return campaign.daysLeft > 0;
+                        if (campaignFilter === 'funded') return campaign.currentAmount >= campaign.fundingGoal;
+                        if (campaignFilter === 'urgent') return campaign.daysLeft <= 7;
+                        return true;
+                      }).map((campaign) => (
+                        <tr key={campaign.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="text-blue-600 mr-2">
-                                {getTransactionTypeIcon(transaction.type)}
-                              </div>
+                              <img 
+                                src={campaign.image} 
+                                alt={campaign.title}
+                                className="w-12 h-12 rounded-lg object-cover mr-3"
+                              />
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {transaction.listing?.title || 'N/A'}
+                                  {campaign.title}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {transaction.type.replace('_', ' ')} • #{transaction.id}
+                                  {campaign.category} • #{campaign.id}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{transaction.user.name}</div>
-                            <div className="text-sm text-gray-500">{transaction.user.email}</div>
+                            <div className="text-sm text-gray-900">{campaign.creator.name}</div>
+                            <div className="text-sm text-gray-500">{campaign.location}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              {formatCurrency(transaction.amount)}
+                              {(campaign.currentAmount / 1000).toFixed(0)}k SEK
                             </div>
                             <div className="text-sm text-gray-500">
-                              Netto: {formatCurrency(transaction.netAmount)}
+                              av {(campaign.fundingGoal / 1000).toFixed(0)}k SEK
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                              <div 
+                                className="bg-emerald-500 h-2 rounded-full" 
+                                style={{ width: `${Math.min((campaign.currentAmount / campaign.fundingGoal) * 100, 100)}%` }}
+                              ></div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTransactionStatusColor(transaction.status)}`}>
-                              {transaction.status.replace('_', ' ')}
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              campaign.currentAmount >= campaign.fundingGoal 
+                                ? 'bg-green-100 text-green-800' 
+                                : campaign.daysLeft <= 7 
+                                ? 'bg-red-100 text-red-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {campaign.currentAmount >= campaign.fundingGoal 
+                                ? 'Finansierad' 
+                                : campaign.daysLeft <= 7 
+                                ? 'Brådskande' 
+                                : 'Aktiv'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div>{formatDate(transaction.createdAt)}</div>
-                            {transaction.completedAt && (
-                              <div className="text-xs text-green-600">
-                                Slutförd: {formatDate(transaction.completedAt)}
-                              </div>
-                            )}
+                            <div>{campaign.daysLeft} dagar</div>
+                            <div className="text-xs text-gray-400">
+                              {campaign.backers} stödjare
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            {transaction.status === 'pending_payout' && (
-                              <button
-                                onClick={() => handleProcessPayout(transaction.id)}
-                                className="text-green-600 hover:text-green-900"
-                              >
-                                Betala ut
-                              </button>
-                            )}
-                            {transaction.status === 'completed' && transaction.type !== 'refund' && (
-                              <button
-                                onClick={() => handleRefundTransaction(transaction.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Återbetala
-                              </button>
-                            )}
+                            <button className="text-emerald-600 hover:text-emerald-900">
+                              Framhäv
+                            </button>
                             <button className="text-blue-600 hover:text-blue-900">
-                              Detaljer
+                              Redigera
+                            </button>
+                            <button className="text-red-600 hover:text-red-900">
+                              Pausa
                             </button>
                           </td>
                         </tr>
@@ -2449,52 +2461,64 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* Financial Reports Section */}
+              {/* Crowdfunding Analytics Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Snabbrapporter</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Crowdfunding-rapporter</h3>
                   <div className="space-y-3">
                     <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">Månadsrapport</span>
+                      <span className="text-sm font-medium text-gray-900">Månadsrapport Crowdfunding</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
                     <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">Skatteunderlag</span>
+                      <span className="text-sm font-medium text-gray-900">Kampanjstatistik</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
                     <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">Utbetalningshistorik</span>
+                      <span className="text-sm font-medium text-gray-900">Skaparanalys</span>
                       <Download className="w-4 h-4 text-gray-400" />
                     </button>
                   </div>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Betalningsmetoder</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanjkategorier</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                          <DollarSign className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm">💻</span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">Stripe</div>
-                          <div className="text-xs text-gray-500">Kort & Digital Plånbok</div>
+                          <div className="text-sm font-medium text-gray-900">Tech Startups</div>
+                          <div className="text-xs text-gray-500">3 aktiva kampanjer</div>
                         </div>
                       </div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="text-sm font-medium text-emerald-600">1.7M SEK</div>
                     </div>
                     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                          <Building2 className="w-4 h-4 text-green-600" />
+                          <span className="text-sm">🏪</span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">Bankgiro</div>
-                          <div className="text-xs text-gray-500">Svenska banker</div>
+                          <div className="text-sm font-medium text-gray-900">Fysiska verksamheter</div>
+                          <div className="text-xs text-gray-500">4 aktiva kampanjer</div>
                         </div>
                       </div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="text-sm font-medium text-emerald-600">2.9M SEK</div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                          <span className="text-sm">💡</span>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">Innovation & Tech</div>
+                          <div className="text-xs text-gray-500">5 aktiva kampanjer</div>
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-emerald-600">8.2M SEK</div>
                     </div>
                   </div>
                 </div>
