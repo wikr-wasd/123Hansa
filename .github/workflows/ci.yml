@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Type-check, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci --no-audit --no-fund
+
+      # Kärnan körs först och separat. Den kräver ingen databas och inget bygge,
+      # så ett fel i affärslogiken ska falla på sekunder — inte efter att hela
+      # webben byggts klart.
+      - name: Affärslogik (@hansa/core)
+        run: npm run test:core
+
+      - name: Typkontroll
+        run: npm run type-check
+
+      # continue-on-error är MEDVETET och TILLFÄLLIGT. Den ärvda koden i
+      # apps/web och apps/api går inte igenom eslint med --max-warnings 0 än.
+      # Att sätta det till false innan koden är städad hade gjort CI rött på
+      # varje PR, och en pipeline som alltid är röd läser ingen. Ta bort raden
+      # när linten är ren — det är en post i docs/TODO.md.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Bygg webben
+        run: npm run build:web

@@ -18,8 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@gohansa/shared/*": ["../../packages/shared/src/*"],
-      "@gohansa/ui/*": ["../../packages/ui/src/*"]
+      "@hansa/core": ["../../packages/core/src/index.ts"]
     },
     "types": ["vite/client"]
   },

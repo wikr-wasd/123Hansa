@@ -3,7 +3,11 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
+
+# package-lock.json checkas IN med flit. Det här är en applikation, inte ett
+# bibliotek: utan låsfil installerar CI och produktion andra versioner än
+# utvecklaren har lokalt, och `npm ci` går inte att köra alls. Buggen som då
+# uppstår går inte att återskapa på maskinen där den hittades.
 
 # Production builds
 dist/
