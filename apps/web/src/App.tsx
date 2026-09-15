@@ -22,12 +22,10 @@ const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const ProfessionalServicesDemo = lazy(() => import('./pages/ProfessionalServicesDemo'));
 const SalesDemo = lazy(() => import('./pages/demos/SalesDemo'));
-const AdminPanel = lazy(() => import('./pages/admin/AuthenticatedAdminWrapper'));
 const HelpPage = lazy(() => import('./pages/footer/HelpPage'));
 const ContactPage = lazy(() => import('./pages/footer/ContactPage'));
 const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
 const ValuationPage = lazy(() => import('./pages/listings/ValuationPage'));
-const TestListingSubmission = lazy(() => import('./pages/test/TestListingSubmission'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Crowdfunding pages
@@ -36,10 +34,18 @@ const CampaignDetailPage = lazy(() => import('./pages/crowdfunding/CampaignDetai
 const DiscoverCampaignsPage = lazy(() => import('./pages/crowdfunding/DiscoverCampaignsPage'));
 const CreateCampaignPage = lazy(() => import('./pages/crowdfunding/CreateCampaignPage'));
 
+// Adminsidorna har ingen riktig inloggning förrän Supabase Auth finns och rollen
+// kontrolleras på servern (docs/TODO.md, fas 3–4). De byggs bara in i
+// utvecklingsläge. Villkoret ligger på import-nivå så att Vite inte ens skapar
+// deras chunkar i produktionsbygget.
+const AdminPanel = import.meta.env.DEV
+  ? lazy(() => import('./pages/admin/AuthenticatedAdminWrapper'))
+  : null;
+const AdminDashboard = import.meta.env.DEV
+  ? lazy(() => import('./pages/admin/AdminDashboard'))
+  : null;
+
 // Auth pages
-const TestbedLogin = lazy(() => import('./pages/auth/TestbedLogin'));
-const QuickTestRegister = lazy(() => import('./pages/auth/QuickTestRegister'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
 
 // Heart pages
@@ -80,7 +86,6 @@ function App() {
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/professional-services" element={<ProfessionalServicesDemo />} />
             <Route path="/sales-demo" element={<SalesDemo />} />
-            <Route path="/kraken" element={<AdminPanel />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/legal" element={<LegalPage />} />
@@ -89,7 +94,6 @@ function App() {
             <Route path="/cookies" element={<LegalPage />} />
             <Route path="/gdpr" element={<LegalPage />} />
             <Route path="/valuation" element={<ValuationPage />} />
-            <Route path="/test-submission" element={<TestListingSubmission />} />
             <Route path="/create-listing" element={
               <ProtectedRoute>
                 <CreateListingPage />
@@ -97,11 +101,9 @@ function App() {
             } />
             <Route path="/create-listing-preview" element={<CreateListingPreview />} />
             
-            {/* Auth routes */}
-            <Route path="/testbed" element={<TestbedLogin />} />
-            <Route path="/testbed-login" element={<TestbedLogin />} />
-            <Route path="/quick-test-register" element={<QuickTestRegister />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Admin — bara i utvecklingsläge, se kommentaren vid importen */}
+            {AdminPanel && <Route path="/kraken" element={<AdminPanel />} />}
+            {AdminDashboard && <Route path="/admin/dashboard" element={<AdminDashboard />} />}
             
             {/* Crowdfunding routes */}
             <Route path="/crowdfunding" element={<CrowdfundingHomePage />} />
