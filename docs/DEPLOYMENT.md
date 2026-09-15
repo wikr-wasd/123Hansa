@@ -47,6 +47,37 @@ Kontrollera i Vercels dashboard:
 - Att senaste bygget är färskt och grönt
 - Att branchen du pushade faktiskt triggade ett bygge
 
+### Läget 2026-09-15: precis den fällan
+
+Två Vercel-projekt bygger `wikr-wasd/123Hansa`: **`123-hansa-web`** och
+**`123hansa-staging`**. Båda byggena av `dev` 2026-09-05 föll med
+
+```
+npm error workspace @123hansa/web@1.0.1
+npm error location /vercel/path0/apps/web
+npm error Missing script: "build:web"
+```
+
+`location .../apps/web` visar att projektens **Root Directory är `apps/web`**.
+Därifrån finns inget `build:web` — det skriptet ligger i rotens `package.json`.
+Lokalt går samma bygge igenom.
+
+Åtgärd, i `123-hansa-web` → Settings → Build and Deployment:
+
+1. **Root Directory** → töm fältet eller välj repots översta nivå → **Save**
+2. **Framework Settings** → stäng av *Override* på Build Command, Output
+   Directory och Install Command, så att `vercel.json` gäller
+3. Deployments → senaste `dev`-bygget → **Redeploy** utan byggcache
+
+`123hansa-staging` tas bort i stället för att lagas. Två projekt på samma repo
+betyder två uppsättningar miljövariabler och två domäner som kan visa olika
+saker — samma sorts glidning som `main` och `staging` hade.
+
+### Planen
+
+Hobby-planen är enligt Vercels villkor för icke-kommersiellt bruk. En
+marknadsplats med riktiga kunder behöver **Pro** före lansering.
+
 ---
 
 ## Bygget

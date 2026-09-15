@@ -21,9 +21,22 @@ Status vid genomgången **2026-09-05**:
 | Tester | 🔴 Nästan inga | Utanför `@hansa/core` finns **noll** testfiler i `apps/web` och `apps/api` |
 | Typkontroll | 🟡 Delvis | `@hansa/core` ren. 722 äkta fel kvar i den ärvda koden i `apps/` |
 | Lint | 🟡 Går att köra | api 18 fel/459 varningar, web 33 fel/763 varningar |
-| Bygge | 🟢 Fungerar | `npm run build:web` går igenom |
+| Bygge | 🟢 Fungerar lokalt | `npm run build:web` går igenom |
 
 🟢 klar · 🟡 påbörjat · 🔴 inte gjort
+
+### Tillägg vid granskningen 2026-09-15
+
+| Del | Läge | Kommentar |
+|---|---|---|
+| Vercel-bygget | 🔴 Faller | Båda projekten (`123-hansa-web`, `123hansa-staging`) har Root Directory `apps/web` och faller på `Missing script: "build:web"`. Produktion visar `main` från juli 2025 |
+| Brancher | 🔴 Isär | `main` 116 commits efter `dev`. `staging` ingår helt i `dev` |
+| Skapa annons | 🔴 Lokal | Sparas i webbläsarens `localStorage`. Ingen annan ser annonsen |
+| Meddelanden | 🔴 Försvinner | `apps/web/api/messages.ts` lägger dem i en array i minnet |
+| `/api/auth` | 🔴 Skal | Svarar bara "Auth API endpoint is working" |
+| Express-API:t | 🔴 Ej driftsatt | Körs ingenstans. Avvecklas, se `OPEN-QUESTIONS.md` fråga 9 |
+| Adminpanelen | 🔴 Oskyddad | `/kraken` och `/admin/dashboard` saknar `ProtectedRoute`. Testkonton med lösenord i klientkoden |
+| Databas | 🔴 Saknas i drift | Supabase-projektet "123Hansa" är pausat och ligger i `us-east-1` |
 
 ### Städningen 2026-09-05
 
@@ -54,21 +67,27 @@ installerat i något workspace samt `'@typescript-eslint/recommended'` utan
 
 ## Systemet
 
+Målbilden efter beslutet 2026-09-15 (`OPEN-QUESTIONS.md` fråga 9). I dag finns
+varken databasen eller serverfunktionerna i drift — se statustabellen ovan.
+
 ```
                  ┌───────────────────────────────┐
-   Webbläsare ──▶│ apps/web  @123hansa/web       │
+   Webbläsare ──▶│ apps/web  @123hansa/web       │  Vercel
                  │ React 18 + Vite + Tailwind    │
-                 │ react-router · zustand        │
-                 └───────────┬───────────────────┘
-                             │ HTTP/JSON
-                 ┌───────────▼───────────────────┐
-                 │ apps/api  @123hansa/api       │
-                 │ Express + Prisma              │
-                 │ JWT · Zod · rate limiting     │
-                 └───────────┬───────────────────┘
-                             │
-                 ┌───────────▼───────────────────┐
-                 │ PostgreSQL                    │
+                 └──────┬─────────────────┬──────┘
+          läsningar och │                 │ allt som räknar pengar
+          egna rader    │                 │ eller byter status
+          (RLS avgör)   │                 ▼
+                        │   ┌───────────────────────────────┐
+                        │   │ apps/web/api                  │  Vercel functions
+                        │   │ bud · avslut · provision      │
+                        │   │ räknar med @hansa/core        │
+                        │   └──────────────┬────────────────┘
+                        ▼                  ▼
+                 ┌───────────────────────────────┐
+                 │ Supabase (EU)                 │
+                 │ Postgres + RLS · Auth         │
+                 │ Storage (datarum) · Realtime  │
                  └───────────────────────────────┘
 
         ┌──────────────────────────────────────────┐
@@ -80,9 +99,13 @@ installerat i något workspace samt `'@typescript-eslint/recommended'` utan
               └── används av web ──────────┘ och av api
 ```
 
-`apps/web/api/` innehåller dessutom Vercel serverless functions. Att det finns
-**två** API-ytor — Express-appen och Vercel-funktionerna — är en skuld, inte ett
-designbeslut. Se TODO.
+Klienten får läsa och skriva direkt mot Supabase **bara** där radnivåpolicyn
+ensam räcker som skydd — egen profil, egna utkast, egna meddelanden. Allt som
+flyttar värde eller ändrar en affärs status går genom en serverfunktion, eftersom
+regel 2 i `CLAUDE.md` säger att klienten aldrig skickar ett pris.
+
+`apps/api` (Express + Prisma) finns kvar i repot tills det som behövs ur det har
+flyttats. Det är inte driftsatt och ska inte byggas vidare på.
 
 ---
 
@@ -150,16 +173,19 @@ skrevs in efter att ett API-anrop visat sig gå förbi middleware.
 ## Skulder som är kända och medvetna
 
 **Två API-ytor.** `apps/api` (Express) och `apps/web/api` (Vercel functions) gör
-delvis samma sak. En av dem ska bort. Vilken beror på om API:t behöver köra
-långlivade processer — WebSocket för meddelanden talar för Express, allt annat
-för serverless.
+delvis samma sak. **Beslutat 2026-09-15:** Express avvecklas till förmån för
+Supabase + Vercel functions. Realtid för meddelanden, som var skälet att behålla
+Express, tas av Supabase Realtime.
 
-**Mockdata i komponenter.** `mockListings` finns i fyra filer. Data ska komma
-från API:t genom ett servicelager, inte ur en konstant i en vy.
+**Mockdata i komponenter.** `mockListings` finns i fyra filer och i två
+Vercel-funktioner. **Beslutat 2026-09-15:** annonserna ligger kvar som märkta
+demoannonser (`OPEN-QUESTIONS.md` fråga 7), men i en enda källa och utan
+möjlighet att kontakta eller buda.
 
-**Prisma-schemat är för litet.** 11 modeller täcker användare, annonser och
+**Schemat är för litet.** 11 Prisma-modeller täcker användare, annonser och
 administration. Bud, sekretessavtal, dokument med åtkomstlogg, affärer och
-utbetalningar saknas helt.
+utbetalningar saknas helt. Det nya schemat skrivs som SQL-migrationer för
+Supabase, med RLS i samma migration som tabellen.
 
 **Ingen testtäckning utanför core.** Route handlers och komponenter har i
 praktiken inga tester. Se `TESTING.md` för vad som ska testas var.

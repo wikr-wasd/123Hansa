@@ -83,29 +83,52 @@ att kunna lansera i Kroatien och att bara påstå det.
 - [ ] **Lägg `country`, `currency` och belopp i minsta enhet på annonsen.**
       Belopp som `Int`, aldrig `Float` eller `Decimal` i mellanled.
 - [ ] **Bygg ett servicelager** i webben som hämtar annonser från API:t.
-- [ ] **Ta bort `mockListings`** ur `BusinessListingsPage.tsx`,
-      `components/listings/BusinessListings.tsx`, `listings/ListingDetailPage.tsx`
-      och `admin/EnhancedAdminPanel.tsx`. Alla fyra, samma commit — en kvarglömd
-      kopia ser ut att fungera.
-- [ ] **Bestäm vad som händer med de 30 demoannonserna.** Se `OPEN-QUESTIONS.md`,
-      fråga 7.
+- [ ] **Samla demoannonserna i en källa** i stället för kopiorna i
+      `BusinessListingsPage.tsx`, `components/listings/BusinessListings.tsx`,
+      `listings/ListingDetailPage.tsx`, `admin/EnhancedAdminPanel.tsx`,
+      `api/listings.ts` och `api/listings/[id].ts`. Alla på en gång — en
+      kvarglömd kopia ser ut att fungera.
+- [x] ~~Bestäm vad som händer med de 30 demoannonserna.~~ Besvarat 2026-09-15:
+      kvar, märkta. Se `OPEN-QUESTIONS.md`, fråga 7
+- [ ] **Märk demoannonserna "Exempelannons"** i lista, annonssida och sök, och
+      ersätt kontakt, bud och sekretessavtal med en förklaring
+- [ ] **Inställning som stänger av demoannonserna** utan kodändring
+- [ ] **Skapa annons sparar i databasen**, inte i `localStorage`
+- [ ] **Meddelanden sparas i databasen**, inte i en array i minnet
 - [ ] **Loading- och error-states** överallt där data hämtas. En tom lista och ett
       trasigt anrop ser likadana ut för användaren annars.
 
 ---
 
-## Fas 3 — Välj bort den ena API-ytan
+## Fas 3 — Supabase som enda backend
 
-- [ ] **Bestäm: Express eller Vercel functions.** I dag finns båda och de gör
-      delvis samma sak. WebSocket för meddelanden talar för Express.
-- [ ] **Avveckla den andra.** Två API-ytor betyder två auth-implementationer och
-      två ställen att glömma en behörighetskontroll på.
-- [ ] **Samla valideringen i Zod-scheman** som delas mellan webben och API:t.
+Fas 2 och 3 flätas ihop i praktiken: annonserna kan inte hämtas från en databas
+som inte finns. Ordningen här är den som går att bygga i.
+
+- [x] ~~Bestäm: Express eller Vercel functions.~~ Besvarat 2026-09-15: Supabase +
+      Vercel functions. Se `OPEN-QUESTIONS.md`, fråga 9
+- [ ] **Skapa Supabase-projekt i EU** för dev, och senare ett för produktion.
+      Väntar på Williams godkännande av kostnaden
+- [ ] **Kontrollera innehållet i det gamla projektet** "123Hansa"
+      (`pmtnrqtkuygyyodcovds`, `us-east-1`, pausat) innan det tas bort
+- [ ] **Schema v1 som SQL-migrationer** — profiler, organisationer, annonser,
+      intresseanmälningar, sekretessavtal, dokument, åtkomstlogg, meddelanden,
+      bud. RLS i samma migration som tabellen. Provkör lokalt i Docker
+- [ ] **Byt inloggningen till Supabase Auth.** `/api/auth` är i dag ett skal
+- [ ] **Avveckla `apps/api`** när det som behövs är flyttat
+- [ ] **Samla valideringen i Zod-scheman** som delas mellan webben och
+      serverfunktionerna
 
 ---
 
 ## Fas 4 — Säkerhet innan riktiga användare
 
+- [ ] **Ta bort testinloggningarna** — `TestbedLogin`, `QuickTestRegister`,
+      `SimpleTestLogin` och rutterna `/testbed`, `/testbed-login`,
+      `/quick-test-register`, `/test-submission`. Lösenord ligger i klientkoden i
+      ett publikt repo. Görs direkt, före allt annat i fasen
+- [ ] **Skydda adminpanelen.** `/kraken` och `/admin/dashboard` renderas utan
+      `ProtectedRoute`, och rollen måste dessutom kontrolleras på servern
 - [ ] **Genomdriv åtkomstmatrisen i tre lager.** Se `SECURITY.md`. Middleware
       räcker aldrig ensamt för ett API.
 - [ ] **Radnivåpolicy eller motsvarande i databasen** för varje tabell, innan den
@@ -135,6 +158,13 @@ svar.
 
 - [ ] **Verifiera att ett Vercel-projekt faktiskt bygger repot.** Lova aldrig en
       preview-URL du inte sett. Se `DEPLOYMENT.md`.
+      2026-09-15: båda projekten faller på Root Directory `apps/web`. William
+      ändrar det i dashboarden
+- [ ] **Ta bort Vercel-projektet `123hansa-staging`** — det bygger samma repo en
+      gång till
+- [ ] **Ta bort branchen `staging`** — den ingår helt i `dev`
+- [ ] **Vercel Pro före lansering.** Hobby-planen är enligt Vercels villkor bara
+      för icke-kommersiellt bruk
 - [ ] Separata miljöer för `dev` och `main` med egna databaser
 - [ ] Sentry med release-taggar och källkartor
 - [ ] Backup och återställning, provad minst en gång

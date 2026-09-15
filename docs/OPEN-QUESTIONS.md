@@ -7,6 +7,8 @@ kostar en omskrivning inom en månad. Det som står här är medvetet obesvarat 
 kodbasen: provisionssatsen är ett argument, inte en konstant, och
 momshanteringen vid gränsöverskridande affär är inte implementerad alls.
 
+Besvarade frågor flyttas längst ned, med datum och motivering.
+
 När en fråga får sitt svar: skriv in svaret **här**, med datum, och först
 därefter i koden.
 
@@ -128,37 +130,14 @@ inventarier blir svaret ett annat än för aktier i ett bolag.
 
 ## 6. Crowdfunding: vilken sorts?
 
-README och koden nämner crowdfunding parallellt med företagsförsäljning. De två
-är helt olika produkter juridiskt:
-
-- **Reward-based** (förköp av en produkt) — lätt reglerat.
-- **Equity crowdfunding** (andelar i bolaget) — kräver tillstånd som
-  gräsrotsfinansieringsplattform, i EU under ECSP-förordningen, och
-  Finansinspektionens tillstånd i Sverige. Norge och Bosnien har egna regimer.
-- **Lånebaserad** — ännu en regim.
-
-`apps/web/src/components/crowdfunding/` och `data/crowdfundingData.ts` finns
-redan i koden. **Vilken av de tre som byggs är inte dokumenterat någonstans.**
-
-Är det equity kan det inte lanseras utan tillstånd, oavsett hur klar koden är.
-
-**Status:** ⬜ obesvarad — och den här kan blockera lansering helt
+✅ **Besvarad 2026-09-15** — se "Besvarade frågor" längst ned. Kvar att besvara
+är delfrågan om pengarna, som hänger ihop med fråga 2.
 
 ---
 
 ## 7. Vad händer med den befintliga mockdatan?
 
-Trettio annonser ligger hårdkodade i komponenterna. De ser ut som riktiga
-företag till salu.
-
-- Ska de bort helt innan lansering, eller finnas kvar som demo bakom en flagga?
-- Om de finns kvar i produktion: en besökare som hör av sig om ett bolag som inte
-  finns är ett förtroendeproblem, inte en bugg.
-
-**Rekommendation:** bort. En tom marknadsplats är ärlig; en full av påhittade
-bolag är det inte.
-
-**Status:** ⬜ obesvarad
+✅ **Besvarad 2026-09-15** — se "Besvarade frågor" längst ned.
 
 ---
 
@@ -178,6 +157,84 @@ vidare enligt `dev → godkännande → main`. Väntar på Williams ja.
 
 ## Besvarade frågor
 
-Inga än. När en fråga besvaras flyttas den hit med datum och motivering — inte
-bara med svaret. Motiveringen är det som gör att beslutet går att ompröva när
+När en fråga besvaras flyttas den hit med datum och motivering — inte bara med
+svaret. Motiveringen är det som gör att beslutet går att ompröva när
 förutsättningarna ändras.
+
+### 6. Crowdfunding: reward-based — 2026-09-15, William
+
+**Beslut:** crowdfunding på 123Hansa är **reward-based**: stödjare förköper en
+produkt eller tjänst, eller får en belöning. Inga andelar, inga lån.
+
+**Motivering:** equity crowdfunding kräver tillstånd som
+gräsrotsfinansieringsplattform (ECSP i EU, Finansinspektionen i Sverige, egna
+regimer i Norge och Bosnien) och hade blockerat lansering oavsett hur klar koden
+var. Lånebaserad är ännu en regim.
+
+**Det här beslutet löser inte:**
+
+- **Vem som håller pengarna** mellan löfte och utbetalning. Håller 123Hansa
+  stödjarnas pengar är det samma escrow-fråga som fråga 2. Kampanjer med
+  "allt eller inget" kräver att någon håller eller reserverar beloppet.
+- **Konsumentskydd.** Stödjare är ofta privatpersoner. Ett förköp är ett
+  distansavtal, med ångerrätt och informationskrav som skiljer sig mellan de fem
+  länderna.
+- **Gränsen mot equity.** En kampanj som i praktiken lovar avkastning är inte
+  reward-based för att den heter så. Granskningen av kampanjer måste fånga det.
+
+**Konsekvens i koden:** kampanjer får inga fält för andelar, värdering per andel
+eller avkastning. Crowdfunding-flödet byggs efter annonsflödet (steg 5 i
+`TODO.md`), och betalningsdelen väntar på fråga 2.
+
+### 7. Demoannonserna: kvar, tydligt märkta — 2026-09-15, William
+
+**Beslut:** de 30 påhittade annonserna **ligger kvar som demo** i stället för att
+tas bort.
+
+**Motivering:** en marknadsplats som är tom vid start visar inte vad tjänsten gör.
+
+**Villkor som följer av beslutet**, eftersom rekommendationen var den motsatta och
+risken — en besökare som hör av sig om ett bolag som inte finns — kvarstår:
+
+- Varje demoannons märks **"Exempelannons"** överallt där den visas: i listan, på
+  annonssidan och i sökträffar. Märkningen är inte en diskret etikett i hörnet.
+- En demoannons **går inte att kontakta, buda på eller begära sekretessavtal för.**
+  Knapparna ersätts med en förklaring. Genomdrivet i API:t och i databasen, inte
+  bara i gränssnittet.
+- Demoannonserna finns på **ett** ställe — i dag en modul, senare rader med
+  `is_demo = true` — aldrig kopierade i fyra komponenter.
+- De räknas aldrig in i statistik som "antal annonser" eller "affärsvolym".
+- Det ska gå att **stänga av dem med en inställning** utan kodändring, för när
+  riktiga annonser finns blir de brus.
+
+### 9. Backend: Supabase + Vercel — 2026-09-15, William
+
+Frågan fanns inte i listan men var den som styrde fas 3 i `TODO.md`: Express
+eller Vercel functions.
+
+**Beslut:** **Supabase** (Postgres, auth, lagring, realtid) med **Vercel** för
+webben och de serverfunktioner som måste räkna på servern. `apps/api` (Express +
+Prisma) avvecklas.
+
+**Motivering:**
+
+- **Behörighet i databasen.** Regel 5 i `CLAUDE.md` kräver kontroll i tre lager.
+  Radnivåpolicy (RLS) i Postgres är det tredje lagret, och Supabase är byggt
+  runt det.
+- **Due diligence-material** kräver lagring med åtkomstkontroll och
+  tidsbegränsade länkar. Supabase Storage har det, policystyrt.
+- **Meddelanden i realtid** var det enda skälet att behålla en långlivad
+  Express-process. Supabase Realtime täcker det.
+- **Samma stack som 123Connect**, där reglerna i `CLAUDE.md` redan prövats.
+- Express-API:t var aldrig driftsatt. Att avveckla det kostar inga användare.
+
+**Villkor:**
+
+- Projektet ska ligga i **EU**. Det befintliga Supabase-projektet "123Hansa"
+  (`pmtnrqtkuygyyodcovds`) ligger i `us-east-1` och är pausat; regionen går inte
+  att byta i efterhand. Ett nytt projekt skapas först när William godkänt
+  kostnaden. Det gamla tas inte bort förrän dess innehåll kontrollerats.
+- **Egen databas för dev och för produktion.** Preview får aldrig peka på
+  produktionsdatabasen.
+- Allt som räknar pengar — bud, provision, moms — körs **på servern** med
+  `@hansa/core`, aldrig som en direkt skrivning från klienten mot en tabell.
