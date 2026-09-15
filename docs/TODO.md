@@ -49,15 +49,18 @@ fungerar i appen — inte när koden är skriven. Se `TESTING.md`.
 
 ---
 
-## Fas 1 — Gör de fem länderna verkliga i gränssnittet ⛔ blockerar lansering
+## Fas 1 — Gör de tre nordiska länderna verkliga i gränssnittet ⛔ blockerar lansering
 
-Kärnan kan hantera fem länder. **Appen kan det inte.** Det är skillnaden mellan
-att kunna lansera i Kroatien och att bara påstå det.
+Lanseringen gäller SE, NO och DK (strategin omprövad 2026-09-15). Kärnan kan
+hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt igenom.
 
-- [ ] **Lägg till `bs` i ordboken.** Bosniska/kroatiska i latinsk skrift. Utan
-      den går sidan inte att använda i två av fem marknader.
-- [ ] **Flytta ordboken ur `i18n/config.ts`.** 592 rader i en fil med fyra språk
-      inbakade blir ohanterlig vid fem. En fil per språk.
+- [ ] **Lanseringsländer som konfiguration** — registrering, annonsformulär och
+      filter erbjuder bara SE, NO och DK. Övriga länder i `@hansa/core` ligger
+      kvar men visas inte
+- [ ] **Ordböckerna `no` och `da` kompletta.** 2026-09-15 har `sv` och `en`
+      runt 240 rader var i `config.ts`, `no` sju och `da` knappt tjugo. Norska
+      och danska besökare ser i praktiken svenska
+- [ ] **Flytta ordboken ur `i18n/config.ts`.** En fil per språk.
 - [ ] **Härled `Dictionary` ur den svenska filen** så att en nyckel som glöms i
       något annat språk stoppar bygget. Utan det ruttnar översättningarna tyst.
 - [ ] **Testa nyckelparitet** — identiska nyckelmängder åt alla håll, inga tomma
@@ -71,8 +74,8 @@ att kunna lansera i Kroatien och att bara påstå det.
       momssats och organisationsnummerfält.
 - [ ] **Koppla in `validateOrgNumber()`** i formuläret, med landets egen etikett
       (`orgNumberLabel`) och begripligt felmeddelande.
-- [ ] **Språk i URL:en** för indexerade sidor (`/sv/...`, `/bs/...`) med
-      hreflang enligt `alternateTags()`. Google indexerar en URL, inte en cookie.
+- [ ] **Språk i URL:en** för indexerade sidor (`/sv/...`, `/no/...`, `/da/...`)
+      med hreflang enligt `alternateTags()`. Google indexerar en URL, inte en cookie.
 
 ---
 
@@ -222,8 +225,12 @@ Blockerad av prisnivåerna i `OPEN-QUESTIONS.md` fråga 1.
 - [ ] `calculateCommission()` i `pricing.ts` används inte längre av strategin.
       Ta bort den när avgiftsberäkningen ersatt den
 
-## Fas 5d — Köparsidan i Bosnien och Serbien
+## Senare skede — Kroatien, och köparsidan i Bosnien och Serbien
 
+Inte före lansering. Strategin omprövad 2026-09-15: Norden först.
+
+- [ ] **Lägg till `bs` i ordboken.** Bosniska/kroatiska i latinsk skrift
+- [ ] **Kroatien (`HR`) i gränssnittet** — finns redan i `@hansa/core`
 - [ ] **Serbien (`RS`) i `country.ts`** — valuta, tidszon, språk (`bs` täcker
       latinsk skrift), organisationsnummer med bara formatkontroll tills en
       kontrollsiffra bekräftats
@@ -251,14 +258,16 @@ Blockerad av prisnivåerna i `OPEN-QUESTIONS.md` fråga 1.
 
 ---
 
-## Fas två — Crowdfunding som separat tjänst
+## Fas två — Crowdfunding som eget projekt
 
-Byggs inte förrän ECSP-tillståndet är på väg. Se `BUSINESS.md` och
-`OPEN-QUESTIONS.md` fråga 6, där typen av crowdfunding väntar på bekräftelse.
+**Byggs inte i det här repot.** Byggs inte förrän bolaget är bildat och
+ECSP-tillståndet är på väg. Se `BUSINESS.md` och `OPEN-QUESTIONS.md` fråga 6.
 
-- [ ] Juridisk person och ansökan om tillstånd
-- [ ] Egen app i repot (`apps/crowdfunding`), eget varumärke, egen domän, eget
-      Vercel-projekt och egen databas. Delar bara `@hansa/core`
+- [ ] Jurist med ECSP-erfarenhet, eget aktiebolag, ansökan om tillstånd
+- [ ] Eget repo, eget varumärke, egen domän, eget Vercel-projekt och egen
+      Supabase-databas. Inga delade användarkonton med marknadsplatsen
+- [ ] Publicera `@hansa/core` som paket, så att crowdfunding-repot kan använda
+      det utan att dela kod eller data med marknadsplatsen
 - [ ] Skriv crowdfunding-flödet mot ECSP-kraven. Den gamla koden raderades
       2026-09-15 och finns i git-historiken om något ska återanvändas
 

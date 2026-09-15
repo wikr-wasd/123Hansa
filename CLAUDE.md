@@ -53,11 +53,13 @@ andelar till många investerare) utan ett uttryckligt beslut i
 Intäkterna är listning, betald exponering och abonnemang. **Aldrig success fee** —
 en avgift på genomförd affär drar plattformen mot förmedlarrollen.
 
-Säljarsidan är **Sverige, Norge, Danmark och Kroatien**. Köparsidan börjar med
-**Bosnien och Serbien**: kapital in i EU, inte tvärtom.
+Lanseringen sker i **Sverige, Norge och Danmark**. Kroatien, och Bosnien och
+Serbien som köparsida, kommer i ett senare skede. `@hansa/core` behåller alla
+fem länderna; det är gränssnittet och registreringen som bara erbjuder SE, NO
+och DK vid lansering.
 
-**Crowdfunding är fas två** och en separat tjänst — egen juridisk person, domän,
-app och databas — med ECSP-tillstånd. Den byggs inte in i marknadsplatsen.
+**Crowdfunding är ett eget projekt** — eget bolag, eget repo, egen databas, egen
+domän — med ECSP-tillstånd. Det byggs aldrig in i det här repot.
 
 AML- och sanktionsscreening av användare, bolag och verkliga huvudmän byggs från
 start, även utan skyldighet. Datarummet och screeningen har högst kvalitetskrav i

@@ -188,6 +188,36 @@ en gräns och behöver en jurists bedömning innan de finns i formuläret:
 
 ---
 
+## 12. Vilka länder är "Norden" vid lansering?
+
+Strategin omprövades 2026-09-15 till Norden först. `country.ts` har SE, NO och
+DK. **Finland och Island** står inte där.
+
+- Finland har euro, finska och svenska, Y-tunnus med kontrollsiffra och ett eget
+  bolagsregister. Tekniskt en post i `COUNTRY_INFO`, men en ny ordbok (`fi`).
+- Utan Finland är "nordisk" en överdrift i marknadsföringen.
+
+**Status:** ⬜ obesvarad. Tills vidare gäller SE, NO och DK.
+
+---
+
+## 13. Vinkeln mot konkurrenterna
+
+Bolagsplatsen, Selskapstorget och Saxis tar redan betalt per annons eller
+abonnemang — se `BUSINESS.md`, avsnittet Konkurrenter. Samma modell räcker inte
+som skäl för en säljare att välja 123Hansa.
+
+Vilken vinkel bär lanseringen? Förslagen i `BUSINESS.md`: en plattform för hela
+Norden, inbyggt datarum, mäklare som kunder, och senare Balkankorridoren.
+
+**Varför det blockerar:** vinkeln avgör vad som byggs först. Mäklare som kunder
+kräver organisationskonton med flera användare och uppdrag per mäklare från dag
+ett — det är en annan datamodell än en säljare med en annons.
+
+**Status:** ⬜ obesvarad
+
+---
+
 ## 11. Sekretessavtalet inför datarummet
 
 Regel 6 i `CLAUDE.md` kräver signerat sekretessavtal innan någon ser due
@@ -269,6 +299,12 @@ som inte gör plattformen till förmedlare, och en användarmodell som tål att
 plattformen senare tar fler steg mot affären.
 
 **Det strategin öppnar:** frågorna 10 och 11 ovan, och Serbien som sjätte land.
+
+#### Omprövad 2026-09-15, William: Norden först
+
+Lansering i **Sverige, Norge och Danmark**. Kroatien, Bosnien och Serbien i ett
+senare skede. Crowdfunding som ett **eget projekt** med eget bolag, eget repo och
+egen databas. Se `BUSINESS.md`. Öppnar frågorna 12 och 13.
 
 ### 7. Demoannonserna: kvar, tydligt märkta — 2026-09-15, William
 
