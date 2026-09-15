@@ -123,12 +123,13 @@ som inte finns. Ordningen här är den som går att bygga i.
 
 ## Fas 4 — Säkerhet innan riktiga användare
 
-- [ ] **Ta bort testinloggningarna** — `TestbedLogin`, `QuickTestRegister`,
-      `SimpleTestLogin` och rutterna `/testbed`, `/testbed-login`,
-      `/quick-test-register`, `/test-submission`. Lösenord ligger i klientkoden i
-      ett publikt repo. Görs direkt, före allt annat i fasen
-- [ ] **Skydda adminpanelen.** `/kraken` och `/admin/dashboard` renderas utan
-      `ProtectedRoute`, och rollen måste dessutom kontrolleras på servern
+- [x] **Ta bort testinloggningarna** — klart 2026-09-15. `TestbedLogin`,
+      `QuickLogin`, `QuickTestRegister`, `SimpleTestLogin`, `AdminLogin` och
+      `TestListingSubmission` borta. ⚠️ Adminlösenordet ligger kvar i
+      git-historiken i ett publikt repo och ska betraktas som röjt
+- [ ] **Skydda adminpanelen.** Tillfälligt löst 2026-09-15: `/kraken` och
+      `/admin/dashboard` byggs bara in i utvecklingsläge. Riktig lösning är
+      Supabase Auth med rollen kontrollerad på servern och i RLS
 - [ ] **Genomdriv åtkomstmatrisen i tre lager.** Se `SECURITY.md`. Middleware
       räcker aldrig ensamt för ett API.
 - [ ] **Radnivåpolicy eller motsvarande i databasen** för varje tabell, innan den
@@ -142,15 +143,73 @@ som inte finns. Ordningen här är den som går att bygga i.
 
 ---
 
-## Fas 5 — Affären
+## Fas 4b — Rensa bort det som strider mot strategin
 
-Blockerad av `OPEN-QUESTIONS.md` frågorna 1–3. Bygg ingenting här förrän de har
-svar.
+Strategin 2026-09-15 (`BUSINESS.md`): ren marknadsplats, avtal och betalning
+sköts av parterna, crowdfunding i fas två. Webben innehåller i dag flera funktioner
+som låtsas göra det plattformen uttryckligen inte ska göra.
 
-- [ ] Budflöde där servern räknar och klienten bara kontrollerar
-- [ ] Provision enligt beslutad modell — sats i konfiguration, inte i kod
+- [ ] **Ta bort "Lämna bud"** på annonssidan. Kvar blir "Visa intresse"
+- [ ] **Ta bort Heart-kontrakten** — `/heart`, `components/heart/`. De simulerar
+      avtalssignering, KYC och escrow i `localStorage`
+- [ ] **Ta bort betalning av köpeskilling** — `components/payment/`,
+      `components/payments/`. Betalning av plattformens egna avgifter byggs om
+      senare, med den leverantör som väljs
+- [ ] **Dölj crowdfunding** från meny, startsida och rutter. Koden flyttas ut
+      när fas två börjar, se nedan
+- [ ] **Stryk formuleringar** som lovar förmedling, rådgivning eller trygg
+      betalning i texter, villkor och SEO-metadata
+
+---
+
+## Fas 5 — Marknadsplatsens kärna
+
+- [ ] **Köparprofiler** — sökkriterier: bransch, land, storlek, prisspann
+- [ ] **Matchning** — bevakningar och utskick när en annons matchar en profil.
+      Rangordning efter relevans, aldrig efter betald exponering
+- [ ] **Intresseanmälan** — köparen visar intresse, säljaren väljer vem som går
+      vidare. Kontaktuppgifter delas inte automatiskt
+- [ ] **Datarum** — dokument i Supabase Storage bakom tidsbegränsade länkar,
+      åtkomst först efter accepterat sekretessavtal, oföränderlig logg. Formen på
+      avtalet: `OPEN-QUESTIONS.md` fråga 11
+- [ ] **Meddelanden** mellan parterna, i realtid, sparade i databasen
+- [ ] **Säkerställ gränsen:** inget bud, ingen köpeskilling, inget avtal där
+      plattformen är part
+
+## Fas 5b — AML och sanktionsscreening
+
+Beslutad från start, se `BUSINESS.md`. Byggs **innan** första riktiga användaren
+registreras — en användarmodell utan screening går inte att eftermontera utan att
+screena alla befintliga i efterhand.
+
+- [ ] **DPIA och post i `PERSONUPPGIFTER.md`** — före första screeningen
+- [ ] Välj leverantör för sanktions- och PEP-listor
+- [ ] Screening av person vid registrering, av bolag och verkliga huvudmän vid
+      annons och vid köparprofil för bolag
+- [ ] Omprövning när listorna uppdateras
+- [ ] Manuell granskning av träffar i adminpanelen, med logg över beslutet
+- [ ] En träff stoppar publicering och datarumsåtkomst, inte bara visar en varning
+
+## Fas 5c — Intäkter
+
+Blockerad av prisnivåerna i `OPEN-QUESTIONS.md` fråga 1.
+
+- [ ] Listningsavgift, betald exponering och abonnemang — beräknade i
+      `@hansa/core`, i landets valuta, med landets moms
+- [ ] Märkning av betald exponering som annonserad
+- [ ] Betalleverantör för avgifterna
 - [ ] Fakturering med rätt momssats per land
-- [ ] Utbetalning till säljaren
+- [ ] `calculateCommission()` i `pricing.ts` används inte längre av strategin.
+      Ta bort den när avgiftsberäkningen ersatt den
+
+## Fas 5d — Köparsidan i Bosnien och Serbien
+
+- [ ] **Serbien (`RS`) i `country.ts`** — valuta, tidszon, språk (`bs` täcker
+      latinsk skrift), organisationsnummer med bara formatkontroll tills en
+      kontrollsiffra bekräftats
+- [ ] Registrering och screening av köpare från länder utan e-legitimation
+- [ ] Märkning av annonser i sektorer där utländska direktinvesteringar kan
+      granskas
 
 ---
 
@@ -169,6 +228,18 @@ svar.
 - [ ] Sentry med release-taggar och källkartor
 - [ ] Backup och återställning, provad minst en gång
 - [ ] Röktest som kör hela flödet mot en levande app
+
+---
+
+## Fas två — Crowdfunding som separat tjänst
+
+Byggs inte förrän ECSP-tillståndet är på väg. Se `BUSINESS.md` och
+`OPEN-QUESTIONS.md` fråga 6, där typen av crowdfunding väntar på bekräftelse.
+
+- [ ] Juridisk person och ansökan om tillstånd
+- [ ] Egen app i repot (`apps/crowdfunding`), eget varumärke, egen domän, eget
+      Vercel-projekt och egen databas. Delar bara `@hansa/core`
+- [ ] Flytta dagens crowdfunding-kod dit, eller skriv om den mot ECSP-kraven
 
 ---
 

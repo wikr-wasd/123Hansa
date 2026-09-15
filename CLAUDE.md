@@ -39,16 +39,29 @@ döda knappar, ingen TODO som skickas som klar.
 
 ## Vad 123Hansa är
 
-Marknadsplats för **företagsaffärer**: köpa och sälja hela bolag, kommersiella
-fastigheter, fakturor, domäner och andra affärstillgångar. Plus crowdfunding för
-bolag som söker kapital i stället för en köpare.
+En **M&A-marknadsplats**: annonser för hela bolag och affärstillgångar,
+matchning mellan köpare och annonser, betald exponering och datarum med
+sekretess. Strategin beslutades 2026-09-15 och står i `docs/BUSINESS.md`.
 
-Marknaden är **Sverige, Norge, Danmark, Kroatien och Bosnien**.
+**Plattformen är inte part i affären.** Den förhandlar inte, tar inget bud, håller
+inga pengar och upprättar inga avtal — det sköter köpare och säljare själva. Den
+gränsen är det som gör att marknadsplatsen kan starta utan tillstånd. Bygg
+**aldrig** en funktion som korsar den (budflöde, avgift per avslut, escrow,
+andelar till många investerare) utan ett uttryckligt beslut i
+`docs/OPEN-QUESTIONS.md`.
 
-Det som skiljer 123Hansa från en annonssajt är att en affär går att **genomföra**
-på plattformen: verifierad säljare, sekretessavtal, due diligence-material bakom
-åtkomstkontroll, bud och avslut. Den kedjan har högst kvalitetskrav i produkten,
-för det är där pengarna och ansvaret finns.
+Intäkterna är listning, betald exponering och abonnemang. **Aldrig success fee** —
+en avgift på genomförd affär drar plattformen mot förmedlarrollen.
+
+Säljarsidan är **Sverige, Norge, Danmark och Kroatien**. Köparsidan börjar med
+**Bosnien och Serbien**: kapital in i EU, inte tvärtom.
+
+**Crowdfunding är fas två** och en separat tjänst — egen juridisk person, domän,
+app och databas — med ECSP-tillstånd. Den byggs inte in i marknadsplatsen.
+
+AML- och sanktionsscreening av användare, bolag och verkliga huvudmän byggs från
+start, även utan skyldighet. Datarummet och screeningen har högst kvalitetskrav i
+produkten, för det är där ansvaret finns.
 
 | Dokument | Innehåll |
 |---|---|
@@ -206,11 +219,15 @@ säljare, och det syns aldrig i loggarna eftersom hen bara ger upp.
 Formatkontroll är inte detsamma som att företaget finns. Registeruppslag är en
 öppen fråga — se `docs/OPEN-QUESTIONS.md`.
 
-### 8. Provisionssatsen är inte beslutad — hårdkoda den inte
+### 8. Prisnivåerna är inte beslutade — hårdkoda dem inte
 
-`calculateCommission()` tar satsen som argument med flit. Det finns ingen
-prislista i kodbasen och ska inte finnas någon förrän beslutet är fattat och
-skrivet i `docs/OPEN-QUESTIONS.md`, fråga 1.
+Modellen är beslutad (listning, exponering, abonnemang, ingen success fee).
+**Nivåerna** är det inte. Det finns ingen prislista i kodbasen och ska inte finnas
+någon förrän beloppen är skrivna i `docs/OPEN-QUESTIONS.md`, fråga 1. Då hör de
+hemma i konfiguration, inte i en komponent.
+
+`calculateCommission()` i `pricing.ts` är från den tidigare modellen och ska inte
+kopplas in någonstans.
 
 ---
 

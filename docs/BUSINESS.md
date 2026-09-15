@@ -1,63 +1,119 @@
 # Affärsmodellen
 
-## Vad 123Hansa säljer
+Strategin beslutades av William 2026-09-15. Den ersätter den tidigare
+beskrivningen, där plattformen skulle bära affären hela vägen till bud och avslut.
 
-En plats där en företagsaffär går att **genomföra**, inte bara annonseras.
-Värdet ligger i det som händer efter första kontakten: verifierad motpart,
-sekretessavtal, strukturerat due diligence-material, bud och avslut.
+## Vad 123Hansa är — och inte är
 
-En annonssajt konkurrerar med Blocket och Bolagsplatsen på pris. En plattform som
-bär affären hela vägen konkurrerar med företagsmäklare på arvode — och det är en
-helt annan prisnivå.
+**En M&A-marknadsplats.** Säljare lägger upp bolag och affärstillgångar, köpare
+hittar dem, och plattformen ger båda verktygen att ta första kontakten på ett
+seriöst sätt.
 
-## Intäktsströmmar — inte beslutade
+| 123Hansa gör | 123Hansa gör inte |
+|---|---|
+| Annonser för hela bolag och affärstillgångar | Förhandlar eller företräder någon part |
+| Matchning mellan köparprofiler och annonser | Tar betalt per genomförd affär |
+| Betald exponering av annonser | Hanterar köpeskilling, handpenning eller escrow |
+| Datarum med sekretess och åtkomstlogg | Upprättar köpeavtal eller överlåtelsehandlingar |
+| AML- och sanktionsscreening av användare och bolag | Erbjuder andelar till många investerare |
 
-⚠️ **Ingen prislista finns i kodbasen och ska inte finnas någon** förrän
-`OPEN-QUESTIONS.md` fråga 1 är besvarad. `calculateCommission()` tar satsen som
-argument med flit.
+Avtal och kontrakt mellan köpare och säljare sköter parterna själva, med egna
+rådgivare. **Det är gränsen som gör att marknadsplatsen kan starta utan
+tillstånd.** Varje funktion som flyttar plattformen över den gränsen — ett
+budflöde, en avgift per avslut, en tjänst som håller pengar — kräver ett nytt
+beslut, inte bara en ny komponent.
 
-Tänkbara modeller, som beslutsunderlag och inte som beslut:
+## Intäkter: abonnemang och listning, aldrig success fee
 
-| Modell | För | Emot |
+| Intäkt | Vem betalar |
+|---|---|
+| **Listningsavgift** | Säljaren, per annons |
+| **Betald exponering** | Säljaren — framlyft placering, nyhetsbrev, matchningsutskick |
+| **Abonnemang** | Köpare (matchning, bevakningar, datarumsåtkomst) och rådgivare |
+
+**Varför inte success fee:** en avgift som bara faller ut när affären genomförs
+gör plattformen ekonomiskt beroende av att affären blir av. Det drar den mot
+förmedlarrollen — med de krav som följer, och med en intressekonflikt mot köparen.
+
+**Betald exponering får aldrig se ut som redaktionellt urval.** En framlyft annons
+märks som annonserad. Matchningen rangordnar efter relevans, inte efter vem som
+betalat.
+
+Prisnivåerna är inte beslutade — `OPEN-QUESTIONS.md` fråga 1. Avgifterna tas ut i
+köparens eller säljarens landsvaluta, som heltal i minsta enhet, med moms enligt
+landet. Fråga 4 om moms vid gränsöverskridande köp gäller fortfarande.
+
+## Marknaderna: säljarsida och köparsida
+
+| Roll | Länder | Logik |
 |---|---|---|
-| Provision på avslut | Betalar sig bara när vi levererat värde | Ingen intäkt förrän första avslutet, som kan dröja månader |
-| Annonsavgift | Kassaflöde från dag ett | Säljaren betalar utan att veta om det leder någonstans |
-| Abonnemang för köpare | Förutsägbart | Köpare vill inte betala för att få leta |
-| Betald exponering | Enkelt att bygga | Riskerar att sälja synlighet före relevans |
+| **Säljarsida** | SE, NO, DK, HR | Bolag i EU/EES som säljs |
+| **Köparsida först** | BA, RS | Köpare från Bosnien och Serbien som investerar in i EU |
 
-Frågorna måste besvaras tillsammans: procent eller trappa, slutpris eller
-utropspris, golv, tak, vem som betalar, och vad som händer om affären avbryts
-efter accepterat bud.
+**Varför det flödet först:** kapital från Balkan in i EU-bolag är juridiskt
+enklare att hantera än att ta in EU-kapital i bolag i Bosnien och Serbien, med
+deras register, valutaregler och svagare rättsliga infrastruktur.
 
-En affär på 50 miljoner med 3,4 % ger 1,7 miljoner i provision. Ingen säljare
-accepterar det utan tak — och ett tak ändrar hela kalkylen för de stora
-affärerna, som är de som bär plattformen.
+**Det flödet är enklare, inte fritt:**
 
-## Marknaderna
+- **Granskning av utländska direktinvesteringar.** En köpare utanför EU som köper
+  ett bolag i en skyddsvärd sektor kan omfattas av nationell granskning — i
+  Sverige lagen om granskning av utländska direktinvesteringar, och motsvarande i
+  Danmark och Norge, inom ramen för EU-förordningen 2019/452. Plattformen ska inte
+  bedöma det, men en annons i en berörd sektor ska visa att granskning kan krävas.
+- **Bankernas kundkännedom.** Pengar från Bosnien och Serbien in i ett EU-bolag
+  granskas av säljarens och köparens banker. Plattformens egen screening gör
+  köparen trovärdigare där, men ersätter den inte.
+- **Serbien är ett sjätte land.** Det står inte i `country.ts`, och villkoren i
+  avsnittet nedan gäller — även om köparsidan kräver mindre än säljarsidan.
 
-Fem länder i två grupper med olika logik:
+## AML- och sanktionsscreening från start
 
-**Norden (SE, NO, DK)** — mogna marknader med etablerade företagsmäklare,
-välfungerande register och e-legitimation. Hög konkurrens, hög betalningsvilja,
-låg friktion i verifiering.
+Beslutat trots att marknadsplatsen troligen inte är skyldig att göra det. Skälet:
+den dag plattformen tar ett steg närmare affären ska det inte kräva en ombyggnad
+av användarmodellen.
 
-**Västra Balkan (HR, BA)** — färre etablerade aktörer, svagare digital
-infrastruktur, ingen e-legitimation med samma täckning. Lägre betalningsvilja i
-absoluta tal, men också lägre konkurrens. Bosnien är dessutom administrativt
-delat i tre register.
+- **Sanktionslistor** — EU:s konsoliderade lista och FN:s. Förbudet att göra
+  ekonomiska resurser tillgängliga för listade personer gäller alla i EU, så den
+  här delen är i praktiken inte frivillig.
+- **Bolag och verkliga huvudmän**, inte bara den person som skapar kontot.
+- **PEP-screening** — personer i politiskt utsatt ställning.
+- **Omprövning** när listorna uppdateras, inte bara vid registrering.
 
-Att bygga för båda grupperna samtidigt är ett medvetet val, men det betyder att
-**ingen funktion får förutsätta BankID**. Ett verifieringskrav som bara går att
-uppfylla i Norden stänger ute två av fem marknader utan att det syns som ett fel.
-Se `OPEN-QUESTIONS.md` fråga 3.
+⚠️ **Dataskydd är den svåra delen.** Utan rättslig förpliktelse vilar screeningen
+på berättigat intresse, och PEP- och sanktionsträffar ligger nära uppgifter om
+lagöverträdelser (artikel 10 i GDPR). Det kräver en konsekvensbedömning (DPIA)
+och en post i `PERSONUPPGIFTER.md` **innan** första screeningen körs.
 
-## Vad som krävs för ett sjätte land
+Leverantör är inte vald.
 
-1. Ett svar på om provisionsmodellen bär i den marknadens prisnivå
-2. Ett register att verifiera bolag mot
+## Crowdfunding: fas två, med ECSP-tillstånd
+
+Crowdfunding är **inte** en del av marknadsplatsen och byggs inte i fas ett.
+
+- Investeringsbaserad crowdfunding kräver tillstånd enligt **ECSP-förordningen**
+  (EU 2020/1503) i ett EU-land. Tillståndet gäller sedan i hela EU.
+- Handläggningen är upp till tre månader från komplett ansökan. Förberedelsen —
+  organisation, kapital, riktlinjer, system — räknas i sex till tolv månader.
+- Crowdfunding ska vara **en separat tjänst**: eget varumärke, egen domän, egen
+  app i repot, egen databas och egna villkor — och sannolikt en egen juridisk
+  person som innehar tillståndet. Det är den juridiska personen och vad den gör
+  som avgör tillståndskraven, inte hur koden är uppdelad.
+
+Crowdfunding-koden som finns i webben i dag döljs från marknadsplatsen och flyttas
+ut när fas två börjar.
+
+## Vad som krävs för ett nytt land
+
+1. En avgiftsnivå som bär i den marknadens prisnivå
+2. För säljarsidan: ett register att verifiera bolag mot
 3. Ett sätt att verifiera en person utan e-legitimation, om sådan saknas
-4. Momsfrågan löst med revisor
-5. Språkbeslut: täcker en befintlig ordbok landet, eller behövs en ny?
+4. Screening som täcker landets bolag och verkliga huvudmän
+5. Momsfrågan löst med revisor
+6. Språkbeslut: täcker en befintlig ordbok landet, eller behövs en ny?
 
 Den tekniska delen är en post i `COUNTRY_INFO` och ett par timmar. Den är inte
-det svåra — punkt 1 till 4 är det.
+det svåra — punkt 1 till 5 är det.
+
+**Ingen funktion får förutsätta BankID.** Köparsidan ligger i länder där det inte
+finns.

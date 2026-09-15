@@ -80,7 +80,7 @@ varken databasen eller serverfunktionerna i drift — se statustabellen ovan.
           (RLS avgör)   │                 ▼
                         │   ┌───────────────────────────────┐
                         │   │ apps/web/api                  │  Vercel functions
-                        │   │ bud · avslut · provision      │
+                        │   │ avgifter · screening · datarum│
                         │   │ räknar med @hansa/core        │
                         │   └──────────────┬────────────────┘
                         ▼                  ▼
@@ -131,28 +131,31 @@ och affären avbryts med "priset har ändrats" utan att någon förstår varför
 
 ---
 
-## Dataflödet för en affär
+## Dataflödet på marknadsplatsen
 
-Så här ska det se ut. I dag är steg 1–2 mockade och steg 4–7 inte byggda.
+Så här ska det se ut enligt strategin 2026-09-15 (`BUSINESS.md`). I dag är steg
+1–2 mockade och steg 3–7 inte byggda.
 
-1. **Säljaren skapar en annons.** Land väljs, och landet avgör valuta, momssatser
-   och vilket organisationsnummerformat som krävs. Numret valideras mot rätt
-   lands algoritm.
-2. **Annonsen granskas** innan den publiceras. En marknadsplats för bolagsaffärer
-   utan granskning blir en bedrägeriplattform.
-3. **Köparen hittar annonsen.** Publik information: bransch, ort, omsättning i
-   spann, utropspris.
-4. **Köparen visar intresse.** Kontaktuppgifter delas inte automatiskt.
-5. **Sekretessavtal signeras.** Först därefter öppnas due diligence-materialet,
-   och åtkomsten loggas oföränderligt.
-6. **Bud läggs.** Servern hämtar annonsens pris — klienten skickar aldrig ett
-   pris. En summa från klienten används bara som kontroll och avviker den avbryts
-   budet.
-7. **Affären avslutas.** Provisionen räknas med `calculateCommission()` i
-   säljarens valuta med säljarens momssats. Valutan fryses på affären.
+1. **Säljaren skapar en annons** och betalar listningsavgiften. Land väljs, och
+   landet avgör valuta, moms och vilket organisationsnummerformat som krävs.
+   Numret valideras mot rätt lands algoritm. Avgiften räknas på servern — regel 2.
+2. **Säljaren, bolaget och dess verkliga huvudmän screenas**, och annonsen
+   **granskas** innan den publiceras. En träff stoppar publiceringen.
+3. **Köparen screenas** vid registrering och får **matchningar** mot sin
+   köparprofil. Betald exponering märks och påverkar aldrig matchningens
+   rangordning.
+4. **Köparen visar intresse.** Kontaktuppgifter delas inte automatiskt; säljaren
+   väljer vem som går vidare.
+5. **Köparen accepterar sekretessavtalet** — parternas avtal, inte plattformens.
+   Vem, vilken version och när loggas oföränderligt.
+6. **Datarummet öppnas.** Dokument via tidsbegränsade länkar, varje åtkomst
+   loggad oföränderligt.
+7. **Parterna fortsätter själva** — förhandling, avtal och betalning sker utanför
+   plattformen. Säljaren markerar annonsen som såld eller tillbakadragen.
 
-Steg 5 och 6 är de som gör 123Hansa till mer än en annonssajt, och det är de som
-inte finns.
+Här tar plattformens ansvar slut. **Det finns inget steg 8.** Ett bud, en
+köpeskilling eller ett avtal där plattformen är part kräver ett nytt beslut i
+`OPEN-QUESTIONS.md`, eftersom det flyttar 123Hansa mot förmedlarrollen.
 
 ---
 
@@ -183,8 +186,9 @@ demoannonser (`OPEN-QUESTIONS.md` fråga 7), men i en enda källa och utan
 möjlighet att kontakta eller buda.
 
 **Schemat är för litet.** 11 Prisma-modeller täcker användare, annonser och
-administration. Bud, sekretessavtal, dokument med åtkomstlogg, affärer och
-utbetalningar saknas helt. Det nya schemat skrivs som SQL-migrationer för
+administration. Köparprofiler, intresseanmälningar, sekretessavtal, dokument med
+åtkomstlogg, screeningresultat och avgifter saknas helt. Bud, affärer och
+utbetalningar ska **inte** finnas — se `BUSINESS.md`. Det nya schemat skrivs som SQL-migrationer för
 Supabase, med RLS i samma migration som tabellen.
 
 **Ingen testtäckning utanför core.** Route handlers och komponenter har i

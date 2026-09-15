@@ -19,7 +19,13 @@ blockerar.
 
 ## 1. Provisionsmodellen ⛔ blockerar intäkter
 
-**Frågan:** Vad tar 123Hansa betalt, och på vad?
+🟡 **Delvis besvarad 2026-09-15:** ingen success fee. Intäkterna är listning,
+betald exponering och abonnemang — se `BUSINESS.md`. Kvar att besvara är
+**prisnivåerna** per avgift och land, och vad ett abonnemang innehåller.
+Delfrågorna nedan om procent, slutpris och tak gällde provisionen och har fallit
+bort.
+
+**Den ursprungliga frågan:** Vad tar 123Hansa betalt, och på vad?
 
 Delfrågor som måste besvaras tillsammans:
 
@@ -46,7 +52,12 @@ den märks som att ingen använder tjänsten.
 
 ## 2. Betalning och escrow ⛔ blockerar avslut
 
-**Frågan:** Hur flyttas pengarna, och vem håller dem under affären?
+✅ **Besvarad 2026-09-15:** köpeskillingen går aldrig genom plattformen. Parterna
+sköter avtal och betalning själva. Kvar är en mindre fråga: vilken
+betalleverantör som tar emot **avgifterna** (listning, exponering, abonnemang) i
+de fem valutorna.
+
+**Den ursprungliga frågan:** Hur flyttas pengarna, och vem håller dem under affären?
 
 - Vilken betalleverantör? Stripe finns i `package.json` sedan tidigare men täcker
   inte de fem marknaderna lika — Bosnien i synnerhet.
@@ -130,8 +141,8 @@ inventarier blir svaret ett annat än för aktier i ett bolag.
 
 ## 6. Crowdfunding: vilken sorts?
 
-✅ **Besvarad 2026-09-15** — se "Besvarade frågor" längst ned. Kvar att besvara
-är delfrågan om pengarna, som hänger ihop med fråga 2.
+✅ **Besvarad 2026-09-15, och omprövad samma dag** — se "Besvarade frågor" längst
+ned. ⚠️ De två svaren motsäger varandra och William behöver bekräfta det senare.
 
 ---
 
@@ -152,6 +163,47 @@ vad besökare på GitHub ser.
 
 **Status:** 🟡 föreslagen: gör om `main` till `staging`s innehåll och arbeta
 vidare enligt `dev → godkännande → main`. Väntar på Williams ja.
+
+---
+
+## 10. Vilka annonser ryms inom "ingen licens"? ⛔ blockerar annonsformuläret
+
+Strategin bygger på att marknadsplatsen inte behöver tillstånd. Det håller för
+**hela bolag som säljs till en köpare**. Tre av annonstyperna i dag ligger nära
+en gräns och behöver en jurists bedömning innan de finns i formuläret:
+
+- **Andelar till flera köpare.** En annons som erbjuder minoritetsposter i ett
+  bolag till många investerare är inte längre en M&A-affär — det är ett
+  erbjudande av värdepapper, och i praktiken crowdfunding bakvägen. Förslag:
+  annonsen gäller hela bolaget eller en kontrollerande post till **en** köpare.
+- **Fakturor.** Köp och försäljning av fakturor är finansiering. En plattform där
+  investerare köper fakturor kan hamna under finansierings- eller
+  crowdfundingregler. Förslag: bort ur fas ett.
+- **Kommersiella fastigheter.** Den som yrkesmässigt förmedlar fastigheter mot
+  ersättning omfattas i Sverige av fastighetsmäklarlagen. En ren annonsplats gör
+  inte det, men matchning i kombination med avgifter kopplade till fastigheten
+  ska bedömas.
+
+**Status:** ⬜ obesvarad
+
+---
+
+## 11. Sekretessavtalet inför datarummet
+
+Regel 6 i `CLAUDE.md` kräver signerat sekretessavtal innan någon ser due
+diligence-material. Strategin säger samtidigt att avtal mellan parterna sköts av
+parterna.
+
+- Ska plattformen erbjuda ett **standardavtal** som köparen accepterar i
+  gränssnittet?
+- Eller laddar **säljaren upp sitt eget** avtal, som köparen accepterar?
+- Plattformen är inte part i avtalet i något av fallen. Att köparen accepterat —
+  vem, vilken version, när — loggas oföränderligt.
+
+**Rekommendation:** säljarens eget avtal, med ett standardutkast som säljaren
+kan välja att använda. Då är det parternas avtal och inte plattformens.
+
+**Status:** ⬜ obesvarad
 
 ---
 
@@ -185,6 +237,38 @@ var. Lånebaserad är ännu en regim.
 **Konsekvens i koden:** kampanjer får inga fält för andelar, värdering per andel
 eller avkastning. Crowdfunding-flödet byggs efter annonsflödet (steg 5 i
 `TODO.md`), och betalningsdelen väntar på fråga 2.
+
+#### ⚠️ Omprövad 2026-09-15, William: fas två, med ECSP-tillstånd
+
+Senare samma dag: *"Crowdfunding som fas två och bara med ECSPR-tillstånd i ett
+EU-land."* Se `BUSINESS.md`.
+
+**Det här motsäger beslutet ovan.** ECSP-förordningen gäller investerings- och
+lånebaserad crowdfunding. **Reward-based omfattas inte**, och kräver inget
+ECSP-tillstånd. Att vänta in ett tillstånd betyder alltså att det är
+investeringsbaserad crowdfunding som avses.
+
+Tills William bekräftat gäller det som båda svaren är överens om: **ingen
+crowdfunding byggs i fas ett**, den döljs från marknadsplatsen, och den blir en
+separat tjänst med egen juridisk person, domän, app och databas.
+
+### Strategin — 2026-09-15, William
+
+Beslutad samma dag och beskriven i sin helhet i `BUSINESS.md`:
+
+- **Ren M&A-marknadsplats:** annonser, matchning, betald exponering, datarum.
+  Ingen licens. Avtal och betalning mellan parterna sköts av parterna
+- **Intäkt på abonnemang och listning**, aldrig success fee — besvarar delar av
+  fråga 1 och hela fråga 2
+- **AML- och sanktionsscreening från start**, även utan skyldighet
+- **Crowdfunding i fas två**, separat, med ECSP-tillstånd — omprövar fråga 6
+- **Bosnien och Serbien som köparsida först**, investeringar in i EU
+
+**Motivering:** kort väg till lansering utan tillståndsprövning, en intäktsmodell
+som inte gör plattformen till förmedlare, och en användarmodell som tål att
+plattformen senare tar fler steg mot affären.
+
+**Det strategin öppnar:** frågorna 10 och 11 ovan, och Serbien som sjätte land.
 
 ### 7. Demoannonserna: kvar, tydligt märkta — 2026-09-15, William
 
@@ -236,5 +320,5 @@ Prisma) avvecklas.
   kostnaden. Det gamla tas inte bort förrän dess innehåll kontrollerats.
 - **Egen databas för dev och för produktion.** Preview får aldrig peka på
   produktionsdatabasen.
-- Allt som räknar pengar — bud, provision, moms — körs **på servern** med
+- Allt som räknar pengar — avgifter och moms — körs **på servern** med
   `@hansa/core`, aldrig som en direkt skrivning från klienten mot en tabell.
