@@ -21,18 +21,11 @@ const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const ProfessionalServicesDemo = lazy(() => import('./pages/ProfessionalServicesDemo'));
-const SalesDemo = lazy(() => import('./pages/demos/SalesDemo'));
 const HelpPage = lazy(() => import('./pages/footer/HelpPage'));
 const ContactPage = lazy(() => import('./pages/footer/ContactPage'));
 const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
 const ValuationPage = lazy(() => import('./pages/listings/ValuationPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-
-// Crowdfunding pages
-const CrowdfundingHomePage = lazy(() => import('./pages/crowdfunding/CrowdfundingHomePage'));
-const CampaignDetailPage = lazy(() => import('./pages/crowdfunding/CampaignDetailPage'));
-const DiscoverCampaignsPage = lazy(() => import('./pages/crowdfunding/DiscoverCampaignsPage'));
-const CreateCampaignPage = lazy(() => import('./pages/crowdfunding/CreateCampaignPage'));
 
 // Adminsidorna har ingen riktig inloggning förrän Supabase Auth finns och rollen
 // kontrolleras på servern (docs/TODO.md, fas 3–4). De byggs bara in i
@@ -47,9 +40,6 @@ const AdminDashboard = import.meta.env.DEV
 
 // Auth pages
 const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
-
-// Heart pages
-const HeartPage = lazy(() => import('./pages/heart/HeartPage'));
 
 function App() {
   const { isLoading } = useAuthStore();
@@ -66,8 +56,8 @@ function App() {
     <>
       <Helmet>
         <html lang="sv" />
-        <title>123hansa.se - Nordic Business Marketplace</title>
-        <meta name="description" content="123hansa.se - The premier platform for buying and selling businesses in Sweden, Norway, and Denmark." />
+        <title>123hansa.se - Marknadsplats för företagsaffärer</title>
+        <meta name="description" content="123hansa.se - Marknadsplatsen för att köpa och sälja företag och affärstillgångar." />
       </Helmet>
       
       <Layout>
@@ -85,7 +75,6 @@ function App() {
             <Route path="/listings" element={<ListingsPage />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/professional-services" element={<ProfessionalServicesDemo />} />
-            <Route path="/sales-demo" element={<SalesDemo />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/legal" element={<LegalPage />} />
@@ -104,14 +93,6 @@ function App() {
             {/* Admin — bara i utvecklingsläge, se kommentaren vid importen */}
             {AdminPanel && <Route path="/kraken" element={<AdminPanel />} />}
             {AdminDashboard && <Route path="/admin/dashboard" element={<AdminDashboard />} />}
-            
-            {/* Crowdfunding routes */}
-            <Route path="/crowdfunding" element={<CrowdfundingHomePage />} />
-            <Route path="/crowdfunding/discover" element={<DiscoverCampaignsPage />} />
-            <Route path="/crowdfunding/campaigns/:id" element={<CampaignDetailPage />} />
-            
-            {/* Heart routes */}
-            <Route path="/heart" element={<HeartPage />} />
             
             {/* Protected routes */}
             <Route path="/profile" element={
@@ -132,11 +113,6 @@ function App() {
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <NotificationsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/crowdfunding/create" element={
-              <ProtectedRoute>
-                <CreateCampaignPage />
               </ProtectedRoute>
             } />
             

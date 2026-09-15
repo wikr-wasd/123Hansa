@@ -35,7 +35,7 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([
     {
       id: '1',
-      description: 'Företagsförsäljning - Provision',
+      description: 'Listningsavgift',
       quantity: 1,
       price: 0,
       total: 0
@@ -114,7 +114,7 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
         if (index === 0) {
           return {
             ...item,
-            description: `Förmedlingsavgift - ${listing.title}`,
+            description: `Listningsavgift - ${listing.title}`,
             quantity: 1,
             price: commission,
             total: commission
@@ -172,7 +172,7 @@ const InvoiceCreator: React.FC<InvoiceCreatorProps> = ({ customerId, customerNam
     setSelectedListing('');
     setInvoiceItems([{
       id: '1',
-      description: 'Företagsförsäljning - Provision',
+      description: 'Listningsavgift',
       quantity: 1,
       price: 0,
       total: 0

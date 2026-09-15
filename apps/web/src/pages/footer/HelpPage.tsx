@@ -17,27 +17,23 @@ const HelpPage: React.FC = () => {
   const faqs = [
     {
       question: "Hur säljer jag mitt företag på 123Hansa?",
-      answer: "Det är enkelt! Skapa ett konto, klicka på 'Skapa annons' och fyll i information om ditt företag. Vi granskar din annons inom 24 timmar och publicerar den när den är godkänd."
+      answer: "Skapa ett konto, klicka på 'Skapa annons' och beskriv ditt företag. Annonsen granskas innan den publiceras. Intresserade köpare kontaktar dig via plattformen."
     },
     {
       question: "Vilka avgifter tar 123Hansa?",
-      answer: "Vi tar 3% provision vid genomförd affär. Inga avgifter för att lista ditt företag eller för att visa intresse som köpare."
+      answer: "123Hansa tar aldrig provision på en affär. Intäkterna kommer från annonsering, framlyft exponering och abonnemang. Aktuella priser visas innan du betalar något."
     },
     {
-      question: "Hur verifierar ni säljare?",
-      answer: "Alla säljare genomgår verifiering via dokument och bankuppgifter. Vi kontrollerar även företagsinformation mot offentliga register."
+      question: "Är 123Hansa part i affären?",
+      answer: "Nej. 123Hansa är en marknadsplats där köpare och säljare hittar varandra. Förhandling, avtal och betalning sköter parterna själva, gärna med egna rådgivare."
+    },
+    {
+      question: "Hur vet jag att motparten är seriös?",
+      answer: "Gör alltid en egen kontroll av bolaget och motparten innan du skriver avtal eller betalar något, gärna med hjälp av jurist eller revisor. 123Hansa kontrollerar användare mot sanktionslistor, men det ersätter inte din egen granskning."
     },
     {
       question: "Kan jag ångra mig efter att jag visat intresse?",
-      answer: "Ja, att visa intresse är inte juridiskt bindande. Det är först när ni tecknar köpeavtal som affären blir bindande."
-    },
-    {
-      question: "Hur länge tar en företagsförsäljning?",
-      answer: "I genomsnitt tar det 45 dagar från publicering till genomförd affär på 123Hansa. Detta beror på företagets storlek och komplexitet."
-    },
-    {
-      question: "Vilken support får jag som säljare?",
-      answer: "Du får tillgång till våra M&A-experter som hjälper dig med värdering, due diligence och juridisk rådgivning genom hela processen."
+      answer: "Ja, att visa intresse är inte bindande. En affär blir bindande först när ni själva tecknar avtal."
     }
   ];
 
@@ -178,18 +174,6 @@ const HelpPage: React.FC = () => {
               </div>
             </Link>
 
-            <Link 
-              to="/sales-demo" 
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow group"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Framgångar</h3>
-                  <p className="text-sm text-gray-600">Se genomförda affärer</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-              </div>
-            </Link>
           </div>
         </div>
       </div>

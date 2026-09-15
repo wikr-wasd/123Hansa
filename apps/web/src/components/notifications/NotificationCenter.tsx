@@ -67,21 +67,6 @@ const NotificationCenter: React.FC = () => {
   useEffect(() => {
     const mockNotifications: Notification[] = [
       {
-        id: 'notif-1',
-        type: 'OFFER_RECEIVED',
-        title: 'Nytt bud mottaget!',
-        message: 'Du har fått ett bud på 8.5M SEK för ditt tech-företag',
-        data: {
-          offerId: 'offer-123',
-          businessId: 'business-456',
-          amount: 8500000,
-          buyerName: 'Johan Andersson',
-        },
-        priority: 'URGENT',
-        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        actionUrl: '/dashboard/offers/offer-123',
-      },
-      {
         id: 'notif-2',
         type: 'NEW_INQUIRY',
         title: 'Ny förfrågan',
@@ -99,26 +84,11 @@ const NotificationCenter: React.FC = () => {
         id: 'notif-3',
         type: 'VERIFICATION_APPROVED',
         title: 'Verifiering godkänd',
-        message: 'Din BankID-verifiering har godkänts. Du kan nu sälja företag.',
+        message: 'Din identitet har verifierats.',
         priority: 'MEDIUM',
         readAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // Read 1 hour ago
         createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
         actionUrl: '/dashboard/verification',
-      },
-      {
-        id: 'notif-4',
-        type: 'PAYMENT_RECEIVED',
-        title: 'Betalning mottagen',
-        message: 'Handpenning på 500,000 SEK har mottagits för företagsförvärvet',
-        data: {
-          paymentId: 'payment-456',
-          amount: 500000,
-          transactionId: 'txn-789',
-        },
-        priority: 'MEDIUM',
-        readAt: new Date(Date.now() - 30 * 60 * 1000),
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-        actionUrl: '/dashboard/payments/payment-456',
       },
       {
         id: 'notif-5',

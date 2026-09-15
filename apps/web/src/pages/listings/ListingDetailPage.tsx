@@ -18,7 +18,6 @@ import {
   Share2,
   MessageCircle,
   TrendingUp,
-  DollarSign,
   Clock,
   Award,
   Phone,
@@ -674,14 +673,10 @@ const ListingDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showInterestModal, setShowInterestModal] = useState(false);
-  const [showBidModal, setShowBidModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
-  const [bidAmount, setBidAmount] = useState('');
-  const [bidComment, setBidComment] = useState('');
-  const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
   const [showShareModal, setShowShareModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 20);
+  const [likeCount, setLikeCount] = useState(0);
   const [interestForm, setInterestForm] = useState({
     name: '',
     email: '',
@@ -958,11 +953,6 @@ ${authUser.firstName} ${authUser.lastName}`
     return Object.keys(errors).length === 0;
   };
 
-  // Legacy function for backward compatibility
-  const isValidEmail = (email: string) => {
-    return validateEmail(email).valid;
-  };
-
   // Handle like functionality
   const handleLike = () => {
     if (!listing) return;
@@ -1038,93 +1028,6 @@ ${authUser.firstName} ${authUser.lastName}`
     if (listing?.location) {
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`;
       window.open(mapsUrl, '_blank');
-    }
-  };
-
-  // Handle bid submission
-  const handleBid = async () => {
-    if (!listing || !bidAmount) {
-      toast.error('Ange ett budbelopp');
-      return;
-    }
-    
-    // Validate required fields
-    if (!contactInfo.name.trim()) {
-      toast.error('Ange ditt namn');
-      return;
-    }
-    
-    if (!contactInfo.email.trim()) {
-      toast.error('Ange din email-adress');
-      return;
-    }
-    
-    if (!isValidEmail(contactInfo.email)) {
-      toast.error('Ange en giltig email-adress');
-      return;
-    }
-    
-    const amount = parseFloat(bidAmount.replace(/\s/g, '').replace(',', '.'));
-    if (isNaN(amount) || amount <= 0) {
-      toast.error('Ange ett giltigt budbelopp');
-      return;
-    }
-    
-    try {
-      // Send bid via our messages API
-      const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
-      const bidMessage = `Hej ${listing.seller.name},
-
-Jag vill lämna ett bud på "${listing.title}".
-
-BUDDETALJER:
-• Budbelopp: ${formatPrice(amount, listing.currency)}
-• Utgångspris: ${formatPrice(listing.askingPrice, listing.currency)}
-• Budratio: ${((amount / listing.askingPrice) * 100).toFixed(1)}%
-
-${bidComment ? `KOMMENTAR:
-${bidComment}
-
-` : ''}KONTAKTINFORMATION:
-• Namn: ${contactInfo.name}
-• E-post: ${contactInfo.email}
-${contactInfo.phone ? `• Telefon: ${contactInfo.phone}` : ''}
-
-Jag är seriöst intresserad och redo att gå vidare med köpprocessen.
-
-Med vänliga hälsningar,
-${contactInfo.name}`;
-
-      const response = await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          listingId: listing.id,
-          sellerId: `seller_${listing.id}`,
-          inquiryType: 'FINANCIAL',
-          message: bidMessage,
-          name: contactInfo.name,
-          email: contactInfo.email,
-          phone: contactInfo.phone || undefined
-        })
-      });
-      
-      if (response.ok) {
-        toast.success('Ditt bud har skickats! Säljaren kommer att kontakta dig inom kort.');
-        setShowBidModal(false);
-        setBidAmount('');
-        setBidComment('');
-        setContactInfo({ name: '', email: '', phone: '' });
-        // Update interested buyers count
-        setListing(prev => prev ? { ...prev, interestedBuyers: prev.interestedBuyers + 1 } : null);
-      } else {
-        toast.error('Kunde inte skicka bud');
-      }
-    } catch (err) {
-      toast.error('Ett fel inträffade');
-      console.error('Error submitting bid:', err);
     }
   };
 
@@ -1516,7 +1419,7 @@ ${contactInfo.name}`;
 
             {/* Right Column - Price and Actions */}
             <div className="lg:col-span-1">
-              {/* Premium Bid Section - Not Sticky */}
+              {/* Pris och kontakt */}
               <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
                 <div className="text-center mb-6">
                   <div className="text-sm font-medium text-gray-500 mb-1">Utgångspris</div>
@@ -1531,7 +1434,7 @@ ${contactInfo.name}`;
                 
                 <div className="space-y-3 mb-6">
                   <button
-                    onClick={() => setShowBidModal(true)}
+                    onClick={() => setShowContactModal(true)}
                     disabled={listing.status !== 'ACTIVE'}
                     className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
                       listing.status === 'ACTIVE'
@@ -1539,21 +1442,8 @@ ${contactInfo.name}`;
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    <DollarSign className="w-5 h-5 mr-2 inline" />
-                    {listing.status === 'ACTIVE' ? 'Lämna bud' : 'Ej tillgänglig'}
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowContactModal(true)}
-                    disabled={listing.status !== 'ACTIVE'}
-                    className={`w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold transition-colors ${
-                      listing.status === 'ACTIVE'
-                        ? 'text-gray-700 hover:bg-gray-50'
-                        : 'text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
                     <MessageCircle className="w-5 h-5 mr-2 inline" />
-                    Kontakta säljare
+                    {listing.status === 'ACTIVE' ? 'Kontakta säljare' : 'Ej tillgänglig'}
                   </button>
                   
                   <button
@@ -1674,79 +1564,6 @@ ${contactInfo.name}`;
           </div>
         </div>
       </div>
-
-      {/* Bid Modal */}
-      {showBidModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Lämna bud</h3>
-            <p className="text-gray-600 mb-6">
-              Lämna ett seriöst bud på {listing?.title}. Säljaren kommer att svara inom 48 timmar.
-            </p>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Budbelopp (SEK) *
-                </label>
-                <input
-                  type="text"
-                  value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value)}
-                  placeholder={`t.ex. ${listing?.askingPrice.toLocaleString('sv-SE')}`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Kommentar (valfritt)
-                </label>
-                <textarea
-                  value={bidComment}
-                  onChange={(e) => setBidComment(e.target.value)}
-                  placeholder="Motivera ditt bud eller ställ frågor..."
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={contactInfo.name}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ditt namn *"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <input
-                  type="email"
-                  value={contactInfo.email}
-                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="E-post *"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowBidModal(false)}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Avbryt
-              </button>
-              <button
-                onClick={handleBid}
-                disabled={!bidAmount || !contactInfo.name || !contactInfo.email}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Skicka bud
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Contact Modal */}
       {listing && (

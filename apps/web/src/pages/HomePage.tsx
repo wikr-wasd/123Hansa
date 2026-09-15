@@ -7,16 +7,13 @@ import {
   Building2, 
   Globe, 
   FileText, 
-  MapPin, 
-  Briefcase,
   TrendingUp,
   Users,
   CheckCircle,
   ArrowRight,
   Star,
   Timer,
-  Shield,
-  Award
+  Shield
 } from 'lucide-react';
 import CategoryIcons from '../components/search/CategoryIcons';
 import { useTranslation } from '../hooks/useTranslation';
@@ -95,57 +92,6 @@ const ASSET_CATEGORIES = [
       { name: 'Email-listor', description: 'Stora, engagerade email-listor' },
       { name: 'Online-kurser', description: 'Monetiserade online-kurser' }
     ]
-  }
-];
-
-// Mock data for social proof
-const SOCIAL_PROOF_STATS = {
-  activeListings: 2847,
-  completedDeals: 1253,
-  totalValue: 4.8, // billion SEK
-  averageTime: 45 // days
-};
-
-// Featured successful deals for demo
-const FEATURED_DEALS = [
-  {
-    id: 1,
-    title: 'TechStartup AB',
-    category: 'SaaS-företag',
-    price: '12.5M SEK',
-    industry: 'Fintech',
-    employees: 25,
-    location: 'Stockholm',
-    soldDate: '2024-06-15',
-    description: 'AI-driven betalningslösning med 200+ företagskunder',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&auto=format',
-    logo: 'https://ui-avatars.com/api/?name=TechStartup+AB&background=0D8ABC&color=fff&size=80'
-  },
-  {
-    id: 2,
-    title: 'Nordic E-handel',
-    category: 'E-handelsplattform',
-    price: '8.2M SEK',
-    industry: 'E-handel',
-    employees: 15,
-    location: 'Göteborg',
-    soldDate: '2024-06-10',
-    description: 'Etablerad e-handelsplattform med stark tillväxt',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop&auto=format',
-    logo: 'https://ui-avatars.com/api/?name=Nordic+E-handel&background=10B981&color=fff&size=80'
-  },
-  {
-    id: 3,
-    title: 'Sustainable Solutions',
-    category: 'Konsultföretag',
-    price: '5.8M SEK',
-    industry: 'Hållbarhet',
-    employees: 12,
-    location: 'Malmö',
-    soldDate: '2024-06-08',
-    description: 'Miljökonsultföretag med stora företagskunder',
-    image: 'https://images.unsplash.com/photo-1497436072909-f5e4be85ed30?w=400&h=300&fit=crop&auto=format',
-    logo: 'https://ui-avatars.com/api/?name=Sustainable+Solutions&background=059669&color=fff&size=80'
   }
 ];
 
@@ -351,53 +297,6 @@ const HomePage: React.FC = () => {
   };
 
   // Get localized deals
-  const getLocalizedDeals = () => {
-    if (isEnglish) {
-      return [
-        {
-          id: 1,
-          title: 'TechStartup AB',
-          category: 'SaaS Company',
-          price: '12.5M SEK',
-          industry: 'Fintech',
-          employees: 25,
-          location: 'Stockholm',
-          soldDate: '2024-06-15',
-          description: 'AI-driven payment solution with 200+ corporate customers',
-          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&auto=format',
-          logo: 'https://ui-avatars.com/api/?name=TechStartup+AB&background=0D8ABC&color=fff&size=80'
-        },
-        {
-          id: 2,
-          title: 'Nordic E-commerce',
-          category: 'E-commerce Platform',
-          price: '8.2M SEK',
-          industry: 'E-commerce',
-          employees: 15,
-          location: 'Gothenburg',
-          soldDate: '2024-06-10',
-          description: 'Established e-commerce platform with strong growth',
-          image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop&auto=format',
-          logo: 'https://ui-avatars.com/api/?name=Nordic+E-commerce&background=10B981&color=fff&size=80'
-        },
-        {
-          id: 3,
-          title: 'Sustainable Solutions',
-          category: 'Consulting Company',
-          price: '5.8M SEK',
-          industry: 'Sustainability',
-          employees: 12,
-          location: 'Malmö',
-          soldDate: '2024-06-08',
-          description: 'Environmental consulting company with large corporate clients',
-          image: 'https://images.unsplash.com/photo-1497436072909-f5e4be85ed30?w=400&h=300&fit=crop&auto=format',
-          logo: 'https://ui-avatars.com/api/?name=Sustainable+Solutions&background=059669&color=fff&size=80'
-        }
-      ];
-    }
-    return FEATURED_DEALS;
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -444,33 +343,12 @@ const HomePage: React.FC = () => {
                 <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   {t('homepage.hero.title.line2')}
                 </span>
-                <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    🚀 Version 2.0 - Uppdaterad Admin Portal
-                  </span>
-                </div>
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-600 mb-8 leading-relaxed">
                 {t('homepage.hero.subtitle')}
               </p>
               
-              <div className="flex flex-wrap justify-center gap-6 mb-12 text-sm font-semibold text-slate-500">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  {t('homepage.hero.social-proof.registered-buyers')}
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  {t('homepage.hero.social-proof.seller-satisfaction')}
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  {t('homepage.hero.social-proof.avg-time')}
-                </div>
-              </div>
-
-
               {/* Prominent Search Bar */}
               <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleSearch} className="relative">
@@ -515,33 +393,6 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Social Proof Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.activeListings.toLocaleString(isEnglish ? 'en-US' : 'sv-SE')}
-                </div>
-                <div className="text-slate-600 font-medium">{t('homepage.stats.active-listings')}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.completedDeals.toLocaleString(isEnglish ? 'en-US' : 'sv-SE')}
-                </div>
-                <div className="text-slate-600 font-medium">{t('homepage.stats.completed-deals')}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.totalValue}{t('homepage.stats.billion')} SEK
-                </div>
-                <div className="text-slate-600 font-medium">{t('homepage.stats.total-value')}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                  {SOCIAL_PROOF_STATS.averageTime}
-                </div>
-                <div className="text-slate-600 font-medium">{t('homepage.stats.avg-time')} ({t('homepage.stats.days')})</div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -599,130 +450,26 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Featured Recent Sales */}
-        <section className="py-20 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                Senaste framgångsrika affärer
-              </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Se exempel på företag som nyligen sålts genom 123Hansa med framgångsrika resultat
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {FEATURED_DEALS.map((deal) => (
-                <div key={deal.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
-                  {/* Header Image */}
-                  <div className="relative h-48 bg-gray-200">
-                    <img
-                      src={deal.image}
-                      alt={deal.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(deal.title)}&background=random&size=400x300`;
-                      }}
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full shadow-sm">
-                        SÅLD
-                      </span>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 bg-white/90 text-slate-600 text-sm font-medium rounded-full shadow-sm">
-                        {new Date(deal.soldDate).toLocaleDateString('sv-SE')}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    {/* Company Logo and Title */}
-                    <div className="flex items-center mb-4">
-                      <img
-                        src={deal.logo}
-                        alt={`${deal.title} logo`}
-                        className="w-12 h-12 rounded-full mr-4 shadow-sm"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(deal.title)}&background=random&size=50`;
-                        }}
-                      />
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-900">{deal.title}</h3>
-                        <p className="text-sm text-slate-500">{deal.category}</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-slate-600 mb-4 text-sm leading-relaxed">{deal.description}</p>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm">Försäljningspris:</span>
-                        <span className="font-bold text-green-600 text-lg">{deal.price}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm">Bransch:</span>
-                        <span className="font-medium text-sm">{deal.industry}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm">Anställda:</span>
-                        <span className="font-medium text-sm">{deal.employees}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm">Plats:</span>
-                        <span className="font-medium text-sm">{deal.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center space-y-4">
-              <Link
-                to="/sales-demo"
-                className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
-              >
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Se detaljerade framgångsstories
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-              
-              <div>
-                <Link
-                  to="/listings?status=SOLD"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
-                >
-                  Se alla genomförda affärer
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Trust & Security Section */}
+        {/* Så fungerar 123Hansa — gränsen mot förmedling, se docs/BUSINESS.md */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                Säkert och professionellt
+                Så fungerar 123Hansa
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Vi erbjuder trygghet och expertis i varje steg av affärsprocessen
+                En marknadsplats där köpare och säljare av bolag hittar varandra
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Shield className="w-8 h-8 text-blue-600" />
+                  <FileText className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Säkra transaktioner</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Säljaren annonserar</h3>
                 <p className="text-slate-600">
-                  Alla affärer hanteras med escrow-tjänster och juridisk support för maximal säkerhet.
+                  Bolaget beskrivs med de uppgifter säljaren väljer att visa. Känsligt material delas först senare, med den säljaren godkänt.
                 </p>
               </div>
 
@@ -730,123 +477,21 @@ const HomePage: React.FC = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Expert support</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Köparen tar kontakt</h3>
                 <p className="text-slate-600">
-                  Våra M&A-experter och företagsmäklare hjälper dig genom hela processen.
+                  Intresserade köpare kontaktar säljaren via plattformen. Säljaren väljer själv vem som går vidare.
                 </p>
               </div>
 
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Award className="w-8 h-8 text-purple-600" />
+                  <Shield className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Verifierade aktörer</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Parterna gör upp själva</h3>
                 <p className="text-slate-600">
-                  Alla användare genomgår verifiering för att säkerställa äkta och seriösa affärer.
+                  Förhandling, avtal och betalning sköts direkt mellan köpare och säljare, gärna med egna rådgivare. 123Hansa är inte part i affären.
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Success Stories & Testimonials */}
-        <section className="py-20 bg-gradient-to-r from-slate-50 to-blue-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                💎 Verkliga framgångsstories från våra kunder
-              </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Läs hur andra entreprenörer har förändrat sina liv genom 123Hansa
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              {/* Testimonial 1 */}
-              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold text-lg">AS</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-slate-900">Anna Svensson</h4>
-                    <p className="text-slate-500 text-sm">Sålde TechStartup AB</p>
-                  </div>
-                </div>
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-slate-600 italic mb-4">
-                  "123Hansa hjälpte mig sälja mitt tech-företag för 2.5M SEK på bara 6 veckor! 
-                  Professionell service hela vägen. Skulle definitivt använda igen."
-                </p>
-                <div className="bg-green-50 px-4 py-2 rounded-lg">
-                  <span className="text-green-700 font-semibold">💰 Exit: 2.5M SEK</span>
-                </div>
-              </div>
-
-              {/* Testimonial 2 */}
-              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">MJ</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-slate-900">Marcus Johansson</h4>
-                    <p className="text-slate-500 text-sm">Köpte E-handelsföretag</p>
-                  </div>
-                </div>
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-slate-600 italic mb-4">
-                  "Hittade det perfekta e-handelsföretaget här. Transparent process, 
-                  bra due diligence-support. Omsättningen har ökat med 300% sedan köpet!"
-                </p>
-                <div className="bg-blue-50 px-4 py-2 rounded-lg">
-                  <span className="text-blue-700 font-semibold">📈 +300% tillväxt</span>
-                </div>
-              </div>
-
-              {/* Testimonial 3 */}
-              <div className="bg-white rounded-2xl shadow-xl p-8 relative">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 font-bold text-lg">LB</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-slate-900">Lisa Bergström</h4>
-                    <p className="text-slate-500 text-sm">Sålde SaaS-plattform</p>
-                  </div>
-                </div>
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-slate-600 italic mb-4">
-                  "Fantastisk plattform! Fick flera seriösa bud inom första veckan. 
-                  Slutade med att sälja för 40% över ursprungligt asking price!"
-                </p>
-                <div className="bg-purple-50 px-4 py-2 rounded-lg">
-                  <span className="text-purple-700 font-semibold">🎯 +40% över asking</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <Link
-                to="/sales-demo"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Award className="w-5 h-5 mr-3" />
-                Läs fler framgångsstories
-                <ArrowRight className="ml-3 w-5 h-5" />
-              </Link>
             </div>
           </div>
         </section>
@@ -905,7 +550,7 @@ const HomePage: React.FC = () => {
                         💰 Professionell Företagsvärdering
                       </h3>
                       <p className="text-gray-600">
-                        Avancerad AI-driven värdering med flera beräkningsmetoder
+                        En grov uppskattning utifrån branschmultiplar
                       </p>
                     </div>
                     
@@ -1090,14 +735,8 @@ const HomePage: React.FC = () => {
 
                         {/* Accuracy & Disclaimer */}
                         <div className="bg-white p-4 rounded-lg border border-blue-100 text-center">
-                          <div className="flex items-center justify-center mb-2">
-                            <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                            <span className="text-sm font-medium text-gray-900">
-                              Konfidensgrad: {parseFloat(profit) > 0 && parseFloat(revenue) > 0 ? '85%' : '70%'}
-                            </span>
-                          </div>
                           <p className="text-xs text-gray-600">
-                            Baserat på marknadsdata från 500+ företagstransaktioner i Sverige
+                            En schablonberäkning, inte en värdering. Anlita en rådgivare inför en affär.
                           </p>
                         </div>
                       </div>
@@ -1139,112 +778,6 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Urgency & Scarcity Section */}
-        <section className="py-20 bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full font-semibold text-sm mb-6">
-                <Timer className="w-4 h-4" />
-                BEGRÄNSAD TID
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                🔥 Heta affärsmöjligheter - Agera nu!
-              </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Dessa premium-företag får flera bud varje dag. Missa inte din chans!
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {/* Hot Deal 1 */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-red-200">
-                <div className="absolute -top-3 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  🔥 HOT DEAL
-                </div>
-                <div className="mb-4">
-                  <h3 className="font-bold text-lg text-slate-900 mb-2">AI-driven MarTech SaaS</h3>
-                  <p className="text-slate-600 text-sm mb-3">
-                    Skalbar plattform, 400k ARR, 89% retention rate
-                  </p>
-                  <div className="text-2xl font-bold text-green-600 mb-2">2.8M SEK</div>
-                  <div className="flex items-center gap-2 text-sm text-red-600 font-semibold">
-                    <Timer className="w-4 h-4" />
-                    12 bud senaste 48h
-                  </div>
-                </div>
-                <Link
-                  to="/listings/3"
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-colors text-center block"
-                >
-                  Lägg bud nu
-                </Link>
-              </div>
-
-              {/* Hot Deal 2 */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-orange-200">
-                <div className="absolute -top-3 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  ⚡ TRENDING
-                </div>
-                <div className="mb-4">
-                  <h3 className="font-bold text-lg text-slate-900 mb-2">Premium Fashion E-commerce</h3>
-                  <p className="text-slate-600 text-sm mb-3">
-                    Etablerat varumärke, 1.2M omsättning/år
-                  </p>
-                  <div className="text-2xl font-bold text-green-600 mb-2">950k SEK</div>
-                  <div className="flex items-center gap-2 text-sm text-orange-600 font-semibold">
-                    <Users className="w-4 h-4" />
-                    45 intresseanmälningar
-                  </div>
-                </div>
-                <Link
-                  to="/listings/2"
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-colors text-center block"
-                >
-                  Visa intresse
-                </Link>
-              </div>
-
-              {/* Hot Deal 3 */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 relative border-2 border-yellow-200">
-                <div className="absolute -top-3 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  💎 PREMIUM
-                </div>
-                <div className="mb-4">
-                  <h3 className="font-bold text-lg text-slate-900 mb-2">Stockholm Café Empire</h3>
-                  <p className="text-slate-600 text-sm mb-3">
-                    Prime location, 85% marginaler, kultföljarskap
-                  </p>
-                  <div className="text-2xl font-bold text-green-600 mb-2">1.2M SEK</div>
-                  <div className="flex items-center gap-2 text-sm text-yellow-600 font-semibold">
-                    <MapPin className="w-4 h-4" />
-                    Exklusivt centrum-läge
-                  </div>
-                </div>
-                <Link
-                  to="/listings/4"
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-3 px-4 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-colors text-center block"
-                >
-                  Boka visning
-                </Link>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <p className="text-slate-600 mb-6 font-semibold">
-                ⏰ Nya premium-affärer läggs upp varje dag. Registrera dig för att få första tillgång!
-              </p>
-              <Link
-                to="/register"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white font-bold rounded-xl hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Timer className="w-5 h-5 mr-3" />
-                Registrera dig gratis nu
-                <ArrowRight className="ml-3 w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -1252,7 +785,7 @@ const HomePage: React.FC = () => {
               Redo att börja din affärsresa?
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              Oavsett om du vill köpa eller sälja - vi hjälper dig att nå dina mål.
+              Lägg upp ditt bolag eller hitta nästa förvärv.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -20,7 +20,7 @@ import {
   Star,
   ArrowUpDown,
   ChevronDown,
-  DollarSign
+  MessageCircle
 } from 'lucide-react';
 import CategoryIcons from '../../components/search/CategoryIcons';
 import HotDealsSection from '../../components/listings/HotDealsSection';
@@ -591,7 +591,7 @@ const ListingsPage: React.FC = () => {
                 }
               </h1>
               <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Nordens ledande marknadsplats för företag, digitala tillgångar och affärstjänster
+                Företag och affärstillgångar till salu
               </p>
               {stats && (
                 <p className="text-lg text-white/90 mb-8">
@@ -813,13 +813,13 @@ const ListingsPage: React.FC = () => {
                         {
                           step: 2,
                           title: 'Ta emot intresse',
-                          description: 'Få bud och meddelanden från kvalificerade köpare som är genuint intresserade.',
+                          description: 'Intresserade köpare kontaktar dig via plattformen. Du väljer själv vem du går vidare med.',
                           icon: <Users className="w-6 h-6" />
                         },
                         {
                           step: 3,
-                          title: 'Genomför affären',
-                          description: 'Förhandla villkor och genomför en säker överlåtelse med vårt stöd.',
+                          title: 'Gör upp direkt med köparen',
+                          description: 'Förhandling, avtal och betalning sköter du och köparen själva, gärna med egna rådgivare.',
                           icon: <CheckCircle className="w-6 h-6" />
                         }
                       ].map((item) => (
@@ -848,19 +848,19 @@ const ListingsPage: React.FC = () => {
                         {
                           step: 1,
                           title: 'Utforska annonser',
-                          description: 'Bläddra bland tusentals företag, webbsidor och digitala tillgångar från hela Norden.',
+                          description: 'Bläddra bland företag, webbsidor och digitala tillgångar som är till salu.',
                           icon: <Search className="w-6 h-6" />
                         },
                         {
                           step: 2,
-                          title: 'Lämna bud',
-                          description: 'Kontakta säljare och lämna seriösa bud på de tillgångar som intresserar dig.',
-                          icon: <DollarSign className="w-6 h-6" />
+                          title: 'Kontakta säljaren',
+                          description: 'Visa intresse eller skicka ett meddelande direkt till säljaren om det som intresserar dig.',
+                          icon: <MessageCircle className="w-6 h-6" />
                         },
                         {
                           step: 3,
                           title: 'Överta verksamheten',
-                          description: 'Slutför köpet och ta över en fungerande verksamhet redo att utvecklas vidare.',
+                          description: 'Förhandling, avtal och betalning sköter du och säljaren själva, gärna med egna rådgivare.',
                           icon: <TrendingUp className="w-6 h-6" />
                         }
                       ].map((item) => (

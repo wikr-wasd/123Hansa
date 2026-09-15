@@ -7,7 +7,6 @@ import {
   FileText, 
   Users, 
   MapPin, 
-  Heart, 
   Calendar,
   TrendingUp,
   Phone,
@@ -20,7 +19,6 @@ import {
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import CommissionInfo from '../../components/business/CommissionInfo';
 import { useAuthStore } from '../../stores/authStore';
 
 const CreateListingPage: React.FC = () => {
@@ -67,7 +65,6 @@ const CreateListingPage: React.FC = () => {
     
     // Avtal och villkor
     acceptTerms: false,
-    acceptHeart: false,
     
     // Metadata
     reasonForSelling: '',
@@ -75,7 +72,6 @@ const CreateListingPage: React.FC = () => {
     negotiable: true
   });
 
-  const [showCommission, setShowCommission] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState<{lat: number; lng: number} | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
@@ -94,7 +90,6 @@ const CreateListingPage: React.FC = () => {
           const parsedDraft = JSON.parse(savedDraft);
           setFormData(parsedDraft.formData || formData);
           setCurrentStep(parsedDraft.currentStep || 1);
-          setShowCommission(parsedDraft.showCommission || false);
           toast.success('Tidigare utkast återställt!', { duration: 3000 });
         } catch (error) {
           console.error('Error loading draft:', error);
@@ -111,7 +106,6 @@ const CreateListingPage: React.FC = () => {
       const draftData = {
         formData,
         currentStep,
-        showCommission,
         savedAt: new Date().toISOString()
       };
       
@@ -123,7 +117,7 @@ const CreateListingPage: React.FC = () => {
         localStorage.setItem(draftKey, JSON.stringify(draftData));
       }
     }
-  }, [formData, currentStep, showCommission, hasLoadedDraft]);
+  }, [formData, currentStep, hasLoadedDraft]);
 
   // Clear draft when successfully submitted
   const clearDraft = () => {
@@ -213,11 +207,6 @@ const CreateListingPage: React.FC = () => {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
 
-    // Show commission calculator when price is entered
-    if (field === 'askingPrice') {
-      setShowCommission(value && parseFloat(value) > 0);
-    }
-
     // Geocode address when location changes
     if (field === 'address' && value.length > 5) {
       geocodeAddress(value);
@@ -275,7 +264,6 @@ const CreateListingPage: React.FC = () => {
 
       case 4:
         if (!formData.acceptTerms) newErrors.acceptTerms = 'Du måste acceptera villkoren';
-        if (!formData.acceptHeart) newErrors.acceptHeart = 'Du måste acceptera Heart-avtal';
         break;
     }
 
@@ -354,54 +342,10 @@ const CreateListingPage: React.FC = () => {
       const updatedListings = [...existingListings, submissionData];
       localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
 
-      // Automatically create Heart contract for this listing
-      const heartContract = {
-        id: `contract_${listingId}_${Date.now()}`,
-        title: `Försäljningsavtal - ${formData.title}`,
-        type: 'sale' as const,
-        status: 'draft' as const,
-        amount: parseInt(formData.askingPrice) || 0,
-        parties: {
-          buyer: {
-            name: '',
-            email: '',
-            id: '',
-            signed: false
-          },
-          seller: {
-            name: `${authUser.firstName} ${authUser.lastName}`,
-            email: authUser.email,
-            id: authUser.id,
-            signed: false
-          }
-        },
-        escrowStatus: 'none' as const,
-        createdAt: new Date().toISOString(),
-        documents: [],
-        listingId: listingId,
-        listingDetails: {
-          title: formData.title,
-          description: formData.description,
-          price: parseInt(formData.askingPrice) || 0,
-          category: formData.category,
-          industry: formData.industry,
-          employees: parseInt(formData.employees) || 0,
-          revenue: parseInt(formData.yearlyRevenue) || 0,
-          city: formData.city,
-          website: formData.website
-        },
-        autoCreated: true
-      };
-
-      // Save contract to localStorage
-      const existingContracts = JSON.parse(localStorage.getItem(`heartContracts_${authUser.id}`) || '[]');
-      const updatedContracts = [...existingContracts, heartContract];
-      localStorage.setItem(`heartContracts_${authUser.id}`, JSON.stringify(updatedContracts));
-
       // Clear the draft since listing was successfully created
       clearDraft();
-      
-      toast.success('Annons och avtalsstöd skapad!');
+
+      toast.success('Annonsen är sparad');
       navigate('/dashboard', { 
         state: { 
           message: `Annons "${formData.title}" har skapats framgångsrikt!`,
@@ -442,7 +386,7 @@ const CreateListingPage: React.FC = () => {
     <>
       <Helmet>
         <title>Sälj ditt företag - 123Hansa</title>
-        <meta name="description" content="Skapa en annons för ditt företag med 123Hansas professionella mäklarservice." />
+        <meta name="description" content="Skapa en annons för ditt företag på 123Hansa, marknadsplatsen för företagsaffärer." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -973,29 +917,6 @@ const CreateListingPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Heart Agreement */}
-                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                        <div className="flex items-start">
-                          <input
-                            type="checkbox"
-                            checked={formData.acceptHeart}
-                            onChange={(e) => handleInputChange('acceptHeart', e.target.checked)}
-                            className="mt-1 mr-3"
-                          />
-                          <div>
-                            <div className="flex items-center mb-2">
-                              <Heart className="w-5 h-5 text-purple-600 mr-2" />
-                              <span className="font-medium text-purple-900">Heart Avtalsstöd</span>
-                            </div>
-                            <p className="text-sm text-purple-800">
-                              Jag godkänner att alla avtal hanteras via Heart-appen för säker digital signering 
-                              och escrow-tjänster. Detta säkerställer transparens och trygghet för alla parter.
-                            </p>
-                          </div>
-                        </div>
-                        {errors.acceptHeart && <p className="mt-2 text-sm text-red-600">{errors.acceptHeart}</p>}
-                      </div>
-
                       {/* Terms */}
                       <div className="flex items-start">
                         <input
@@ -1005,7 +926,7 @@ const CreateListingPage: React.FC = () => {
                           className="mt-1 mr-3"
                         />
                         <p className="text-sm text-gray-600">
-                          Jag accepterar 123Hansas användarvillkor och förstår att 3% mäklararvode debiteras vid genomförd försäljning.
+                          Jag accepterar 123Hansas användarvillkor och förstår att 123Hansa inte är part i affären.
                           Jag intygar att all information är korrekt och att jag har rätt att sälja företaget.
                         </p>
                       </div>
@@ -1051,129 +972,21 @@ const CreateListingPage: React.FC = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Commission Info */}
-              {showCommission && formData.askingPrice && (
-                <CommissionInfo 
-                  salePrice={parseFloat(formData.askingPrice)} 
-                  className="hidden lg:block fixed top-20 right-6 w-80 z-40 max-h-[calc(100vh-6rem)] overflow-y-auto"
-                />
-              )}
-              
-              {/* Mobile Commission Info - shows inline on smaller screens */}
-              {showCommission && formData.askingPrice && (
-                <div className="lg:hidden">
-                  <CommissionInfo 
-                    salePrice={parseFloat(formData.askingPrice)} 
-                    className=""
-                  />
-                </div>
-              )}
-
-              {/* Progress Info */}
+              {/* Gränsen mot förmedling — se docs/BUSINESS.md */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h3 className="font-semibold text-blue-900 mb-4">Vad händer sen?</h3>
-                <div className="space-y-3 text-sm text-blue-800">
-                  <div className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
-                    <span>Automatisk granskning av din annons</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
-                    <span>Manuell verifiering inom 24 timmar</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
-                    <span>Publicering på 123Hansa marketplace</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 text-blue-600" />
-                    <span>Kvalificerade köpare kontaktar dig</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Marknadsföringspaket Info */}
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6">
-                <h3 className="font-semibold text-emerald-900 mb-4 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Professionell Marknadsföring Ingår!
-                </h3>
-                
-                <div className="space-y-4">
-                  {/* Direktreklam */}
-                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
-                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">🎯 Direktreklam</h4>
-                    <ul className="space-y-1 text-xs text-emerald-800">
-                      <li>• Google Ads (Sök & Display)</li>
-                      <li>• Facebook & Instagram Ads</li>
-                      <li>• LinkedIn Business Targeting</li>
-                      <li>• YouTube marknadsföring</li>
-                    </ul>
-                  </div>
-
-                  {/* Media */}
-                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
-                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">📰 Medieplaceringar</h4>
-                    <ul className="space-y-1 text-xs text-emerald-800">
-                      <li>• Aftonbladet & Schibsted-koncernen</li>
-                      <li>• Blocket & lokala medier</li>
-                      <li>• Branschspecifika publikationer</li>
-                      <li>• PR & pressutskick</li>
-                    </ul>
-                  </div>
-
-                  {/* Digital */}
-                  <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-emerald-100">
-                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">📧 Digital Marknadsföring</h4>
-                    <ul className="space-y-1 text-xs text-emerald-800">
-                      <li>• E-post till 50,000+ prenumeranter</li>
-                      <li>• SMS & push-notiser</li>
-                      <li>• Segmenterade kampanjer</li>
-                      <li>• Nyhetsbrev & automation</li>
-                    </ul>
-                  </div>
-
-                  {/* Team */}
-                  <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg p-3 border border-emerald-100">
-                    <h4 className="font-semibold text-emerald-900 mb-2 text-sm">👥 Dedikerat Team</h4>
-                    <ul className="space-y-1 text-xs text-emerald-800">
-                      <li>• Målgruppsanalys & optimering</li>
-                      <li>• Kontinuerlig kampanjförbättring</li>
-                      <li>• Veckovisa rapporter</li>
-                      <li>• Personlig marknadsföringsspecialist</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-4 bg-emerald-600 text-white rounded p-3 text-center">
-                  <p className="text-sm font-bold">Marknadsföringsvärde: 50,000+ kr</p>
-                  <p className="text-xs mt-1 opacity-90">Allt ingår utan extra kostnad!</p>
-                </div>
-              </div>
-
-              {/* Andra fördelar */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h3 className="font-semibold text-blue-900 mb-4">Andra Fördelar</h3>
-                <ul className="space-y-2 text-sm text-blue-800">
-                  <li className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                    Endast 3% provision vid genomförd affär
+                <h3 className="font-semibold text-blue-900 mb-4">Så fungerar 123Hansa</h3>
+                <ul className="space-y-3 text-sm text-blue-800">
+                  <li className="flex items-start">
+                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
+                    <span>123Hansa är en marknadsplats. Vi visar din annons för köpare som söker bolag som ditt.</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                    Säkra avtal via Heart-appen
+                  <li className="flex items-start">
+                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
+                    <span>Intresserade köpare kontaktar dig via plattformen. Du väljer själv vem du går vidare med.</span>
                   </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                    Escrow-tjänst för säkra transaktioner
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                    Kvalificerade köpare
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                    Juridisk support
+                  <li className="flex items-start">
+                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
+                    <span>Förhandling, avtal och betalning sköter du och köparen direkt, gärna med egna rådgivare. 123Hansa är inte part i affären och tar ingen provision på den.</span>
                   </li>
                 </ul>
               </div>

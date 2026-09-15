@@ -78,7 +78,7 @@ const CreateListingPreview: React.FC = () => {
       title: 'Granska & Publicera',
       description: 'Kontrollera allt innan publicering',
       icon: CheckCircle,
-      fields: ['Godkänn villkor', 'Heart-säkring', 'Slutkontroll'],
+      fields: ['Godkänn villkor', 'Slutkontroll'],
       time: '1 min'
     }
   ];
@@ -91,18 +91,18 @@ const CreateListingPreview: React.FC = () => {
     },
     {
       icon: Shield,
-      title: 'Säker Process', 
-      description: 'Säkrad process för alla avtal'
+      title: 'Du bestämmer', 
+      description: 'Du väljer själv vilka köpare du går vidare med'
     },
     {
       icon: Heart,
-      title: 'Professionell Support',
-      description: '3% mäklararvode inkluderar experthjälp'
+      title: 'Ingen provision',
+      description: '123Hansa tar aldrig betalt per affär'
     },
     {
       icon: Star,
       title: 'Hög Exponering',
-      description: 'Syns för tusentals potentiella köpare'
+      description: 'Syns för köpare som söker bolag som ditt'
     }
   ];
 

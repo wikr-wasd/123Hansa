@@ -134,7 +134,7 @@ const RegisterPage: React.FC = () => {
               Skapa ditt konto
             </h2>
             <p className="text-nordic-gray-600">
-              Anslut dig till Nordens ledande företagsmarknadsplats
+              Skapa ett konto på marknadsplatsen för företagsaffärer
             </p>
           </div>
 

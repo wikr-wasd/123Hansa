@@ -13,7 +13,6 @@ const resources = {
       home: 'Hem',
       businesses: 'Företag',
       marketplace: 'Marknadsplats',
-      crowdfunding: 'Crowdfunding',
       'create-listing': 'Lägg till annons',
       dashboard: 'Min Sida',
       logout: 'Logga ut',
@@ -21,7 +20,7 @@ const resources = {
       // HomePage
       'hero.title': 'Nordic Business Marketplace',
       'hero.subtitle': 'Köp och sälj företag i Norden',
-      'hero.description': 'Den främsta plattformen för företagsförsäljning i Sverige, Norge och Danmark. Hitta din nästa affärsmöjlighet eller sälj ditt företag säkert.',
+      'hero.description': 'Marknadsplatsen för företagsaffärer. Hitta din nästa affärsmöjlighet eller annonsera ditt företag.',
       'hero.browse': 'Utforska Företag',
       'hero.sell': 'Sälj ditt företag',
       
@@ -94,31 +93,10 @@ const resources = {
       'common.public': 'Offentlig',
       'common.private': 'Privat',
       
-      // Crowdfunding
-      'crowdfunding.title': 'Crowdfunding för Företag',
-      'crowdfunding.subtitle': 'Finansiera ditt nästa projekt',
-      'crowdfunding.create-campaign': 'Skapa kampanj',
-      'crowdfunding.browse-campaigns': 'Utforska kampanjer',
-      'crowdfunding.funding-goal': 'Finansieringsmål',
-      'crowdfunding.current-funding': 'Nuvarande finansiering',
-      'crowdfunding.backers': 'Stöttare',
-      'crowdfunding.days-left': 'Dagar kvar',
-      'crowdfunding.platform-fee': 'Plattformsavgift',
-      'crowdfunding.escrow-fee': 'Escrow-avgift',
-      'crowdfunding.marketing-included': 'Marknadsföring ingår',
-      'crowdfunding.transparent-pricing': 'Transparent Prissättning',
-      'crowdfunding.professional-marketing': 'Professionell Marknadsföring',
-      'crowdfunding.direct-advertising': 'Direktreklam & Betalda Annonser',
-      'crowdfunding.media-placements': 'Medieplaceringar & Press',
-      'crowdfunding.digital-marketing': 'Digital Marknadsföring',
-      'crowdfunding.dedicated-team': 'Dedikerat Marknadsföringsteam',
-      'crowdfunding.marketing-value': 'Totalt Marknadsföringsvärde',
-      'crowdfunding.all-included': 'Allt detta ingår utan extra kostnad när du skapar en kampanj!',
       
       // Listing
       'listing.show-interest': 'Visa intresse',
       'listing.contact-seller': 'Kontakta säljare',
-      'listing.make-offer': 'Gör bud',
       'listing.save-favorite': 'Spara favorit',
       'listing.share': 'Dela',
       'listing.report': 'Rapportera',
@@ -192,9 +170,7 @@ const resources = {
       // Notifications
       'notification.new-message': 'Nytt meddelande',
       'notification.new-interest': 'Nytt intresse',
-      'notification.new-offer': 'Nytt bud',
       'notification.listing-sold': 'Annons såld',
-      'notification.campaign-funded': 'Kampanj finansierad',
       'notification.language-changed': 'Språk ändrat till {{language}}',
       
       // Marketing
@@ -245,7 +221,7 @@ const resources = {
       'success.logged-out': 'Utloggad framgångsrikt',
       
       // Footer
-      'footer.description': 'Nordens ledande marknadsplats för företag och digitala tillgångar.',
+      'footer.description': 'Marknadsplatsen för företag och affärstillgångar.',
       'footer.businesses': 'Företag',
       'footer.buy-businesses': 'Köp företag',
       'footer.sell-businesses': 'Sälj företag',
@@ -259,26 +235,17 @@ const resources = {
       
       // HomePage
       'homepage.title': '123Hansa.se - Nordens Marknadsplats för Företag',
-      'homepage.meta-description': 'Köp och sälj företag, digitala tillgångar, fastigheter och affärstjänster på Nordens ledande marknadsplats. Säkra transaktioner med professionell support.',
-      'homepage.meta-keywords': 'köpa företag, sälja företag, företagsförvärv, M&A, företagsmäklare, Sverige, Norge, Danmark',
+      'homepage.meta-description': 'Köp och sälj företag och affärstillgångar. Köpare och säljare hittar varandra och gör upp direkt.',
+      'homepage.meta-keywords': 'köpa företag, sälja företag, företagsförvärv, M&A, företag till salu, Sverige, Norge, Danmark, Kroatien',
       'homepage.hero.title.line1': 'Nordens',
       'homepage.hero.title.line2': 'Marknadsplats',
       'homepage.hero.title.line3': 'för Företag',
-      'homepage.hero.subtitle': '🚀 3,2 miljarder SEK i genomförda affärer senaste året! Köp och sälj företag, digitala tillgångar och affärstjänster med förtroende. Professionell support från start till slutförd affär.',
-      'homepage.hero.social-proof.registered-buyers': 'Över 15,000 registrerade köpare',
-      'homepage.hero.social-proof.seller-satisfaction': '95% nöjdhet från säljare',
-      'homepage.hero.social-proof.avg-time': 'Genomsnittlig försäljningstid: 45 dagar',
+      'homepage.hero.subtitle': 'Köp och sälj företag och affärstillgångar. Köpare och säljare hittar varandra här och gör upp direkt med varandra.',
       'homepage.search.placeholder': 'Sök efter företag, domäner, lokaler eller tjänster...',
       'homepage.search.all-categories': 'Alla kategorier',
       'homepage.search.button': 'Sök',
-      'homepage.stats.active-listings': 'Aktiva annonser',
-      'homepage.stats.completed-deals': 'Genomförda affärer',
-      'homepage.stats.total-value': 'Totalt värde',
-      'homepage.stats.avg-time': 'Genomsnittlig tid',
-      'homepage.stats.billion': 'miljarder',
-      'homepage.stats.days': 'dagar',
       'homepage.categories.title': 'Vad kan du köpa och sälja?',
-      'homepage.categories.subtitle': '123hansa är Nordens mest omfattande marknadsplats för alla typer av affärstillgångar',
+      'homepage.categories.subtitle': 'Företag, e-handel, domäner och andra affärstillgångar',
     }
   },
   en: {
@@ -290,7 +257,6 @@ const resources = {
       home: 'Home',
       businesses: 'Businesses',
       marketplace: 'Marketplace',
-      crowdfunding: 'Crowdfunding',
       'create-listing': 'Create Listing',
       dashboard: 'Dashboard',
       logout: 'Logout',
@@ -298,7 +264,7 @@ const resources = {
       // HomePage
       'hero.title': 'Nordic Business Marketplace',
       'hero.subtitle': 'Buy and sell businesses in the Nordic region',
-      'hero.description': 'The premier platform for business sales in Sweden, Norway, and Denmark. Find your next business opportunity or sell your company securely.',
+      'hero.description': 'The marketplace for business sales. Find your next business opportunity or list your company.',
       'hero.browse': 'Browse Businesses',
       'hero.sell': 'Sell Your Business',
       
@@ -371,31 +337,10 @@ const resources = {
       'common.public': 'Public',
       'common.private': 'Private',
       
-      // Crowdfunding
-      'crowdfunding.title': 'Business Crowdfunding',
-      'crowdfunding.subtitle': 'Fund your next project',
-      'crowdfunding.create-campaign': 'Create Campaign',
-      'crowdfunding.browse-campaigns': 'Browse Campaigns',
-      'crowdfunding.funding-goal': 'Funding Goal',
-      'crowdfunding.current-funding': 'Current Funding',
-      'crowdfunding.backers': 'Backers',
-      'crowdfunding.days-left': 'Days Left',
-      'crowdfunding.platform-fee': 'Platform Fee',
-      'crowdfunding.escrow-fee': 'Escrow Fee',
-      'crowdfunding.marketing-included': 'Marketing Included',
-      'crowdfunding.transparent-pricing': 'Transparent Pricing',
-      'crowdfunding.professional-marketing': 'Professional Marketing',
-      'crowdfunding.direct-advertising': 'Direct Advertising & Paid Ads',
-      'crowdfunding.media-placements': 'Media Placements & Press',
-      'crowdfunding.digital-marketing': 'Digital Marketing',
-      'crowdfunding.dedicated-team': 'Dedicated Marketing Team',
-      'crowdfunding.marketing-value': 'Total Marketing Value',
-      'crowdfunding.all-included': 'All this is included at no extra cost when you create a campaign!',
       
       // Listing
       'listing.show-interest': 'Show Interest',
       'listing.contact-seller': 'Contact Seller',
-      'listing.make-offer': 'Make Offer',
       'listing.save-favorite': 'Save Favorite',
       'listing.share': 'Share',
       'listing.report': 'Report',
@@ -469,9 +414,7 @@ const resources = {
       // Notifications
       'notification.new-message': 'New message',
       'notification.new-interest': 'New interest',
-      'notification.new-offer': 'New offer',
       'notification.listing-sold': 'Listing sold',
-      'notification.campaign-funded': 'Campaign funded',
       'notification.language-changed': 'Language changed to {{language}}',
       
       // Marketing
@@ -522,7 +465,7 @@ const resources = {
       'success.logged-out': 'Successfully logged out',
       
       // Footer
-      'footer.description': 'The Nordic region\'s leading marketplace for businesses and digital assets.',
+      'footer.description': 'The marketplace for businesses and business assets.',
       'footer.businesses': 'Businesses',
       'footer.buy-businesses': 'Buy Businesses',
       'footer.sell-businesses': 'Sell Businesses',
@@ -536,26 +479,17 @@ const resources = {
       
       // HomePage
       'homepage.title': '123Hansa.se - Nordic Business Marketplace',
-      'homepage.meta-description': 'Buy and sell businesses, digital assets, real estate and business services on the Nordic region\'s leading marketplace. Secure transactions with professional support.',
-      'homepage.meta-keywords': 'buy business, sell business, business acquisition, M&A, business broker, Sweden, Norway, Denmark',
+      'homepage.meta-description': 'Buy and sell businesses and business assets. Buyers and sellers find each other and deal directly.',
+      'homepage.meta-keywords': 'buy business, sell business, business acquisition, M&A, businesses for sale, Sweden, Norway, Denmark, Croatia',
       'homepage.hero.title.line1': 'Nordic',
       'homepage.hero.title.line2': 'Business',
       'homepage.hero.title.line3': 'Marketplace',
-      'homepage.hero.subtitle': '🚀 3.2 billion SEK in completed deals last year! Buy and sell businesses, digital assets and business services with confidence. Professional support from start to completion.',
-      'homepage.hero.social-proof.registered-buyers': 'Over 15,000 registered buyers',
-      'homepage.hero.social-proof.seller-satisfaction': '95% seller satisfaction',
-      'homepage.hero.social-proof.avg-time': 'Average sale time: 45 days',
+      'homepage.hero.subtitle': 'Buy and sell businesses and business assets. Buyers and sellers find each other here and deal directly with each other.',
       'homepage.search.placeholder': 'Search for businesses, domains, properties or services...',
       'homepage.search.all-categories': 'All categories',
       'homepage.search.button': 'Search',
-      'homepage.stats.active-listings': 'Active listings',
-      'homepage.stats.completed-deals': 'Completed deals',
-      'homepage.stats.total-value': 'Total value',
-      'homepage.stats.avg-time': 'Average time',
-      'homepage.stats.billion': 'billion',
-      'homepage.stats.days': 'days',
       'homepage.categories.title': 'What can you buy and sell?',
-      'homepage.categories.subtitle': '123hansa is the Nordic region\'s most comprehensive marketplace for all types of business assets',
+      'homepage.categories.subtitle': 'Businesses, e-commerce, domains and other business assets',
     }
   },
   no: {

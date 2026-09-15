@@ -149,16 +149,36 @@ Strategin 2026-09-15 (`BUSINESS.md`): ren marknadsplats, avtal och betalning
 sköts av parterna, crowdfunding i fas två. Webben innehåller i dag flera funktioner
 som låtsas göra det plattformen uttryckligen inte ska göra.
 
-- [ ] **Ta bort "Lämna bud"** på annonssidan. Kvar blir "Visa intresse"
-- [ ] **Ta bort Heart-kontrakten** — `/heart`, `components/heart/`. De simulerar
-      avtalssignering, KYC och escrow i `localStorage`
-- [ ] **Ta bort betalning av köpeskilling** — `components/payment/`,
-      `components/payments/`. Betalning av plattformens egna avgifter byggs om
-      senare, med den leverantör som väljs
-- [ ] **Dölj crowdfunding** från meny, startsida och rutter. Koden flyttas ut
-      när fas två börjar, se nedan
-- [ ] **Stryk formuleringar** som lovar förmedling, rådgivning eller trygg
-      betalning i texter, villkor och SEO-metadata
+- [x] **Ta bort "Lämna bud"** — klart 2026-09-15. Annonssidan har "Kontakta
+      säljare" och "Visa intresse"; stegen på annonslistan omskrivna
+- [x] **Ta bort Heart-kontrakten** — klart 2026-09-15. `/heart`,
+      `components/heart/`, fliken i dashboarden och kryssrutan i
+      annonsformuläret som krävde "Heart-avtal med escrow"
+- [x] **Ta bort betalning av köpeskilling** — klart 2026-09-15. Betalkomponenterna
+      var döda och togs bort med resten av den onåbara koden
+- [x] **Ta bort crowdfunding** från meny, mobilknapp, rutter och ordbok — klart
+      2026-09-15. Koden raderades i stället för att döljas; den byggde på mockdata
+      och ska ändå skrivas om mot ECSP. Den finns i historiken före commiten som
+      tog bort den
+- [x] **Stryk formuleringar** som lovar förmedling, provision eller trygg
+      betalning — klart 2026-09-15 i användarvillkor (`LegalPage`), hjälpsidan,
+      annonsformuläret, startsidan, SEO-metadata och ordboken
+- [x] **Ta bort påhittad social proof** — klart 2026-09-15. Startsidans
+      "genomförda affärer", "3,2 miljarder SEK", kundomdömen, "SÅLD"-affärer,
+      "BEGRÄNSAD TID – 12 bud senaste 48h", `/sales-demo`, "96,8 %
+      framgångsgrad" och "500+ transaktioner" i värderingen. Påhittade omdömen
+      och falsk brådska är förbjudna affärsmetoder enligt EU:s konsumentregler
+- [ ] **Användarvillkoren behöver en jurist.** Avgiftsavsnittet är rättat, men
+      texten i `LegalPage.tsx` är skriven utan juridisk granskning
+- [ ] **Värderingstjänsten för 2 500 SEK** (`ValuationPage.tsx`) säljer en
+      "professionell värdering från våra experter" som inte finns. Beslut:
+      bygga den på riktigt med en partner, eller ta bort den
+- [ ] **Demoannonsernas texter** lovar "garanterade intäkter" och
+      "marknadsledande". Skrivs om när de samlas i en källa och märks
+      "Exempelannons" (fas 2)
+- [ ] **Adminpanelens mockdata** (`AdminDashboard.tsx`, bara i dev) visar escrow,
+      mäklararvode och crowdfunding-kampanjer. Försvinner när adminpanelen byggs
+      om mot Supabase
 
 ---
 
@@ -239,7 +259,8 @@ Byggs inte förrän ECSP-tillståndet är på väg. Se `BUSINESS.md` och
 - [ ] Juridisk person och ansökan om tillstånd
 - [ ] Egen app i repot (`apps/crowdfunding`), eget varumärke, egen domän, eget
       Vercel-projekt och egen databas. Delar bara `@hansa/core`
-- [ ] Flytta dagens crowdfunding-kod dit, eller skriv om den mot ECSP-kraven
+- [ ] Skriv crowdfunding-flödet mot ECSP-kraven. Den gamla koden raderades
+      2026-09-15 och finns i git-historiken om något ska återanvändas
 
 ---
 

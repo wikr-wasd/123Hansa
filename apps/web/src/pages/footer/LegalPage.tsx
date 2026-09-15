@@ -102,8 +102,12 @@ const LegalPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">5. Avgifter</h3>
                     <p className="text-gray-700">
-                      123Hansa tar en provision på 3% av det slutliga försäljningspriset vid genomförd transaktion. 
-                      Inga avgifter tas för att lista annonser eller visa intresse som köpare.
+                      123Hansa tar ingen provision på affärer mellan användare. Avgifter för annonsering,
+                      exponering och abonnemang anges innan du betalar.
+                    </p>
+                    <p className="text-gray-700 mt-3">
+                      123Hansa är inte part i affärer mellan användare och förmedlar dem inte. Förhandling,
+                      avtal och betalning sköts direkt mellan köpare och säljare.
                     </p>
                   </div>
 

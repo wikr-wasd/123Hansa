@@ -29,7 +29,6 @@ import {
   ExternalLink,
   MoreHorizontal,
   Send,
-  Shield,
   Reply,
   X,
   Trash2,
@@ -37,14 +36,12 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
-import { HeartContract } from '../../components/heart/HeartContract';
-import { EnhancedHeartContract } from '../../components/heart/EnhancedHeartContract';
 import { VerificationModal } from '../../components/auth/VerificationModal';
 
 const DashboardPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'heart' | 'profile' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'favorites' | 'messages' | 'purchases' | 'profile' | 'settings'>('overview');
   const { user: authUser } = useAuthStore();
   const [userListings, setUserListings] = useState<any[]>([]);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
@@ -209,15 +206,6 @@ const DashboardPage: React.FC = () => {
           timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
           read: false,
           icon: '👁️'
-        },
-        {
-          id: 'notif_3',
-          type: 'heart',
-          title: 'Heart Avtal',
-          message: 'Du har ett nytt Heart avtal att granska',
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
-          read: true,
-          icon: '❤️'
         }
       ];
       
@@ -643,10 +631,7 @@ const DashboardPage: React.FC = () => {
                                     onClick={() => {
                                       markNotificationAsRead(notification.id);
                                       // Navigate based on notification type
-                                      if (notification.type === 'heart') {
-                                        setActiveTab('heart');
-                                        setShowNotifications(false);
-                                      } else if (notification.type === 'message') {
+                                      if (notification.type === 'message') {
                                         setActiveTab('messages');
                                         setShowNotifications(false);
                                       } else if (notification.type === 'listing') {
@@ -676,13 +661,11 @@ const DashboardPage: React.FC = () => {
                                         {/* Notification type badge */}
                                         <div className="flex items-center justify-between">
                                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                            notification.type === 'heart' ? 'bg-pink-100 text-pink-800' :
                                             notification.type === 'message' ? 'bg-blue-100 text-blue-800' :
                                             notification.type === 'listing' ? 'bg-green-100 text-green-800' :
                                             'bg-gray-100 text-gray-800'
                                           }`}>
-                                            {notification.type === 'heart' ? 'Heart Avtal' :
-                                             notification.type === 'message' ? 'Meddelande' :
+                                            {notification.type === 'message' ? 'Meddelande' :
                                              notification.type === 'listing' ? 'Annons' :
                                              'Allmän'}
                                           </span>
@@ -691,10 +674,7 @@ const DashboardPage: React.FC = () => {
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               // Navigate to specific notification
-                                              if (notification.type === 'heart') {
-                                                setActiveTab('heart');
-                                                setShowNotifications(false);
-                                              } else if (notification.type === 'message') {
+                                              if (notification.type === 'message') {
                                                 setActiveTab('messages');
                                                 setShowNotifications(false);
                                               } else if (notification.type === 'listing') {
@@ -741,7 +721,6 @@ const DashboardPage: React.FC = () => {
                 { id: 'favorites', name: 'Favoriter', icon: Heart },
                 { id: 'messages', name: 'Meddelanden', icon: MessageSquare },
                 { id: 'purchases', name: 'Fakturor', icon: CreditCard },
-                { id: 'heart', name: 'Heart Avtal', icon: Shield },
                 { id: 'profile', name: 'Profil', icon: User },
                 { id: 'settings', name: 'Inställningar', icon: Settings }
               ].map((tab) => {
@@ -809,13 +788,6 @@ const DashboardPage: React.FC = () => {
                   <Plus className="w-5 h-5 mr-2" />
                   Skapa ny annons
                 </Link>
-                <button
-                  onClick={() => setActiveTab('heart')}
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-medium rounded-lg hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  <Shield className="w-5 h-5 mr-2" />
-                  Heart Avtal
-                </button>
               </div>
 
               {/* Stats Grid */}
@@ -1772,12 +1744,6 @@ support@123hansa.se
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'heart' && (
-            <div className="space-y-6">
-              <EnhancedHeartContract />
             </div>
           )}
 
