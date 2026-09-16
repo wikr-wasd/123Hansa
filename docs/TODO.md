@@ -81,24 +81,27 @@ hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt 
 
 ## Fas 2 — Ersätt mockdatan ⛔ blockerar allt som rör riktiga annonser
 
-- [ ] **Utöka Prisma-schemat.** Dagens 11 modeller saknar bud, sekretessavtal,
-      dokument med åtkomstlogg, affärer och utbetalningar.
-- [ ] **Lägg `country`, `currency` och belopp i minsta enhet på annonsen.**
-      Belopp som `Int`, aldrig `Float` eller `Decimal` i mellanled.
-- [ ] **Bygg ett servicelager** i webben som hämtar annonser från API:t.
-- [ ] **Samla demoannonserna i en källa** i stället för kopiorna i
-      `BusinessListingsPage.tsx`, `components/listings/BusinessListings.tsx`,
-      `listings/ListingDetailPage.tsx`, `admin/EnhancedAdminPanel.tsx`,
-      `api/listings.ts` och `api/listings/[id].ts`. Alla på en gång — en
-      kvarglömd kopia ser ut att fungera.
+Prisma-schemat ersattes av SQL-migrationerna i `supabase/` (fas 3). Land,
+valuta och belopp i minsta enhet finns där.
+
+- [x] **Servicelager i webben** — klart 2026-09-16. `services/listingService.ts`
+      hämtar annonser ur Supabase och formaterar belopp med `@hansa/core`
+- [x] **Demoannonserna i en källa** — klart 2026-09-16. Sex annonser i
+      `supabase/seed.sql` med `is_demo = true`, inte längre kopior i komponenter
+- [ ] **Gamla mockdata som är kvar**: dashboarden, meddelanden, notiser och
+      värderingsverktyget. Annonssidorna är klara
 - [x] ~~Bestäm vad som händer med de 30 demoannonserna.~~ Besvarat 2026-09-15:
       kvar, märkta. Se `OPEN-QUESTIONS.md`, fråga 7
-- [ ] **Märk demoannonserna "Exempelannons"** i lista, annonssida och sök, och
-      ersätt kontakt, bud och sekretessavtal med en förklaring
+- [x] **Märk demoannonserna "Exempelannons"** — klart 2026-09-16. Märkta i
+      listan och på annonssidan, och kontaktrutan ersatt med en förklaring.
+      Databasen nekar dessutom intresseanmälan på demoannonser (verifierat med
+      ett anrop förbi gränssnittet: 403)
 - [ ] **Inställning som stänger av demoannonserna** utan kodändring
 - [ ] **Skapa annons sparar i databasen**, inte i `localStorage`
 - [ ] **Meddelanden sparas i databasen**, inte i en array i minnet
-- [ ] **Loading- och error-states** överallt där data hämtas. En tom lista och ett
+- [x] **Loading- och error-states** på annonssidorna — klart 2026-09-16
+      (laddning, fel med "Försök igen", tomt resultat med "Rensa filtren")
+- [ ] **Loading- och error-states** på övriga sidor som hämtar data. En tom lista och ett
       trasigt anrop ser likadana ut för användaren annars.
 
 ---
@@ -125,7 +128,10 @@ som inte finns. Ordningen här är den som går att bygga i.
 - [ ] **Serverfunktion som verifierar organisationsnummer** med
       `validateOrgNumber()` ur `@hansa/core` och sätter `verified_at`
 - [ ] **Bevakningarna ska skicka något** — matchning mot nya annonser och utskick
-- [ ] **Byt inloggningen till Supabase Auth.** `/api/auth` är i dag ett skal
+- [x] **Inloggning via Supabase Auth** — klart 2026-09-16. Registrering,
+      inloggning och session provade i webbläsaren mot lokal databas
+- [ ] **Ta bort `apps/web/api/`** — `auth.ts`, `listings.ts` och `messages.ts`
+      är skal med mockdata som inte längre används av webben
 - [ ] **Avveckla `apps/api`** när det som behövs är flyttat
 - [ ] **Samla valideringen i Zod-scheman** som delas mellan webben och
       serverfunktionerna
@@ -138,6 +144,9 @@ som inte finns. Ordningen här är den som går att bygga i.
       `QuickLogin`, `QuickTestRegister`, `SimpleTestLogin`, `AdminLogin` och
       `TestListingSubmission` borta. ⚠️ Adminlösenordet ligger kvar i
       git-historiken i ett publikt repo och ska betraktas som röjt
+- [ ] **Byt Sentry-token.** `.env.example` innehöll en riktig
+      `SENTRY_AUTH_TOKEN` i det publika repot fram till 2026-09-16. Den ska
+      betraktas som röjd och bytas i Sentry, precis som adminlösenordet
 - [ ] **Skydda adminpanelen.** Tillfälligt löst 2026-09-15: `/kraken` och
       `/admin/dashboard` byggs bara in i utvecklingsläge. Riktig lösning är
       Supabase Auth med rollen kontrollerad på servern och i RLS

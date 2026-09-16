@@ -14,11 +14,13 @@
     "type-check": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@hansa/core": "*",
     "@hookform/resolvers": "^3.3.2",
     "@prisma/client": "^5.22.0",
     "@sentry/react": "^7.99.0",
     "@stripe/react-stripe-js": "^2.4.0",
     "@stripe/stripe-js": "^2.2.2",
+    "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",

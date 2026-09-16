@@ -12,11 +12,11 @@ Status vid genomgången **2026-09-05**:
 |---|---|---|
 | `@hansa/core` | 🟢 Klar och testad | 83 tester. Pengar, land, moms, provision, org.nr, språk |
 | Webbens rutter | 🟡 Finns | 35 rutter i `App.tsx`, men flera renderar mockdata |
-| Annonsdata | 🔴 Mockad | `mockListings` hårdkodad i minst fyra filer. API:t anropas inte |
+| Annonsdata | 🟢 Från databasen | Sedan 2026-09-16: `listingService.ts` mot Supabase. `mockListings` borta ur annonssidorna |
 | API:ts rutter | 🟡 Finns | 13 route-filer. Täckningen mot webben är inte verifierad |
 | Databasschema | 🔴 Otillräckligt | 11 Prisma-modeller. Bud, NDA, due diligence och utbetalning saknas |
 | i18n | 🟡 Delvis | `sv`, `en`, `no`, `da` i en fil. `bs` saknas. 5 komponenter använder den |
-| Autentisering | 🟡 Finns | JWT + Supabase-spår. Åtkomstmatrisen är inte genomdriven i tre lager |
+| Autentisering | 🟡 Supabase Auth | Sedan 2026-09-16: registrering och inloggning på riktigt. Roller och admin saknas ännu |
 | Betalning | 🔴 Inte beslutat | Stripe i package.json, ingen leverantör vald |
 | Tester | 🔴 Nästan inga | Utanför `@hansa/core` finns **noll** testfiler i `apps/web` och `apps/api` |
 | Typkontroll | 🟡 Delvis | `@hansa/core` ren. 722 äkta fel kvar i den ärvda koden i `apps/` |

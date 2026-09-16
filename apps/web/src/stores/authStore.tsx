@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService, User, RegisterRequest, LoginRequest } from '../services/authService';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import toast from 'react-hot-toast';
+import { authService, type LoginRequest, type RegisterRequest, type User } from '../services/authService';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -19,135 +20,104 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Sessionen ägs av Supabase-klienten, som håller den i localStorage och
+  // förnyar tokenen själv. Vi speglar den bara.
   useEffect(() => {
-    checkAuthStatus();
+    if (!isSupabaseConfigured) {
+      setIsLoading(false);
+      return;
+    }
+
+    let active = true;
+
+    authService
+      .getCurrentUser()
+      .then((current) => {
+        if (active) setUser(current);
+      })
+      .catch(() => {
+        if (active) setUser(null);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    const unsubscribe = authService.onAuthChange((next) => {
+      if (active) setUser(next);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
-  const checkAuthStatus = async () => {
+  const login = useCallback(async (data: LoginRequest) => {
+    setIsLoading(true);
     try {
-      if (authService.isAuthenticated()) {
-        const token = authService.getAccessToken();
-        
-        // Check if this is a mock token for testing
-        if (token?.startsWith('mock_token_')) {
-          // For mock tokens, get user data from localStorage
-          const storedUser = localStorage.getItem('user');
-          if (storedUser) {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-            setIsLoading(false);
-            return;
-          }
-        }
-        
-        // For real tokens, call the API
-        const userData = await authService.getCurrentUser();
-        setUser(userData);
-      }
+      const loggedIn = await authService.login(data);
+      setUser(loggedIn);
+      toast.success('Välkommen tillbaka');
     } catch (error) {
-      console.error('Auth check failed:', error);
-      // Clear invalid tokens
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const login = async (data: LoginRequest) => {
-    setIsLoading(true);
-    try {
-      const response = await authService.login(data);
-      setUser(response.user);
-      toast.success('Inloggning lyckades!');
-    } catch (error: any) {
-      toast.error(error.message || 'Inloggning misslyckades');
+      toast.error(error instanceof Error ? error.message : 'Inloggningen misslyckades');
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (data: RegisterRequest) => {
+  const register = useCallback(async (data: RegisterRequest) => {
     setIsLoading(true);
     try {
-      const response = await authService.register(data);
-      setUser(response.user);
-      toast.success('Registrering lyckades! Välkommen till 123hansa!');
-    } catch (error: any) {
-      toast.error(error.message || 'Registrering misslyckades');
+      const { user: created, needsConfirmation } = await authService.register(data);
+      setUser(created);
+      toast.success(
+        needsConfirmation
+          ? 'Kontot är skapat. Bekräfta din e-postadress för att logga in.'
+          : 'Kontot är skapat'
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Registreringen misslyckades');
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
-      const token = authService.getAccessToken();
-      
-      // For mock tokens, just clear localStorage
-      if (token?.startsWith('mock_token_')) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        setUser(null);
-        toast.success('Du har loggats ut');
-        return;
-      }
-      
-      // For real tokens, call the API
       await authService.logout();
+    } finally {
       setUser(null);
-      toast.success('Du har loggats ut');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Still clear local state
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setUser(null);
+      toast.success('Du är utloggad');
     }
-  };
+  }, []);
 
-  const refreshUser = async () => {
-    try {
-      if (authService.isAuthenticated()) {
-        const userData = await authService.getCurrentUser();
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
-      // If refresh fails, user might need to login again
-      setUser(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    }
-  };
+  const refreshUser = useCallback(async () => {
+    setUser(await authService.getCurrentUser());
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{
+  const value = useMemo(
+    () => ({
       user,
-      isAuthenticated: !!user,
+      isAuthenticated: Boolean(user),
       isLoading,
       login,
       register,
       logout,
       refreshUser,
       setUser,
-    }}>
-      {children}
-    </AuthContext.Provider>
+    }),
+    [user, isLoading, login, register, logout, refreshUser]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuthStore = () => {
+export const useAuthStore = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuthStore must be used within an AuthProvider');
+  if (!context) {
+    throw new Error('useAuthStore måste användas inuti AuthProvider');
   }
   return context;
 };
-
-export const useAuth = useAuthStore;

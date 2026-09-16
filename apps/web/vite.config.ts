@@ -44,6 +44,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      // Delad affärslogik. Pekar på källkoden så att Vite kompilerar den med
+      // resten av webben — paketet har ingen byggd dist, med flit.
+      '@hansa/core': resolve(__dirname, '../../packages/core/src/index.ts'),
     },
   },
   server: {
