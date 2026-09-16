@@ -11,14 +11,14 @@ Status vid genomgången **2026-09-05**:
 | Del | Läge | Kommentar |
 |---|---|---|
 | `@hansa/core` | 🟢 Klar och testad | 83 tester. Pengar, land, moms, provision, org.nr, språk |
-| Webbens rutter | 🟡 Finns | 35 rutter i `App.tsx`, men flera renderar mockdata |
+| Webbens rutter | 🟡 Finns | Annonser, Min sida, meddelanden, datarum och granskning hämtar riktig data. `/notifications` är kvar på mockdata |
 | Annonsdata | 🟢 Från databasen | Sedan 2026-09-16: `listingService.ts` mot Supabase. `mockListings` borta ur annonssidorna |
-| API:ts rutter | 🟡 Finns | 13 route-filer. Täckningen mot webben är inte verifierad |
-| Databasschema | 🔴 Otillräckligt | 11 Prisma-modeller. Bud, NDA, due diligence och utbetalning saknas |
+| API:ts rutter | 🔴 Avvecklas | `apps/api` är inte driftsatt och används inte. Se `OPEN-QUESTIONS.md` fråga 9 |
+| Databasschema | 🟢 Byggt | SQL-migrationer i `supabase/` med RLS: organisationer, annonser, intresse, meddelanden, sekretessavtal, datarum, åtkomstlogg. 63 behörighetstester |
 | i18n | 🟡 Delvis | `sv`, `en`, `no`, `da` i en fil. `bs` saknas. 5 komponenter använder den |
-| Autentisering | 🟡 Supabase Auth | Sedan 2026-09-16: registrering och inloggning på riktigt. Roller och admin saknas ännu |
+| Autentisering | 🟢 Supabase Auth | Registrering, inloggning och session. Granskarrollen ligger i `platform_admins` och kontrolleras i databasen |
 | Betalning | 🔴 Inte beslutat | Stripe i package.json, ingen leverantör vald |
-| Tester | 🔴 Nästan inga | Utanför `@hansa/core` finns **noll** testfiler i `apps/web` och `apps/api` |
+| Tester | 🟡 Delvis | 98 i `@hansa/core`, 63 behörighetstester mot databasen. `apps/web` har fortfarande inga |
 | Typkontroll | 🟡 Delvis | `@hansa/core` ren. 722 äkta fel kvar i den ärvda koden i `apps/` |
 | Lint | 🟡 Går att köra | api 18 fel/459 varningar, web 33 fel/763 varningar |
 | Bygge | 🟢 Fungerar lokalt | `npm run build:web` går igenom |
@@ -31,11 +31,11 @@ Status vid genomgången **2026-09-05**:
 |---|---|---|
 | Vercel-bygget | 🔴 Faller | Båda projekten (`123-hansa-web`, `123hansa-staging`) har Root Directory `apps/web` och faller på `Missing script: "build:web"`. Produktion visar `main` från juli 2025 |
 | Brancher | 🔴 Isär | `main` 116 commits efter `dev`. `staging` ingår helt i `dev` |
-| Skapa annons | 🔴 Lokal | Sparas i webbläsarens `localStorage`. Ingen annan ser annonsen |
-| Meddelanden | 🔴 Försvinner | `apps/web/api/messages.ts` lägger dem i en array i minnet |
+| Skapa annons | 🟢 Mot databasen | Organisation med kontrollerat organisationsnummer, annons, granskning |
+| Meddelanden | 🟢 I databasen | Realtid, efter accepterad intresseanmälan |
 | `/api/auth` | 🔴 Skal | Svarar bara "Auth API endpoint is working" |
 | Express-API:t | 🔴 Ej driftsatt | Körs ingenstans. Avvecklas, se `OPEN-QUESTIONS.md` fråga 9 |
-| Adminpanelen | 🔴 Oskyddad | `/kraken` och `/admin/dashboard` saknar `ProtectedRoute`. Testkonton med lösenord i klientkoden |
+| Adminpanelen | 🟢 Ersatt | De mockade panelerna borta. `/admin/review` skyddas av `am_i_platform_admin()` och av databasen |
 | Datarum | 🟢 Byggt | Sekretessavtal, dokument och oföränderlig åtkomstlogg. Nedladdning genom serverfunktion som loggar först |
 | Databas | 🟡 Schema klart, inte i drift | `supabase/migrations/` med RLS och 61 gröna behörighetstester, körs lokalt i Docker. Molnprojektet "123Hansa" är pausat och ligger i `us-east-1` — ett nytt i EU skapas när William godkänt kostnaden |
 
@@ -68,8 +68,8 @@ installerat i något workspace samt `'@typescript-eslint/recommended'` utan
 
 ## Systemet
 
-Målbilden efter beslutet 2026-09-15 (`OPEN-QUESTIONS.md` fråga 9). I dag finns
-varken databasen eller serverfunktionerna i drift — se statustabellen ovan.
+Beslutet 2026-09-15 (`OPEN-QUESTIONS.md` fråga 9). Byggt och provat lokalt;
+ingenting av det är ännu driftsatt i molnet — se statustabellen ovan.
 
 ```
                  ┌───────────────────────────────┐
@@ -134,8 +134,9 @@ och affären avbryts med "priset har ändrats" utan att någon förstår varför
 
 ## Dataflödet på marknadsplatsen
 
-Så här ska det se ut enligt strategin 2026-09-15 (`BUSINESS.md`). I dag är steg
-1–2 mockade och steg 3–7 inte byggda.
+Så här ska det se ut enligt strategin 2026-09-15 (`BUSINESS.md`). Steg 1 och 3–6
+är byggda mot databasen. Screeningen i steg 2 finns inte, och avgifterna i steg 1
+väntar på prisbeslut.
 
 1. **Säljaren skapar en annons** och betalar listningsavgiften. Land väljs, och
    landet avgör valuta, moms och vilket organisationsnummerformat som krävs.
