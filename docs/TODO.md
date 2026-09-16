@@ -114,9 +114,17 @@ som inte finns. Ordningen här är den som går att bygga i.
       Väntar på Williams godkännande av kostnaden
 - [ ] **Kontrollera innehållet i det gamla projektet** "123Hansa"
       (`pmtnrqtkuygyyodcovds`, `us-east-1`, pausat) innan det tas bort
-- [ ] **Schema v1 som SQL-migrationer** — profiler, organisationer, annonser,
-      intresseanmälningar, sekretessavtal, dokument, åtkomstlogg, meddelanden,
-      bud. RLS i samma migration som tabellen. Provkör lokalt i Docker
+- [x] **Schema v1 som SQL-migrationer** — klart 2026-09-15.
+      `supabase/migrations/20260915120000_marketplace_v1.sql`: marknader,
+      profiler, organisationer med medlemmar, annonser med granskning,
+      intresseanmälningar, meddelanden, sekretessavtal med versioner, datarum
+      med oföränderlig åtkomstlogg, bevakningar. RLS i samma migration som
+      tabellen. 61 behörighetstester gröna mot lokal Postgres 17
+- [ ] **Serverfunktion för dokumentåtkomst** — anropar `record_document_access()`
+      och skapar en tidsbegränsad länk. Utan den kan loggen kringgås
+- [ ] **Serverfunktion som verifierar organisationsnummer** med
+      `validateOrgNumber()` ur `@hansa/core` och sätter `verified_at`
+- [ ] **Bevakningarna ska skicka något** — matchning mot nya annonser och utskick
 - [ ] **Byt inloggningen till Supabase Auth.** `/api/auth` är i dag ett skal
 - [ ] **Avveckla `apps/api`** när det som behövs är flyttat
 - [ ] **Samla valideringen i Zod-scheman** som delas mellan webben och

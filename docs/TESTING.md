@@ -22,12 +22,28 @@ Det är därför `ARCHITECTURE.md` har en statustabell och inte bara en beskrivn
 | Var | Vad | Kräver | Läge |
 |---|---|---|---|
 | `packages/core` | Pengar, valuta, moms, provision, org.nr, språkval | inget | 🟢 83 tester |
+| `supabase/tests` | Behörighet i databasen (RLS, triggers, datarum, logg) | Docker | 🟢 61 tester |
 | `apps/web` | Rena moduler och komponenter | inget | 🔴 i praktiken inga |
 | `apps/api` | Route handlers, validering, behörighet | databas | 🔴 i praktiken inga |
 | Röktest | Hela flödet mot levande app | app + databas | 🔴 finns inte |
 
 Kärnan är testad för att den **går** att testa: inga runtime-beroenden, ingen
 databas, 400 ms. Det är hela poängen med att lägga reglerna där.
+
+### Databastesterna
+
+`supabase/tests/database/marketplace_rls.test.sql` provar varje regel från den
+roll som **inte** ska få göra något — säljare, köpare, utomstående, anonym och
+administratör. Ett test som bara visar att säljaren kan publicera bevisar
+ingenting om att köparen inte kan.
+
+**Fälla:** en `UPDATE` som RLS filtrerar bort kastar inget fel — den påverkar
+noll rader, och en trigger på tabellen körs aldrig. Testa sådana fall genom att
+läsa tillbaka värdet som `postgres`, inte med `throws_ok`. Det första utkastet av
+testet för sekretessavtalen gick i just den fällan.
+
+Databastesterna bevisar att reglerna **i databasen** håller. De bevisar ingenting
+om att webben anropar databasen — i dag gör den det inte alls.
 
 ---
 
@@ -41,7 +57,17 @@ npm run lint
 npm run build
 
 npm run verify        # allt ovanstående. Kör den före leverans
+
+# Databasen — kräver att Docker Desktop är igång
+npm run db:start      # lokal Supabase på portarna 544xx
+npm run db:reset      # bygg om databasen från migrationerna
+npm run test:db       # behörighetstesterna
+npm run db:stop
 ```
+
+Lokala Supabase för 123Hansa använder portarna **54420–54429** (API 54421,
+databas 54422, Studio 54423). Standardportarna 5432x används av Burp på samma
+maskin.
 
 ---
 

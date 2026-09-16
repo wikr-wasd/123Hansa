@@ -58,3 +58,32 @@ jobs:
 
       - name: Bygg webben
         run: npm run build:web
+
+  # Behörigheten i databasen testas separat: den kräver Docker och tar därför
+  # längre tid, men den får INTE ha continue-on-error. Faller ett RLS-test
+  # betyder det att någon kan läsa eller ändra data de inte ska komma åt.
+  database:
+    name: Behörighet i databasen
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci --no-audit --no-fund
+
+      - name: Starta lokal Supabase
+        run: npm run db:start
+
+      - name: Kör behörighetstesterna
+        run: npm run test:db
+
+      - name: Stoppa
+        if: always()
+        run: npm run db:stop

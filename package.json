@@ -23,9 +23,13 @@
     "test:core": "npm run test --workspace=@hansa/core",
     "test:web": "npm run test --workspace=@123hansa/web -- --run",
     "test:api": "npm run test --workspace=@123hansa/api",
+    "test:db": "supabase test db",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "verify": "npm run type-check && npm run lint && npm run test && npm run build"
+    "verify": "npm run type-check && npm run lint && npm run test && npm run build",
+    "db:start": "supabase start -x imgproxy,edge-runtime,logflare,vector,supavisor",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset"
   },
   "keywords": [
     "marketplace",
@@ -40,6 +44,7 @@
   "author": "123Hansa",
   "license": "UNLICENSED",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "supabase": "2.117.0"
   }
 }

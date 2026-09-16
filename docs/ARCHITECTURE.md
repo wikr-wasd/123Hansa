@@ -36,7 +36,7 @@ Status vid genomgången **2026-09-05**:
 | `/api/auth` | 🔴 Skal | Svarar bara "Auth API endpoint is working" |
 | Express-API:t | 🔴 Ej driftsatt | Körs ingenstans. Avvecklas, se `OPEN-QUESTIONS.md` fråga 9 |
 | Adminpanelen | 🔴 Oskyddad | `/kraken` och `/admin/dashboard` saknar `ProtectedRoute`. Testkonton med lösenord i klientkoden |
-| Databas | 🔴 Saknas i drift | Supabase-projektet "123Hansa" är pausat och ligger i `us-east-1` |
+| Databas | 🟡 Schema klart, inte i drift | `supabase/migrations/` med RLS och 61 gröna behörighetstester, körs lokalt i Docker. Molnprojektet "123Hansa" är pausat och ligger i `us-east-1` — ett nytt i EU skapas när William godkänt kostnaden |
 
 ### Städningen 2026-09-05
 
@@ -185,10 +185,14 @@ Vercel-funktioner. **Beslutat 2026-09-15:** annonserna ligger kvar som märkta
 demoannonser (`OPEN-QUESTIONS.md` fråga 7), men i en enda källa och utan
 möjlighet att kontakta eller buda.
 
-**Schemat är för litet.** 11 Prisma-modeller täcker användare, annonser och
-administration. Köparprofiler, intresseanmälningar, sekretessavtal, dokument med
-åtkomstlogg, screeningresultat och avgifter saknas helt. Bud, affärer och
-utbetalningar ska **inte** finnas — se `BUSINESS.md`. Det nya schemat skrivs som SQL-migrationer för
+**Två scheman samtidigt.** Prisma-schemat i `apps/api/prisma/` är från det
+Express-API som avvecklas, och används inte av något som körs. Det nya schemat är
+SQL-migrationer i `supabase/migrations/`. Prisma-schemat tas bort med resten av
+`apps/api`.
+
+Det som ännu saknas i det nya schemat: screeningresultat (fas 5b, kräver DPIA
+först) och avgifter (fas 5c, kräver prisbeslut). Bud, affärer och utbetalningar
+ska **inte** finnas — se `BUSINESS.md`. Det nya schemat skrivs som SQL-migrationer för
 Supabase, med RLS i samma migration som tabellen.
 
 **Ingen testtäckning utanför core.** Route handlers och komponenter har i
