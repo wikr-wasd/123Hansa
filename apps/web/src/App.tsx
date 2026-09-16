@@ -27,16 +27,9 @@ const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
 const ValuationPage = lazy(() => import('./pages/listings/ValuationPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Adminsidorna har ingen riktig inloggning förrän Supabase Auth finns och rollen
-// kontrolleras på servern (docs/TODO.md, fas 3–4). De byggs bara in i
-// utvecklingsläge. Villkoret ligger på import-nivå så att Vite inte ens skapar
-// deras chunkar i produktionsbygget.
-const AdminPanel = import.meta.env.DEV
-  ? lazy(() => import('./pages/admin/AuthenticatedAdminWrapper'))
-  : null;
-const AdminDashboard = import.meta.env.DEV
-  ? lazy(() => import('./pages/admin/AdminDashboard'))
-  : null;
+// Granskningsvyn. Vem som kommer in avgörs av am_i_platform_admin() i
+// databasen, och varje åtgärd kontrolleras dessutom av databasen själv.
+const ReviewPage = lazy(() => import('./pages/admin/ReviewPage'));
 
 // Auth pages
 const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
@@ -90,9 +83,12 @@ function App() {
             } />
             <Route path="/create-listing-preview" element={<CreateListingPreview />} />
             
-            {/* Admin — bara i utvecklingsläge, se kommentaren vid importen */}
-            {AdminPanel && <Route path="/kraken" element={<AdminPanel />} />}
-            {AdminDashboard && <Route path="/admin/dashboard" element={<AdminDashboard />} />}
+            {/* Granskning — behörigheten kontrolleras i sidan och i databasen */}
+            <Route path="/admin/review" element={
+              <ProtectedRoute>
+                <ReviewPage />
+              </ProtectedRoute>
+            } />
             
             {/* Protected routes */}
             <Route path="/profile" element={

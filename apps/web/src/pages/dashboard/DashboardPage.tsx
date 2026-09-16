@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { AlertCircle, Loader2, Plus } from 'lucide-react';
+import { AlertCircle, Loader2, Plus, ShieldCheck } from 'lucide-react';
 import type { CountryCode } from '@hansa/core';
 import { useAuthStore } from '../../stores/authStore';
+import { amIAdmin } from '../../services/adminService';
 import { authService, type LocaleCode } from '../../services/authService';
 import {
   fetchMyInterests,
@@ -60,6 +61,7 @@ const DashboardPage: React.FC = () => {
   const [country, setCountry] = useState<CountryCode>((user?.country as CountryCode) ?? 'SE');
   const [language, setLanguage] = useState<LocaleCode>(user?.language ?? 'sv');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -91,6 +93,11 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Granskare ska hitta sin kö utan att känna till adressen.
+  useEffect(() => {
+    amIAdmin().then(setIsAdmin);
+  }, []);
 
   const act = async (action: () => Promise<void>, success: string) => {
     try {
@@ -137,13 +144,24 @@ const DashboardPage: React.FC = () => {
                 {user ? `${user.firstName} ${user.lastName}`.trim() || user.email : ''}
               </p>
             </div>
-            <Link
-              to="/create-listing"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-              Lägg upp en annons
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              {isAdmin && (
+                <Link
+                  to="/admin/review"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+                  Granskning
+                </Link>
+              )}
+              <Link
+                to="/create-listing"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+              >
+                <Plus className="h-5 w-5" aria-hidden="true" />
+                Lägg upp en annons
+              </Link>
+            </div>
           </div>
 
           <nav className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8">

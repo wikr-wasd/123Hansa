@@ -491,10 +491,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      am_i_platform_admin: { Args: never; Returns: boolean }
       record_document_access: { Args: { p_document: string }; Returns: string }
       review_listing: {
         Args: { p_approve: boolean; p_listing: string; p_note?: string }
         Returns: Database["public"]["Enums"]["listing_status"]
+      }
+      verify_organization: {
+        Args: { p_organization: string; p_verified?: boolean }
+        Returns: string
       }
     }
     Enums: {

@@ -135,8 +135,10 @@ som inte finns. Ordningen här är den som går att bygga i.
       med `validateOrgNumber()` i klienten och av granskaren
 - [ ] **Automatisera verifieringen** mot officiella register när datakällan är
       vald (`OPEN-QUESTIONS.md` fråga 14). I dag är det ett mänskligt beslut
-- [ ] **Granskningsgränssnitt för administratörer.** `review_listing()` och
-      `verify_organization()` finns i databasen, men måste anropas manuellt
+- [x] **Granskningsgränssnitt för administratörer** — klart 2026-09-16 på
+      `/admin/review`: kö för väntande, publicerade och nekade annonser,
+      kontroll av organisationsnumret med `validateOrgNumber()`, verifiering av
+      organisationen och svar till säljaren
 - [ ] **Bevakningarna ska skicka något** — matchning mot nya annonser och utskick
 - [x] **Inloggning via Supabase Auth** — klart 2026-09-16. Registrering,
       inloggning och session provade i webbläsaren mot lokal databas
@@ -157,9 +159,14 @@ som inte finns. Ordningen här är den som går att bygga i.
 - [ ] **Byt Sentry-token.** `.env.example` innehöll en riktig
       `SENTRY_AUTH_TOKEN` i det publika repot fram till 2026-09-16. Den ska
       betraktas som röjd och bytas i Sentry, precis som adminlösenordet
-- [ ] **Skydda adminpanelen.** Tillfälligt löst 2026-09-15: `/kraken` och
-      `/admin/dashboard` byggs bara in i utvecklingsläge. Riktig lösning är
-      Supabase Auth med rollen kontrollerad på servern och i RLS
+- [x] **Adminpanelen skyddad** — klart 2026-09-16. De mockade panelerna
+      (`/kraken`, `/admin/dashboard`, AdvancedAdminPanel, CustomerAdminPanel) är
+      borttagna. Kvar är `/admin/review`, där behörigheten avgörs av
+      `am_i_platform_admin()` och varje åtgärd dessutom kontrolleras av
+      databasen
+- [ ] **Administratörer måste läggas till med SQL.** `platform_admins` har inga
+      policyer med flit, men det behövs ett sätt att hantera dem som inte är
+      psql
 - [ ] **Genomdriv åtkomstmatrisen i tre lager.** Se `SECURITY.md`. Middleware
       räcker aldrig ensamt för ett API.
 - [ ] **Radnivåpolicy eller motsvarande i databasen** för varje tabell, innan den
