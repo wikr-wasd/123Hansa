@@ -88,8 +88,8 @@ valuta och belopp i minsta enhet finns där.
       hämtar annonser ur Supabase och formaterar belopp med `@hansa/core`
 - [x] **Demoannonserna i en källa** — klart 2026-09-16. Sex annonser i
       `supabase/seed.sql` med `is_demo = true`, inte längre kopior i komponenter
-- [ ] **Gamla mockdata som är kvar**: meddelanden och notiser. Annonssidorna,
-      Min sida och värderingsverktyget är klara
+- [ ] **Gamla mockdata som är kvar**: notissidan (`/notifications`). Allt annat
+      i webben hämtar nu riktig data
 - [x] ~~Bestäm vad som händer med de 30 demoannonserna.~~ Besvarat 2026-09-15:
       kvar, märkta. Se `OPEN-QUESTIONS.md`, fråga 7
 - [x] **Märk demoannonserna "Exempelannons"** — klart 2026-09-16. Märkta i
@@ -103,7 +103,8 @@ valuta och belopp i minsta enhet finns där.
 - [x] **Min sida på riktigt** — klart 2026-09-16. Egna annonser med status,
       mottagna och skickade intresseanmälningar, och profil. Ersätter 2 800
       rader mockad dashboard
-- [ ] **Meddelanden sparas i databasen**, inte i en array i minnet
+- [x] **Meddelanden sparas i databasen** — klart 2026-09-16, med realtid via
+      Supabase. Samtal öppnas när säljaren accepterat intresseanmälan
 - [x] **Loading- och error-states** på annonssidorna — klart 2026-09-16
       (laddning, fel med "Försök igen", tomt resultat med "Rensa filtren")
 - [ ] **Loading- och error-states** på övriga sidor som hämtar data. En tom lista och ett
@@ -235,7 +236,8 @@ som låtsas göra det plattformen uttryckligen inte ska göra.
 - [ ] **Datarum** — dokument i Supabase Storage bakom tidsbegränsade länkar,
       åtkomst först efter accepterat sekretessavtal, oföränderlig logg. Formen på
       avtalet: `OPEN-QUESTIONS.md` fråga 11
-- [ ] **Meddelanden** mellan parterna, i realtid, sparade i databasen
+- [x] **Meddelanden** mellan parterna, i realtid, sparade i databasen — klart
+      2026-09-16
 - [ ] **Säkerställ gränsen:** inget bud, ingen köpeskilling, inget avtal där
       plattformen är part
 

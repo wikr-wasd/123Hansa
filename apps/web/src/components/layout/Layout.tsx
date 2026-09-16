@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
-import ChatSystem from '../chat/ChatSystem';
 import { useTranslation } from '../../hooks/useTranslation';
 import PWAInstallPrompt from '../mobile/PWAInstallPrompt';
 import { useMobileScrollControl } from '../../utils/mobileScrollController';
@@ -13,7 +12,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, isAuthenticated, logout, isLoading } = useAuthStore();
+  const { isAuthenticated, logout, isLoading } = useAuthStore();
   const { t } = useTranslation();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -77,6 +76,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <LoadingSpinner size="sm" />
               ) : isAuthenticated ? (
                 <>
+                  <Link 
+                    to="/messages" 
+                    className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
+                  >
+                    Meddelanden
+                  </Link>
                   <Link 
                     to="/dashboard" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
@@ -142,6 +147,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 py-3"><LoadingSpinner size="sm" /></div>
             ) : isAuthenticated ? (
               <>
+                <Link to="/messages" className={mobileLinkClass}>Meddelanden</Link>
                 <Link to="/dashboard" className={mobileLinkClass}>{t('dashboard')}</Link>
                 <button type="button" onClick={handleLogout} className={`${mobileLinkClass} w-full text-left`}>
                   {t('logout')}
@@ -205,15 +211,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
-
-      {/* Global Chat System - Available when logged in */}
-      {isAuthenticated && user && (
-        <ChatSystem 
-          currentUserId={user.id}
-          currentUserName={`${user.firstName} ${user.lastName}`}
-          currentUserType="user"
-        />
-      )}
 
       {/* PWA Install Prompt - Only on mobile/tablet */}
       <PWAInstallPrompt />
