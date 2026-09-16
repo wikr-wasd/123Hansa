@@ -27,9 +27,10 @@
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "verify": "npm run type-check && npm run lint && npm run test && npm run build",
-    "db:start": "supabase start -x imgproxy,edge-runtime,logflare,vector,supavisor",
+    "db:start": "supabase start -x imgproxy,logflare,vector,supavisor",
     "db:stop": "supabase stop",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "db:functions": "supabase functions serve"
   },
   "keywords": [
     "marketplace",

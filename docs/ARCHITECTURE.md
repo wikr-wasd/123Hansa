@@ -36,6 +36,7 @@ Status vid genomgången **2026-09-05**:
 | `/api/auth` | 🔴 Skal | Svarar bara "Auth API endpoint is working" |
 | Express-API:t | 🔴 Ej driftsatt | Körs ingenstans. Avvecklas, se `OPEN-QUESTIONS.md` fråga 9 |
 | Adminpanelen | 🔴 Oskyddad | `/kraken` och `/admin/dashboard` saknar `ProtectedRoute`. Testkonton med lösenord i klientkoden |
+| Datarum | 🟢 Byggt | Sekretessavtal, dokument och oföränderlig åtkomstlogg. Nedladdning genom serverfunktion som loggar först |
 | Databas | 🟡 Schema klart, inte i drift | `supabase/migrations/` med RLS och 61 gröna behörighetstester, körs lokalt i Docker. Molnprojektet "123Hansa" är pausat och ligger i `us-east-1` — ett nytt i EU skapas när William godkänt kostnaden |
 
 ### Städningen 2026-09-05

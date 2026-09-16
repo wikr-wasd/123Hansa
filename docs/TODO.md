@@ -129,8 +129,9 @@ som inte finns. Ordningen här är den som går att bygga i.
       intresseanmälningar, meddelanden, sekretessavtal med versioner, datarum
       med oföränderlig åtkomstlogg, bevakningar. RLS i samma migration som
       tabellen. 61 behörighetstester gröna mot lokal Postgres 17
-- [ ] **Serverfunktion för dokumentåtkomst** — anropar `record_document_access()`
-      och skapar en tidsbegränsad länk. Utan den kan loggen kringgås
+- [x] **Serverfunktion för dokumentåtkomst** — klart 2026-09-16.
+      `supabase/functions/dataroom-download` loggar först och skapar den
+      kortlivade länken sedan. Tjänstenyckeln lämnar aldrig funktionen
 - [x] **Verifiering av organisationer** — klart 2026-09-16 som
       `verify_organization()`, anropbar av administratörer. Numret kontrolleras
       med `validateOrgNumber()` i klienten och av granskaren
@@ -233,9 +234,14 @@ som låtsas göra det plattformen uttryckligen inte ska göra.
       Rangordning efter relevans, aldrig efter betald exponering
 - [ ] **Intresseanmälan** — köparen visar intresse, säljaren väljer vem som går
       vidare. Kontaktuppgifter delas inte automatiskt
-- [ ] **Datarum** — dokument i Supabase Storage bakom tidsbegränsade länkar,
-      åtkomst först efter accepterat sekretessavtal, oföränderlig logg. Formen på
-      avtalet: `OPEN-QUESTIONS.md` fråga 11
+- [x] **Datarum** — klart 2026-09-16 på `/listings/:id/datarum`. Säljaren
+      lägger in sitt eget sekretessavtal och laddar upp dokument, köparen
+      accepterar avtalet och öppnar dem, och säljaren ser vem som öppnat vad.
+      Provat att köparen INTE kommer åt något före avtalet, varken i
+      gränssnittet, mot API:t eller mot lagringen direkt
+- [ ] **Ny avtalsversion i gränssnittet.** Databasen hanterar versioner och
+      kräver ny acceptans, men säljaren kan bara lägga in den första från
+      webben
 - [x] **Meddelanden** mellan parterna, i realtid, sparade i databasen — klart
       2026-09-16
 - [ ] **Säkerställ gränsen:** inget bud, ingen köpeskilling, inget avtal där

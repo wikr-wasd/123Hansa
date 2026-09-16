@@ -213,8 +213,28 @@ export interface NewListing {
   foundedYear: number | null;
 }
 
-/** Annonser för de organisationer användaren är med i. RLS avgör vilka det är. */
+/**
+ * Annonser för de organisationer användaren är MEDLEM i.
+ *
+ * Filtreringen sker på medlemskapet, inte på vad radnivåpolicyn råkar släppa
+ * igenom: en publicerad annons får alla läsa, och en köpare med accepterat
+ * intresse får dessutom läsa säljarens organisation. Utan det här filtret såg
+ * köparen säljarens annons som sin egen — och fick säljarens vy i datarummet.
+ */
 export async function fetchMyListings(): Promise<MyListing[]> {
+  const { data: auth } = await supabase().auth.getUser();
+  if (!auth.user) return [];
+
+  const { data: memberships, error: membershipError } = await supabase()
+    .from('organization_members')
+    .select('organization_id')
+    .eq('user_id', auth.user.id);
+
+  if (membershipError) throw new Error(membershipError.message);
+
+  const organizationIds = (memberships ?? []).map((row) => row.organization_id);
+  if (organizationIds.length === 0) return [];
+
   const { data, error } = await supabase()
     .from('listings')
     .select(
@@ -222,6 +242,7 @@ export async function fetchMyListings(): Promise<MyListing[]> {
        organizations!inner(name, verified_at),
        listing_interests(count)`
     )
+    .in('organization_id', organizationIds)
     .order('updated_at', { ascending: false });
 
   if (error) throw new Error(error.message);

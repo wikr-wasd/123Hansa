@@ -270,6 +270,12 @@ const DashboardPage: React.FC = () => {
                     )}
 
                     <div className="flex flex-wrap gap-3">
+                      <Link
+                        to={`/listings/${listing.id}/datarum`}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      >
+                        Datarum
+                      </Link>
                       {listing.status === 'published' && (
                         <Link
                           to={`/listings/${listing.id}`}
@@ -379,7 +385,23 @@ const DashboardPage: React.FC = () => {
                           </Link>
                           <Badge status={interest.status} label={INTEREST_STATUS_LABELS[interest.status]} />
                         </div>
-                        <p className="whitespace-pre-line text-sm text-gray-700">{interest.message}</p>
+                        <p className="mb-3 whitespace-pre-line text-sm text-gray-700">{interest.message}</p>
+                        {interest.status === 'accepted' && (
+                          <div className="flex flex-wrap gap-3">
+                            <Link
+                              to={`/listings/${interest.listingId}/datarum`}
+                              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                              Öppna datarummet
+                            </Link>
+                            <Link
+                              to={`/messages?samtal=${interest.id}`}
+                              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                              Meddelanden
+                            </Link>
+                          </div>
+                        )}
                       </article>
                     ))}
                   </div>

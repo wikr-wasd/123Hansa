@@ -165,3 +165,25 @@ Om självhostning inte är aktuellt bör de tas bort — en driftfil som inte an
 Vercel behåller tidigare deploys. En felaktig produktionsdeploy rullas tillbaka i
 dashboarden, inte genom en revert-commit — reverten tar minuter, rollbacken tar
 sekunder. Gör rollbacken först, reverten sedan.
+
+---
+
+## Serverfunktioner (Supabase Edge Functions)
+
+`supabase/functions/dataroom-download` lämnar ut dokument ur datarummet. Den
+måste driftsättas separat från webben:
+
+```bash
+npx supabase functions deploy dataroom-download
+```
+
+Lokalt körs den med `npm run db:functions` (kräver att `npm run db:start` gjorts
+först).
+
+Funktionen använder `SUPABASE_SERVICE_ROLE_KEY`, som Supabase sätter automatiskt
+i funktionsmiljön. **Nyckeln får aldrig hamna i webbens miljövariabler** — allt
+med prefixet `VITE_` byggs in i JavaScript-buntar som vem som helst kan läsa.
+
+Funktionen returnerar sökvägen till filen, inte hela adressen. Inifrån
+containern heter Supabase `kong:8000`, vilket ingen webbläsare kan nå, och
+adressen skiljer sig ändå mellan lokalt, preview och produktion.
