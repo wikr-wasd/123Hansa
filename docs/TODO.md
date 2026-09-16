@@ -57,17 +57,20 @@ hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt 
 - [ ] **Lanseringsländer som konfiguration** — registrering, annonsformulär och
       filter erbjuder bara SE, NO och DK. Övriga länder i `@hansa/core` ligger
       kvar men visas inte
-- [ ] **Ordböckerna `no` och `da` kompletta.** 2026-09-15 har `sv` och `en`
-      runt 240 rader var i `config.ts`, `no` sju och `da` knappt tjugo. Norska
-      och danska besökare ser i praktiken svenska
-- [ ] **Flytta ordboken ur `i18n/config.ts`.** En fil per språk.
-- [ ] **Härled `Dictionary` ur den svenska filen** så att en nyckel som glöms i
-      något annat språk stoppar bygget. Utan det ruttnar översättningarna tyst.
-- [ ] **Testa nyckelparitet** — identiska nyckelmängder åt alla håll, inga tomma
-      strängar, språknamnen på sitt eget språk.
-- [ ] **Byt ut hårdkodad svenska i JSX.** Bara 5 av komponenterna använder
-      `useTranslation`; resten har texten inbakad. Det är den enskilt största
-      posten i fas 1.
+- [x] **Ordböckerna `no` och `da` kompletta** — klart 2026-09-16. Alla fyra
+      språken har samma 77 nycklar. ⚠️ Norska och danska är översatta av
+      utvecklare, inte av modersmålstalare — ska läsas igenom före lansering
+- [x] **Ordboken ur `i18n/config.ts`** — klart 2026-09-16, en fil per språk.
+      450 nycklar fanns, 29 användes; resten var arv från borttagna funktioner
+- [x] **`Dictionary` härledd ur svenskan** — klart 2026-09-16. En glömd nyckel
+      blir ett typfel med nyckelns namn utskrivet. Verifierat genom att ta bort
+      en nyckel och se bygget falla
+- [x] **Nyckelparitet testad** — klart 2026-09-16. 11 tester: samma nyckelmängd,
+      inga tomma strängar, och inte bara kopierad svenska. De första riktiga
+      testerna i `apps/web`
+- [ ] **Byt ut hårdkodad svenska i JSX.** Klart 2026-09-16: menyn, sidfoten,
+      startsidan, annonslistan och annonssidan. Kvar: Min sida, datarummet,
+      granskningen, annonsformuläret, meddelanden, inloggning och registrering
 - [ ] **Ta bort hårdkodad `SEK` och `sv-SE`.** 42 filer nämner `SEK`. Priser ska
       formateras med `formatMoney()` och `intlLocaleFor(country)`.
 - [ ] **Lägg landsväljare i annonsformuläret**, och låt landet styra valuta,

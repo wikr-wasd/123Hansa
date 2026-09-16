@@ -8,9 +8,15 @@ interface Language {
   flag: string;
 }
 
+// Språknamnen står på sitt eget språk: ett val som säger "Norwegian" på en
+// norsk sida är skrivet av någon som inte tänkte på vem som läser det.
+// Flaggan för engelska är medvetet 🇬🇧 och inte 🇺🇸 — språket är inte ett land,
+// men av två dåliga val är det här det mindre missvisande i Norden.
 const languages: Language[] = [
   { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'en', name: 'English', flag: '🇬🇧' },
 ];
 
 interface LanguageSwitcherProps {
@@ -21,7 +27,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'header'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { t, changeLanguage, getCurrentLanguage } = useTranslation();
+  const { changeLanguage, getCurrentLanguage } = useTranslation();
   
   const currentLanguage = getCurrentLanguage();
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0];
@@ -30,10 +36,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     changeLanguage(langCode);
     setIsOpen(false);
     
-    // Show toast message
     import('react-hot-toast').then(({ toast }) => {
-      const newLang = languages.find(l => l.code === langCode);
-      toast.success(t('notification.language-changed', { language: newLang?.name }));
+      const newLang = languages.find((l) => l.code === langCode);
+      if (newLang) toast.success(newLang.name);
     });
   };
 

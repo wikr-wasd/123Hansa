@@ -10,27 +10,32 @@ import {
   type Listing,
 } from '../../services/listingService';
 import { isSupabaseConfigured, missingConfigMessage } from '../../lib/supabase';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Lanseringsmarknaderna. Kroatien och Bosnien finns i @hansa/core men öppnas
 // först i ett senare skede (docs/BUSINESS.md).
-const MARKETS: { code: CountryCode | 'ALL'; label: string }[] = [
-  { code: 'ALL', label: 'Alla länder' },
-  { code: 'SE', label: 'Sverige' },
-  { code: 'NO', label: 'Norge' },
-  { code: 'DK', label: 'Danmark' },
+const MARKETS: { code: CountryCode | 'ALL'; labelKey: string }[] = [
+  { code: 'ALL', labelKey: 'listings.all-countries' },
+  { code: 'SE', labelKey: 'country.SE' },
+  { code: 'NO', labelKey: 'country.NO' },
+  { code: 'DK', labelKey: 'country.DK' },
 ];
 
 const PAGE_SIZE = 12;
 
-export const DemoBadge: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <span
-    className={`inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 ring-1 ring-amber-300 ${className}`}
-  >
-    Exempelannons
-  </span>
-);
+export const DemoBadge: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const { t } = useTranslation();
+  return (
+    <span
+      className={`inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 ring-1 ring-amber-300 ${className}`}
+    >
+      {t('listings.demo-badge')}
+    </span>
+  );
+};
 
 const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
+  const { t } = useTranslation();
   const price = formatListingAmount(listing.askingPriceMinor, listing.country);
   const revenue = formatListingAmount(listing.revenueMinor, listing.country);
 
@@ -52,7 +57,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
       <dl className="space-y-1 text-sm text-gray-600">
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-          <dt className="sr-only">Plats</dt>
+          <dt className="sr-only">{t('listing.location')}</dt>
           <dd>
             {listing.region ? `${listing.region}, ` : ''}
             {listing.country}
@@ -61,27 +66,28 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
         {listing.employees !== null && (
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-            <dt className="sr-only">Anställda</dt>
-            <dd>{listing.employees} anställda</dd>
+            <dt className="sr-only">{t('listing.employees')}</dt>
+            <dd>{listing.employees} {t('listings.employees')}</dd>
           </div>
         )}
         {revenue && (
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-            <dt className="sr-only">Omsättning</dt>
-            <dd>{revenue} i omsättning</dd>
+            <dt className="sr-only">{t('listing.key-figures')}</dt>
+            <dd>{revenue} {t('listings.revenue')}</dd>
           </div>
         )}
       </dl>
 
       <p className="mt-4 border-t border-gray-100 pt-4 text-lg font-bold text-gray-900">
-        {price ?? 'Pris på begäran'}
+        {price ?? t('listings.price-on-request')}
       </p>
     </Link>
   );
 };
 
 const ListingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const query = searchParams.get('q') ?? '';
@@ -113,7 +119,7 @@ const ListingsPage: React.FC = () => {
       setListings(page.listings);
       setTotal(page.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Annonserna kunde inte hämtas');
+      setError(err instanceof Error ? err.message : t('listings.error-title'));
       setListings([]);
       setTotal(0);
     } finally {
@@ -155,7 +161,7 @@ const ListingsPage: React.FC = () => {
       setListings((current) => [...current, ...page.listings]);
       setTotal(page.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fler annonser kunde inte hämtas');
+      setError(err instanceof Error ? err.message : t('listings.error-title'));
     } finally {
       setIsLoadingMore(false);
     }
@@ -164,20 +170,15 @@ const ListingsPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Företag till salu – 123Hansa</title>
-        <meta
-          name="description"
-          content="Bläddra bland företag och affärstillgångar till salu i Sverige, Norge och Danmark."
-        />
+        <title>{`${t('listings.title')} – 123Hansa`}</title>
+        <meta name="description" content={t('listings.subtitle')} />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
         <section className="bg-white border-b border-gray-200">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">Företag till salu</h1>
-            <p className="mb-8 text-lg text-gray-600">
-              Köpare och säljare hittar varandra här och gör upp direkt med varandra.
-            </p>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">{t('listings.title')}</h1>
+            <p className="mb-8 text-lg text-gray-600">{t('listings.subtitle')}</p>
 
             <form
               className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto]"
@@ -192,21 +193,21 @@ const ListingsPage: React.FC = () => {
                   aria-hidden="true"
                 />
                 <label htmlFor="listing-search" className="sr-only">
-                  Sök bland annonser
+                  {t('listings.search-label')}
                 </label>
                 <input
                   id="listing-search"
                   type="search"
                   value={searchField}
                   onChange={(event) => setSearchField(event.target.value)}
-                  placeholder="Sök på bransch, ort eller nyckelord"
+                  placeholder={t('listings.search-placeholder')}
                   className="w-full rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label htmlFor="country-filter" className="sr-only">
-                  Land
+                  {t('listings.country-label')}
                 </label>
                 <select
                   id="country-filter"
@@ -216,7 +217,7 @@ const ListingsPage: React.FC = () => {
                 >
                   {MARKETS.map((market) => (
                     <option key={market.code} value={market.code}>
-                      {market.label}
+                      {t(market.labelKey)}
                     </option>
                   ))}
                 </select>
@@ -224,7 +225,7 @@ const ListingsPage: React.FC = () => {
 
               <div>
                 <label htmlFor="industry-filter" className="sr-only">
-                  Bransch
+                  {t('listings.industry-label')}
                 </label>
                 <select
                   id="industry-filter"
@@ -232,7 +233,7 @@ const ListingsPage: React.FC = () => {
                   onChange={(event) => updateParam('industry', event.target.value)}
                   className="w-full rounded-lg border border-gray-300 py-3 px-4 focus:border-transparent focus:ring-2 focus:ring-blue-500 md:w-56"
                 >
-                  <option value="">Alla branscher</option>
+                  <option value="">{t('listings.all-industries')}</option>
                   {industries.map((name) => (
                     <option key={name} value={name}>
                       {name}
@@ -245,7 +246,7 @@ const ListingsPage: React.FC = () => {
                 type="submit"
                 className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
               >
-                Sök
+                {t('listings.search')}
               </button>
             </form>
           </div>
@@ -255,7 +256,7 @@ const ListingsPage: React.FC = () => {
           {isLoading && (
             <div className="flex items-center justify-center gap-3 py-20 text-gray-600">
               <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-              <span>Hämtar annonser…</span>
+              <span>{t('listings.loading')}</span>
             </div>
           )}
 
@@ -263,7 +264,7 @@ const ListingsPage: React.FC = () => {
             <div className="rounded-xl border border-red-200 bg-red-50 p-6" role="alert">
               <div className="mb-2 flex items-center gap-2 text-red-800">
                 <AlertCircle className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-semibold">Annonserna kunde inte hämtas</h2>
+                <h2 className="font-semibold">{t('listings.error-title')}</h2>
               </div>
               <p className="mb-4 text-sm text-red-700">{error}</p>
               <button
@@ -271,21 +272,21 @@ const ListingsPage: React.FC = () => {
                 onClick={load}
                 className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
               >
-                Försök igen
+                {t('listings.retry')}
               </button>
             </div>
           )}
 
           {!isLoading && !error && listings.length === 0 && (
             <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">Inga annonser matchar sökningen</h2>
-              <p className="mb-6 text-gray-600">Pröva ett annat land, en annan bransch eller ett bredare sökord.</p>
+              <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('listings.empty-title')}</h2>
+              <p className="mb-6 text-gray-600">{t('listings.empty-body')}</p>
               <button
                 type="button"
                 onClick={() => setSearchParams(new URLSearchParams())}
                 className="rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50"
               >
-                Rensa filtren
+                {t('listings.clear-filters')}
               </button>
             </div>
           )}
@@ -293,7 +294,7 @@ const ListingsPage: React.FC = () => {
           {!isLoading && !error && listings.length > 0 && (
             <>
               <p className="mb-6 text-sm text-gray-600">
-                {total} {total === 1 ? 'annons' : 'annonser'}
+                {total} {total === 1 ? t('listings.count-one') : t('listings.count-many')}
               </p>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {listings.map((listing) => (
@@ -310,7 +311,7 @@ const ListingsPage: React.FC = () => {
                     className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
                   >
                     {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-                    Visa fler annonser
+                    {t('listings.load-more')}
                   </button>
                 </div>
               )}

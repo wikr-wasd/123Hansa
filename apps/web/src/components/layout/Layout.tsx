@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     to="/messages" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
                   >
-                    Meddelanden
+                    {t('messages')}
                   </Link>
                   <Link 
                     to="/dashboard" 
@@ -123,7 +123,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="mobile-menu"
-                aria-label={mobileMenuOpen ? 'Stäng meny' : 'Öppna meny'}
+                aria-label={mobileMenuOpen ? t('nav.close-menu') : t('nav.open-menu')}
                 className="rounded-lg p-2 text-nordic-gray-700 hover:bg-nordic-gray-100 hover:text-nordic-blue-600"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,7 +147,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 py-3"><LoadingSpinner size="sm" /></div>
             ) : isAuthenticated ? (
               <>
-                <Link to="/messages" className={mobileLinkClass}>Meddelanden</Link>
+                <Link to="/messages" className={mobileLinkClass}>{t('messages')}</Link>
                 <Link to="/dashboard" className={mobileLinkClass}>{t('dashboard')}</Link>
                 <button type="button" onClick={handleLogout} className={`${mobileLinkClass} w-full text-left`}>
                   {t('logout')}
