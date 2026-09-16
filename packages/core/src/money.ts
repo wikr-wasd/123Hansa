@@ -138,11 +138,24 @@ export function allocate(m: Money, parts: number): Money[] {
  * hålla den dag en valuta utan decimaler tillkommer — serbiska dinarer, som
  * systerprodukten Burp redan träffat på.
  */
-export function formatMoney(m: Money, locale: string): string {
+export interface FormatMoneyOptions {
+  /**
+   * `symbol` ger landets eget skrivsätt: "1 200,00 kr".
+   *
+   * `code` ger "1 200,00 SEK" och ska användas när belopp från flera länder
+   * visas bredvid varandra. SEK, NOK och DKK skrivs alla "kr" i sina egna
+   * locale, så i en nordisk annonslista är symbolen inte bara otydlig — den är
+   * vilseledande, eftersom kurserna skiljer sig.
+   */
+  readonly currencyDisplay?: 'symbol' | 'code';
+}
+
+export function formatMoney(m: Money, locale: string, options: FormatMoneyOptions = {}): string {
   const info = CURRENCY_INFO[m.currency];
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: m.currency,
+    currencyDisplay: options.currencyDisplay ?? 'symbol',
     minimumFractionDigits: info.decimalDigits,
     maximumFractionDigits: info.decimalDigits,
   }).format(m.amount / 10 ** info.decimalDigits);

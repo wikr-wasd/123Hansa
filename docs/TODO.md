@@ -190,9 +190,15 @@ som låtsas göra det plattformen uttryckligen inte ska göra.
       och falsk brådska är förbjudna affärsmetoder enligt EU:s konsumentregler
 - [ ] **Användarvillkoren behöver en jurist.** Avgiftsavsnittet är rättat, men
       texten i `LegalPage.tsx` är skriven utan juridisk granskning
+- [x] **Värderingsschablonen** — klart 2026-09-16. `estimateValuation()` i
+      `@hansa/core` med 13 tester, och en räknare på startsidan som visar
+      spann, valuta per land och sina egna antaganden
 - [ ] **Värderingstjänsten för 2 500 SEK** (`ValuationPage.tsx`) säljer en
-      "professionell värdering från våra experter" som inte finns. Beslut:
-      bygga den på riktigt med en partner, eller ta bort den
+      "professionell värdering från våra experter" som inte finns. Se
+      `OPEN-QUESTIONS.md` fråga 15
+- [ ] **Hämta bolagsuppgifter från officiella register** — adapter per land,
+      anrop på servern. Se `OPEN-QUESTIONS.md` fråga 14. Skrapning av
+      allabolag.se är uteslutet
 - [ ] **Demoannonsernas texter** lovar "garanterade intäkter" och
       "marknadsledande". Skrivs om när de samlas i en källa och märks
       "Exempelannons" (fas 2)

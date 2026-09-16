@@ -218,6 +218,54 @@ ett — det är en annan datamodell än en säljare med en annons.
 
 ---
 
+## 14. Datakälla för företagsuppgifter
+
+Värderingsverktyget och verifieringen av säljare behöver riktiga bolagsuppgifter:
+namn, organisationsnummer, bransch, och för värderingen omsättning och resultat.
+
+**Att skrapa allabolag.se är inte ett alternativ.** De säljer själva den datan
+via eget API, deras villkor tillåter inte automatisk insamling, och
+sammanställningen skyddas dessutom av katalogskyddet (49 § upphovsrättslagen,
+EU:s databasdirektiv). En marknadsplats vars hela strategi bygger på att följa
+reglerna kan inte börja med att bryta mot någon annans.
+
+Officiella källor per lanseringsland:
+
+| Land | Källa | Läge |
+|---|---|---|
+| NO | Brønnøysundregistrene, Enhetsregisteret + nyckeltal ur Regnskapsregisteret | Öppna data, gratis |
+| DK | CVR/Virk, officiellt API | Gratis, kräver registrering |
+| SE | Bolagsverkets API:er, SCB:s avgiftsfria företagsregister, eller licensierad leverantör (Roaring, Creditsafe, allabolag/D&B) | Kräver avtal. Årsredovisningsdata kostar oftast |
+
+**Frågan:** vilken svensk källa, och vad får den kosta per uppslag?
+
+**Konsekvens i koden:** hämtningen byggs bakom ett gränssnitt med en adapter per
+land, och anropen sker på servern — aldrig från webbläsaren, eftersom nycklar
+och anropsgränser inte hör hemma där.
+
+⚠️ **Dataskydd:** uppgifter om enskilda firmor är personuppgifter. Innan
+uppslagen börjar sparas behövs en post i `PERSONUPPGIFTER.md`.
+
+**Status:** ⬜ obesvarad
+
+---
+
+## 15. Vad ska värderingstjänsten vara?
+
+Det finns i dag två saker med samma namn:
+
+1. **Schablonen** på startsidan — `estimateValuation()` i `@hansa/core`, öppen
+   för alla, säger rakt ut att den är en schablon. Byggd 2026-09-16.
+2. **"Professionell värdering 2 500 kr"** på `/valuation` — en betaltjänst som
+   lovar en rapport från "våra experter". **Den tjänsten finns inte.**
+
+Alternativen för nummer två: bygga den med en riktig värderingspartner som
+utför arbetet, eller ta bort den. Att sälja den i befintligt skick går inte.
+
+**Status:** ⬜ obesvarad
+
+---
+
 ## 11. Sekretessavtalet inför datarummet
 
 Regel 6 i `CLAUDE.md` kräver signerat sekretessavtal innan någon ser due

@@ -72,11 +72,16 @@ function toListing(row: Partial<ListingRow>): Listing {
   };
 }
 
-/** Formaterar ett belopp i annonsens eget land, aldrig i besökarens. */
+/**
+ * Formaterar ett belopp i annonsens eget land, aldrig i besökarens.
+ *
+ * Valutakoden skrivs ut, inte symbolen: SEK, NOK och DKK heter alla "kr", och i
+ * en lista med annonser från tre länder är det vilseledande.
+ */
 export function formatListingAmount(amountMinor: number | null, country: CountryCode): string | null {
   if (amountMinor === null) return null;
   const currency = countryInfo(country).currency;
-  return formatMoney(money(amountMinor, currency), intlLocaleFor(country));
+  return formatMoney(money(amountMinor, currency), intlLocaleFor(country), { currencyDisplay: 'code' });
 }
 
 export async function fetchListings(filters: ListingFilters = {}): Promise<ListingPage> {

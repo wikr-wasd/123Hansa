@@ -85,6 +85,20 @@ describe('parseAmount', () => {
 });
 
 describe('formatMoney', () => {
+  it('skiljer nordiska valutor åt med currencyDisplay: code', () => {
+    // SEK, NOK och DKK skrivs alla "kr" med symbol. I en lista med annonser
+    // från flera länder måste koden synas, annars ser 1 200 NOK ut som 1 200 SEK.
+    const sek = formatMoney(money(120_000, 'SEK'), 'sv-SE', { currencyDisplay: 'code' });
+    const nok = formatMoney(money(120_000, 'NOK'), 'nb-NO', { currencyDisplay: 'code' });
+    expect(sek).toContain('SEK');
+    expect(nok).toContain('NOK');
+    expect(sek).not.toBe(nok);
+  });
+
+  it('visar symbolen som standard', () => {
+    expect(formatMoney(money(120_000, 'SEK'), 'sv-SE')).toContain('kr');
+  });
+
   it('visar rätt valuta per marknad', () => {
     // Intl-utdata varierar mellan Node-versioner i mellanslag och symbolplacering,
     // så testet kontrollerar siffrorna och valutan — inte tecken för tecken.

@@ -13,3 +13,4 @@ export * from './money.js';
 export * from './orgnumber.js';
 export * from './pricing.js';
 export * from './vat.js';
+export * from './valuation.js';
