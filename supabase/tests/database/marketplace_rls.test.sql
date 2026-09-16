@@ -43,7 +43,7 @@ set local role authenticated;
 set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001", "role": "authenticated"}';
 select lives_ok($$
   insert into public.organizations (id, name, country, org_number)
-  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'Testbolaget AB', 'SE', '5560000000') $$,
+  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'Testbolaget AB', 'SE', '5569876543') $$,
   'säljaren skapar en organisation');
 select is((select role::text from public.organization_members where organization_id = 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001' and user_id = 'aaaaaaaa-aaaa-4aaa-8aaa-000000000001'),
   'owner', 'skaparen blir ägare');
@@ -75,17 +75,24 @@ select throws_ok($$
   'P0001', null, 'säljaren kan inte skapa en publicerad annons');
 select throws_ok($$ update public.listings set status = 'published' where id = 'cccccccc-cccc-4ccc-8ccc-000000000001' $$,
   'P0001', null, 'säljaren kan inte publicera själv');
-select throws_ok($$ update public.listings set status = 'pending_review' where id = 'cccccccc-cccc-4ccc-8ccc-000000000001' $$,
-  'P0001', null, 'overifierad organisation kan inte skicka annons till granskning');
-reset role;
-
-update public.organizations set verified_at = now() where id = 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001';
-
-set local role authenticated;
-set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001", "role": "authenticated"}';
 select lives_ok($$ update public.listings set status = 'pending_review' where id = 'cccccccc-cccc-4ccc-8ccc-000000000001' $$,
-  'verifierad organisation skickar annonsen till granskning');
-select throws_ok($$ update public.organizations set org_number = '5569999999' where id = 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001' $$,
+  'säljaren skickar annonsen till granskning även innan organisationen är verifierad');
+
+-- Verifieringen görs av en administratör, och krävs först vid publicering.
+set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000004", "role": "authenticated"}';
+select throws_ok($$ select public.review_listing('cccccccc-cccc-4ccc-8ccc-000000000001', true) $$,
+  'P0001', null, 'en annons kan inte publiceras från en overifierad organisation');
+
+set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002", "role": "authenticated"}';
+select throws_ok($$ select public.verify_organization('bbbbbbbb-bbbb-4bbb-8bbb-000000000001') $$,
+  '42501', null, 'en vanlig användare kan inte verifiera en organisation');
+
+set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000004", "role": "authenticated"}';
+select isnt(public.verify_organization('bbbbbbbb-bbbb-4bbb-8bbb-000000000001'), null,
+  'administratören verifierar organisationen');
+
+set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001", "role": "authenticated"}';
+select throws_ok($$ update public.organizations set org_number = '5561112222' where id = 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001' $$,
   'P0001', null, 'organisationsnumret kan inte bytas efter verifiering');
 
 set local request.jwt.claims to '{"sub": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002", "role": "authenticated"}';

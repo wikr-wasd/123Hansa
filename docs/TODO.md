@@ -88,8 +88,8 @@ valuta och belopp i minsta enhet finns där.
       hämtar annonser ur Supabase och formaterar belopp med `@hansa/core`
 - [x] **Demoannonserna i en källa** — klart 2026-09-16. Sex annonser i
       `supabase/seed.sql` med `is_demo = true`, inte längre kopior i komponenter
-- [ ] **Gamla mockdata som är kvar**: dashboarden, meddelanden, notiser och
-      värderingsverktyget. Annonssidorna är klara
+- [ ] **Gamla mockdata som är kvar**: meddelanden och notiser. Annonssidorna,
+      Min sida och värderingsverktyget är klara
 - [x] ~~Bestäm vad som händer med de 30 demoannonserna.~~ Besvarat 2026-09-15:
       kvar, märkta. Se `OPEN-QUESTIONS.md`, fråga 7
 - [x] **Märk demoannonserna "Exempelannons"** — klart 2026-09-16. Märkta i
@@ -97,7 +97,12 @@ valuta och belopp i minsta enhet finns där.
       Databasen nekar dessutom intresseanmälan på demoannonser (verifierat med
       ett anrop förbi gränssnittet: 403)
 - [ ] **Inställning som stänger av demoannonserna** utan kodändring
-- [ ] **Skapa annons sparar i databasen**, inte i `localStorage`
+- [x] **Skapa annons sparar i databasen** — klart 2026-09-16. Formuläret skapar
+      organisation (med `validateOrgNumber()` mot landets algoritm) och annons,
+      och skickar den till granskning
+- [x] **Min sida på riktigt** — klart 2026-09-16. Egna annonser med status,
+      mottagna och skickade intresseanmälningar, och profil. Ersätter 2 800
+      rader mockad dashboard
 - [ ] **Meddelanden sparas i databasen**, inte i en array i minnet
 - [x] **Loading- och error-states** på annonssidorna — klart 2026-09-16
       (laddning, fel med "Försök igen", tomt resultat med "Rensa filtren")
@@ -125,8 +130,13 @@ som inte finns. Ordningen här är den som går att bygga i.
       tabellen. 61 behörighetstester gröna mot lokal Postgres 17
 - [ ] **Serverfunktion för dokumentåtkomst** — anropar `record_document_access()`
       och skapar en tidsbegränsad länk. Utan den kan loggen kringgås
-- [ ] **Serverfunktion som verifierar organisationsnummer** med
-      `validateOrgNumber()` ur `@hansa/core` och sätter `verified_at`
+- [x] **Verifiering av organisationer** — klart 2026-09-16 som
+      `verify_organization()`, anropbar av administratörer. Numret kontrolleras
+      med `validateOrgNumber()` i klienten och av granskaren
+- [ ] **Automatisera verifieringen** mot officiella register när datakällan är
+      vald (`OPEN-QUESTIONS.md` fråga 14). I dag är det ett mänskligt beslut
+- [ ] **Granskningsgränssnitt för administratörer.** `review_listing()` och
+      `verify_organization()` finns i databasen, men måste anropas manuellt
 - [ ] **Bevakningarna ska skicka något** — matchning mot nya annonser och utskick
 - [x] **Inloggning via Supabase Auth** — klart 2026-09-16. Registrering,
       inloggning och session provade i webbläsaren mot lokal databas

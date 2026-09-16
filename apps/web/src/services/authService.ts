@@ -5,8 +5,10 @@ import { supabase } from '../lib/supabase';
 // /api/auth bara svarade "Auth API endpoint is working" och testinloggningen
 // jämförde lösenord i klientkoden.
 
-export type CountryCode = 'SE' | 'NO' | 'DK';
-export type LocaleCode = 'sv' | 'no' | 'da' | 'bs' | 'en';
+// Länderna och språken definieras i @hansa/core, inte här. Två listor glider
+// isär, och då kan en profil få ett land som resten av systemet inte känner.
+export type { CountryCode, LocaleCode } from '@hansa/core';
+import type { CountryCode, LocaleCode } from '@hansa/core';
 
 export interface User {
   id: string;

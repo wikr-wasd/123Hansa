@@ -1,997 +1,496 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Building2, 
-  DollarSign, 
-  FileText, 
-  Users, 
-  MapPin, 
-  Calendar,
-  TrendingUp,
-  Phone,
-  Mail,
-  Globe,
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle,
-  Plus,
-  X
-} from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from '../../stores/authStore';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { countryInfo, parseAmount, type CountryCode } from '@hansa/core';
+import {
+  checkOrgNumber,
+  createOrganization,
+  fetchMyOrganizations,
+  organizationNumberLabel,
+  type Organization,
+} from '../../services/organizationService';
+import { createListing, submitListingForReview } from '../../services/listingService';
+
+// Annonsen sparas i databasen och skickas till granskning. Tidigare sparade den
+// här sidan i webbläsarens localStorage, där ingen annan kunde se den.
+
+const MARKETS: { code: CountryCode; label: string }[] = [
+  { code: 'SE', label: 'Sverige' },
+  { code: 'NO', label: 'Norge' },
+  { code: 'DK', label: 'Danmark' },
+];
+
+const INDUSTRIES = [
+  'IT och systemutveckling',
+  'E-handel',
+  'Konsult och tjänster',
+  'Tillverkning',
+  'Bygg och anläggning',
+  'Detaljhandel',
+  'Restaurang och café',
+  'Vård och hälsa',
+  'Transport och logistik',
+  'Fastighetsservice',
+  'Ekonomi och redovisning',
+  'Livsmedel',
+  'Annan bransch',
+];
+
+const fieldClass =
+  'w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500';
+const labelClass = 'mb-2 block text-sm font-semibold text-gray-700';
 
 const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user: authUser } = useAuthStore();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    // Grundläggande information
-    title: '',
-    category: 'companies',
-    subcategory: '',
-    industry: '',
-    description: '',
-    longDescription: '',
-    
-    // Ekonomisk information
-    askingPrice: '',
-    monthlyRevenue: '',
-    monthlyProfit: '',
-    yearlyRevenue: '',
-    yearlyProfit: '',
-    
-    // Företagsdetaljer
-    employees: '',
-    foundedYear: '',
-    businessType: 'AB',
-    website: '',
-    
-    // Lokalisering
-    location: '',
-    address: '',
-    showExactLocation: false,
-    
-    // Kontaktinformation
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-    preferredContactMethod: 'email',
-    
-    // Highlights
-    highlights: [''],
-    
-    // Avtal och villkor
-    acceptTerms: false,
-    
-    // Metadata
-    reasonForSelling: '',
-    timeframe: '',
-    negotiable: true
-  });
 
-  const [mapCoordinates, setMapCoordinates] = useState<{lat: number; lng: number} | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [organizationId, setOrganizationId] = useState<string>('new');
+  const [orgName, setOrgName] = useState('');
+  const [orgCountry, setOrgCountry] = useState<CountryCode>('SE');
+  const [orgNumber, setOrgNumber] = useState('');
+  const [orgKind, setOrgKind] = useState<'company' | 'broker'>('company');
+
+  const [title, setTitle] = useState('');
+  const [summary, setSummary] = useState('');
+  const [description, setDescription] = useState('');
+  const [industry, setIndustry] = useState(INDUSTRIES[0]);
+  const [region, setRegion] = useState('');
+  const [price, setPrice] = useState('');
+  const [revenue, setRevenue] = useState('');
+  const [employees, setEmployees] = useState('');
+  const [foundedYear, setFoundedYear] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
 
-  // Auto-save draft key for localStorage
-  const getDraftKey = () => authUser ? `listingDraft_${authUser.id}` : 'listingDraft_anonymous';
-
-  // Load draft on component mount
   useEffect(() => {
-    if (!hasLoadedDraft) {
-      const draftKey = getDraftKey();
-      const savedDraft = localStorage.getItem(draftKey);
-      
-      if (savedDraft) {
+    fetchMyOrganizations()
+      .then((orgs) => {
+        setOrganizations(orgs);
+        if (orgs.length > 0) setOrganizationId(orgs[0].id);
+      })
+      .catch((err) => setLoadError(err instanceof Error ? err.message : 'Kunde inte hämta dina organisationer'))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const selectedOrganization = organizations.find((org) => org.id === organizationId) ?? null;
+  const isNewOrganization = organizationId === 'new';
+  const country = isNewOrganization ? orgCountry : (selectedOrganization?.country ?? 'SE');
+  const currency = countryInfo(country).currency;
+
+  const orgNumberProblem = useMemo(() => {
+    if (!isNewOrganization || orgNumber.trim().length === 0) return null;
+    return checkOrgNumber(orgNumber, orgCountry);
+  }, [isNewOrganization, orgNumber, orgCountry]);
+
+  const validate = (): boolean => {
+    const next: Record<string, string> = {};
+
+    if (isNewOrganization) {
+      if (!orgName.trim()) next.orgName = 'Ange organisationens namn';
+      if (!orgNumber.trim()) {
+        next.orgNumber = `Ange ${organizationNumberLabel(orgCountry).toLowerCase()}`;
+      } else {
+        const problem = checkOrgNumber(orgNumber, orgCountry);
+        if (problem) next.orgNumber = problem;
+      }
+    }
+
+    if (title.trim().length < 3) next.title = 'Rubriken måste vara minst tre tecken';
+    if (title.trim().length > 160) next.title = 'Rubriken får vara högst 160 tecken';
+    if (!summary.trim()) next.summary = 'Skriv en kort sammanfattning';
+    if (summary.trim().length > 500) next.summary = 'Sammanfattningen får vara högst 500 tecken';
+    if (!description.trim()) next.description = 'Beskriv verksamheten';
+
+    for (const [key, value] of [
+      ['price', price],
+      ['revenue', revenue],
+    ] as const) {
+      if (value.trim()) {
         try {
-          const parsedDraft = JSON.parse(savedDraft);
-          setFormData(parsedDraft.formData || formData);
-          setCurrentStep(parsedDraft.currentStep || 1);
-          toast.success('Tidigare utkast återställt!', { duration: 3000 });
-        } catch (error) {
-          console.error('Error loading draft:', error);
+          parseAmount(value, currency);
+        } catch {
+          next[key] = `Ange ett belopp i ${currency}, till exempel 1 500 000`;
         }
       }
-      setHasLoadedDraft(true);
     }
-  }, [authUser, hasLoadedDraft]);
 
-  // Auto-save draft whenever form data changes
-  useEffect(() => {
-    if (hasLoadedDraft) {
-      const draftKey = getDraftKey();
-      const draftData = {
-        formData,
-        currentStep,
-        savedAt: new Date().toISOString()
-      };
-      
-      // Only save if there's meaningful content
-      const hasContent = formData.title || formData.description || formData.askingPrice || 
-                        formData.category !== 'companies' || formData.industry;
-      
-      if (hasContent) {
-        localStorage.setItem(draftKey, JSON.stringify(draftData));
+    if (employees.trim() && !/^\d+$/.test(employees.trim())) {
+      next.employees = 'Ange antal anställda som ett heltal';
+    }
+    if (foundedYear.trim()) {
+      const year = Number(foundedYear);
+      if (!Number.isInteger(year) || year < 1800 || year > new Date().getFullYear()) {
+        next.foundedYear = 'Ange ett rimligt årtal';
       }
     }
-  }, [formData, currentStep, hasLoadedDraft]);
 
-  // Clear draft when successfully submitted
-  const clearDraft = () => {
-    const draftKey = getDraftKey();
-    localStorage.removeItem(draftKey);
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
-  const categories = [
-    { 
-      id: 'companies', 
-      name: 'Företag & Bolag',
-      subcategories: ['aktiebolag', 'handelsbolag', 'enskild_firma', 'ekonomisk_forening'] 
-    },
-    { 
-      id: 'ecommerce', 
-      name: 'E-handel & Webshops',
-      subcategories: ['webshop', 'marketplace', 'dropshipping', 'subscription'] 
-    },
-    { 
-      id: 'domains', 
-      name: 'Domäner & Webbplatser',
-      subcategories: ['premium_domain', 'developed_site', 'parked_domain'] 
-    },
-    { 
-      id: 'content', 
-      name: 'Content & Media',
-      subcategories: ['blog', 'youtube', 'podcast', 'newsletter'] 
-    },
-    { 
-      id: 'social', 
-      name: 'Social Media',
-      subcategories: ['instagram', 'tiktok', 'facebook', 'linkedin'] 
-    },
-    { 
-      id: 'affiliate', 
-      name: 'Affiliate & Passive Income',
-      subcategories: ['review_site', 'comparison_site', 'coupon_site', 'lead_generation'] 
-    }
-  ];
-
-  const businessTypes = [
-    { id: 'AB', name: 'Aktiebolag (AB)' },
-    { id: 'HB', name: 'Handelsbolag (HB)' },
-    { id: 'KB', name: 'Kommanditbolag (KB)' },
-    { id: 'EF', name: 'Enskild firma' },
-    { id: 'EK', name: 'Ekonomisk förening' },
-    { id: 'OTHER', name: 'Annat' }
-  ];
-
-  const timeframes = [
-    { id: 'immediate', name: 'Så snart som möjligt' },
-    { id: '3months', name: 'Inom 3 månader' },
-    { id: '6months', name: 'Inom 6 månader' },
-    { id: '12months', name: 'Inom 12 månader' },
-    { id: 'flexible', name: 'Flexibel tidsram' }
-  ];
-
-  const totalSteps = 4;
-
-  // Geocoding function for address to coordinates
-  const geocodeAddress = async (address: string) => {
-    if (!address.trim()) return;
-    
-    try {
-      // Using a simple geocoding service (in production, use Google Maps API)
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Sweden')}&limit=1`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        setMapCoordinates({
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        });
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-    }
-  };
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear errors when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-
-    // Geocode address when location changes
-    if (field === 'address' && value.length > 5) {
-      geocodeAddress(value);
-    }
-  };
-
-  const addHighlight = () => {
-    setFormData(prev => ({
-      ...prev,
-      highlights: [...prev.highlights, '']
-    }));
-  };
-
-  const updateHighlight = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      highlights: prev.highlights.map((h, i) => i === index ? value : h)
-    }));
-  };
-
-  const removeHighlight = (index: number) => {
-    if (formData.highlights.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        highlights: prev.highlights.filter((_, i) => i !== index)
-      }));
-    }
-  };
-
-  const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    switch (step) {
-      case 1:
-        if (!formData.title.trim()) newErrors.title = 'Företagsnamn är obligatoriskt';
-        if (!formData.category) newErrors.category = 'Kategori är obligatorisk';
-        if (!formData.description.trim()) newErrors.description = 'Beskrivning är obligatorisk';
-        if (!formData.askingPrice || parseFloat(formData.askingPrice) <= 0) {
-          newErrors.askingPrice = 'Giltigt pris är obligatoriskt';
-        }
-        break;
-      
-      case 2:
-        if (!formData.employees) newErrors.employees = 'Antal anställda är obligatoriskt';
-        if (!formData.foundedYear) newErrors.foundedYear = 'Grundat år är obligatoriskt';
-        break;
-
-      case 3:
-        if (!formData.contactName.trim()) newErrors.contactName = 'Kontaktnamn är obligatoriskt';
-        if (!formData.contactEmail.trim()) newErrors.contactEmail = 'E-post är obligatorisk';
-        if (formData.contactEmail && !/\S+@\S+\.\S+/.test(formData.contactEmail)) {
-          newErrors.contactEmail = 'Giltig e-post krävs';
-        }
-        break;
-
-      case 4:
-        if (!formData.acceptTerms) newErrors.acceptTerms = 'Du måste acceptera villkoren';
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
-    if (!authUser) {
-      toast.error('Du måste vara inloggad för att skapa annonser');
-      navigate('/simple-test-login');
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validate()) {
+      toast.error('Något saknas i formuläret');
       return;
     }
 
-    setIsSubmitting(true);
-    
+    setIsSaving(true);
     try {
-      const listingId = `listing_${authUser.id}_${Date.now()}`;
-      const submissionData = {
-        id: listingId,
-        ...formData,
-        highlights: formData.highlights.filter(h => h.trim() !== ''),
-        coordinates: mapCoordinates,
-        submittedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        userId: authUser.id,
-        status: 'active',
-        views: 0,
-        favoriteCount: 0,
-        inquiryCount: 0,
-        price: parseInt(formData.askingPrice) || 0,
-        sector: formData.industry || 'Annat',
-        location: {
-          city: formData.city || 'Sverige',
-          region: formData.city || 'Sverige', 
-          country: 'Sweden'
-        },
-        financials: {
-          revenue: parseInt(formData.yearlyRevenue) || 0,
-          ebitda: parseInt(formData.yearlyProfit) || 0,
-          employees: parseInt(formData.employees) || 1,
-          yearEstablished: parseInt(formData.foundedYear) || new Date().getFullYear()
-        },
-        seller: {
-          name: `${authUser.firstName} ${authUser.lastName}`,
-          verified: authUser.isEmailVerified,
-          rating: 4.5,
-          totalTransactions: 0
-        },
-        sellerId: authUser.id,
-        category: formData.category,
-        description: formData.description,
-        featured: false,
-        premium: false,
-        images: formData.images?.length > 0 ? formData.images : [
-          'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop'
-        ],
-        features: formData.highlights.filter(h => h.trim() !== '').slice(0, 6),
-        listedAt: new Date(),
-        updatedAt: new Date()
-      };
+      let orgId = organizationId;
+      if (isNewOrganization) {
+        const created = await createOrganization({
+          name: orgName,
+          country: orgCountry,
+          orgNumber,
+          kind: orgKind,
+        });
+        orgId = created.id;
+        setOrganizations((current) => [...current, created]);
+      }
 
-      // Save to localStorage
-      const existingListings = JSON.parse(localStorage.getItem(`userListings_${authUser.id}`) || '[]');
-      const updatedListings = [...existingListings, submissionData];
-      localStorage.setItem(`userListings_${authUser.id}`, JSON.stringify(updatedListings));
-
-      // Clear the draft since listing was successfully created
-      clearDraft();
-
-      toast.success('Annonsen är sparad');
-      navigate('/dashboard', { 
-        state: { 
-          message: `Annons "${formData.title}" har skapats framgångsrikt!`,
-          activeTab: 'listings'
-        }
+      const listingId = await createListing({
+        organizationId: orgId,
+        country,
+        title,
+        summary,
+        description,
+        industry,
+        region,
+        askingPriceMinor: price.trim() ? parseAmount(price, currency).amount : null,
+        revenueMinor: revenue.trim() ? parseAmount(revenue, currency).amount : null,
+        employees: employees.trim() ? Number(employees) : null,
+        foundedYear: foundedYear.trim() ? Number(foundedYear) : null,
       });
-    } catch (error) {
-      console.error('Error creating listing:', error);
-      toast.error('Kunde inte skapa annons. Försök igen.');
+
+      await submitListingForReview(listingId);
+
+      toast.success('Annonsen är inskickad för granskning');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Annonsen kunde inte sparas');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
-  const getCurrentCategory = () => {
-    return categories.find(cat => cat.id === formData.category);
-  };
-
-  const renderGoogleMap = () => {
-    if (!mapCoordinates || !formData.showExactLocation) return null;
-
+  if (isLoading) {
     return (
-      <div className="mt-4">
-        <div className="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600 text-sm">Karta kommer att visas här</p>
-            <p className="text-xs text-gray-500">
-              Lat: {mapCoordinates.lat.toFixed(4)}, Lng: {mapCoordinates.lng.toFixed(4)}
-            </p>
-          </div>
-        </div>
+      <div className="flex min-h-screen items-center justify-center gap-3 text-gray-600">
+        <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+        <span>Hämtar dina uppgifter…</span>
       </div>
     );
-  };
+  }
 
   return (
     <>
       <Helmet>
-        <title>Sälj ditt företag - 123Hansa</title>
-        <meta name="description" content="Skapa en annons för ditt företag på 123Hansa, marknadsplatsen för företagsaffärer." />
+        <title>Lägg upp en annons – 123Hansa</title>
+        <meta name="description" content="Lägg upp ditt företag till salu på 123Hansa." />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Sälj ditt företag
-              </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Skapa en professionell annons med vår steg-för-steg guide
+      <div className="min-h-screen bg-gray-50 py-10">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Lägg upp en annons</h1>
+          <p className="mb-8 text-gray-600">
+            Annonsen granskas innan den publiceras. Du väljer själv vilka intresserade köpare du går
+            vidare med — 123Hansa är inte part i affären.
+          </p>
+
+          {loadError && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+              {loadError}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <section className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">Säljare</h2>
+
+              <label htmlFor="organization" className={labelClass}>
+                Organisation
+              </label>
+              <select
+                id="organization"
+                value={organizationId}
+                onChange={(event) => setOrganizationId(event.target.value)}
+                className={`${fieldClass} mb-4`}
+              >
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name} ({org.orgNumber}, {org.country})
+                  </option>
+                ))}
+                <option value="new">+ Ny organisation</option>
+              </select>
+
+              {isNewOrganization ? (
+                <div className="space-y-4 rounded-lg bg-gray-50 p-4">
+                  <div>
+                    <label htmlFor="org-name" className={labelClass}>
+                      Namn *
+                    </label>
+                    <input
+                      id="org-name"
+                      value={orgName}
+                      onChange={(event) => setOrgName(event.target.value)}
+                      className={fieldClass}
+                      placeholder="Exempel AB"
+                    />
+                    {errors.orgName && <p className="mt-1 text-sm text-red-600">{errors.orgName}</p>}
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="org-country" className={labelClass}>
+                        Land *
+                      </label>
+                      <select
+                        id="org-country"
+                        value={orgCountry}
+                        onChange={(event) => setOrgCountry(event.target.value as CountryCode)}
+                        className={fieldClass}
+                      >
+                        {MARKETS.map((market) => (
+                          <option key={market.code} value={market.code}>
+                            {market.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="org-number" className={labelClass}>
+                        {organizationNumberLabel(orgCountry)} *
+                      </label>
+                      <input
+                        id="org-number"
+                        value={orgNumber}
+                        onChange={(event) => setOrgNumber(event.target.value)}
+                        className={fieldClass}
+                        placeholder={orgCountry === 'DK' ? '12345674' : '556677-8899'}
+                      />
+                      {(errors.orgNumber || orgNumberProblem) && (
+                        <p className="mt-1 text-sm text-red-600">{errors.orgNumber ?? orgNumberProblem}</p>
+                      )}
+                      {!errors.orgNumber && !orgNumberProblem && orgNumber.trim() && (
+                        <p className="mt-1 flex items-center gap-1 text-sm text-green-700">
+                          <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                          Numret har rätt kontrollsiffra
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="org-kind" className={labelClass}>
+                      Typ
+                    </label>
+                    <select
+                      id="org-kind"
+                      value={orgKind}
+                      onChange={(event) => setOrgKind(event.target.value as 'company' | 'broker')}
+                      className={fieldClass}
+                    >
+                      <option value="company">Bolag som säljer sin egen verksamhet</option>
+                      <option value="broker">Mäklare eller rådgivare som säljer åt andra</option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                selectedOrganization && (
+                  <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
+                    {selectedOrganization.verifiedAt ? (
+                      <span className="flex items-center gap-2 text-green-700">
+                        <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                        Verifierad organisation
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2 text-amber-700">
+                        <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                        Organisationen är inte verifierad än. Annonsen kan skickas in, men publiceras
+                        först när vi kontrollerat uppgifterna.
+                      </span>
+                    )}
+                  </p>
+                )
+              )}
+            </section>
+
+            <section className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">Om verksamheten</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="title" className={labelClass}>
+                    Rubrik *
+                  </label>
+                  <input
+                    id="title"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    className={fieldClass}
+                    placeholder="Etablerat konsultbolag i Göteborg"
+                  />
+                  {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="summary" className={labelClass}>
+                    Kort sammanfattning *
+                  </label>
+                  <input
+                    id="summary"
+                    value={summary}
+                    onChange={(event) => setSummary(event.target.value)}
+                    className={fieldClass}
+                    placeholder="Tolv anställda, långa kundrelationer, ägaren går i pension."
+                    maxLength={500}
+                  />
+                  {errors.summary && <p className="mt-1 text-sm text-red-600">{errors.summary}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="description" className={labelClass}>
+                    Beskrivning *
+                  </label>
+                  <textarea
+                    id="description"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    rows={8}
+                    maxLength={20000}
+                    className={fieldClass}
+                    placeholder="Beskriv verksamheten, kunderna, personalen och varför den säljs. Känsliga uppgifter delar du senare, med köpare du valt."
+                  />
+                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="industry" className={labelClass}>
+                      Bransch *
+                    </label>
+                    <select
+                      id="industry"
+                      value={industry}
+                      onChange={(event) => setIndustry(event.target.value)}
+                      className={fieldClass}
+                    >
+                      {INDUSTRIES.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="region" className={labelClass}>
+                      Ort eller region
+                    </label>
+                    <input
+                      id="region"
+                      value={region}
+                      onChange={(event) => setRegion(event.target.value)}
+                      className={fieldClass}
+                      placeholder="Göteborg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-lg font-semibold text-gray-900">Siffror</h2>
+              <p className="mb-4 text-sm text-gray-600">
+                Beloppen anges i {currency}, som följer av organisationens land. Lämna priset tomt om
+                du hellre skriver "pris på begäran".
               </p>
-            </div>
-          </div>
-        </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {/* Progress Bar */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-700">Steg {currentStep} av {totalSteps}</span>
-              <span className="text-sm text-gray-500">{Math.round((currentStep / totalSteps) * 100)}% klart</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-              ></div>
-            </div>
-            
-            {/* Step indicators */}
-            <div className="flex justify-between mt-4">
-              {[1, 2, 3, 4].map((step) => (
-                <div key={step} className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step <= currentStep 
-                      ? 'bg-emerald-500 text-white' 
-                      : 'bg-gray-200 text-gray-500'
-                  }`}>
-                    {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
-                  </div>
-                  <span className="text-xs text-gray-500 mt-1">
-                    {step === 1 && 'Grundinfo'}
-                    {step === 2 && 'Detaljer'}
-                    {step === 3 && 'Kontakt'}
-                    {step === 4 && 'Granska'}
-                  </span>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="price" className={labelClass}>
+                    Utgångspris ({currency})
+                  </label>
+                  <input
+                    id="price"
+                    inputMode="decimal"
+                    value={price}
+                    onChange={(event) => setPrice(event.target.value)}
+                    className={fieldClass}
+                    placeholder="2 500 000"
+                  />
+                  {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Form */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                
-                {/* Step 1: Grundläggande Information */}
-                {currentStep === 1 && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Grundläggande information</h2>
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Företagsnamn *
-                        </label>
-                        <div className="relative">
-                          <Building2 className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                          <input
-                            type="text"
-                            value={formData.title}
-                            onChange={(e) => handleInputChange('title', e.target.value)}
-                            className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                              errors.title ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                            placeholder="t.ex. TechStartup AB"
-                          />
-                        </div>
-                        {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
-                      </div>
+                <div>
+                  <label htmlFor="revenue" className={labelClass}>
+                    Årsomsättning ({currency})
+                  </label>
+                  <input
+                    id="revenue"
+                    inputMode="decimal"
+                    value={revenue}
+                    onChange={(event) => setRevenue(event.target.value)}
+                    className={fieldClass}
+                    placeholder="8 000 000"
+                  />
+                  {errors.revenue && <p className="mt-1 text-sm text-red-600">{errors.revenue}</p>}
+                </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Kategori *
-                          </label>
-                          <select
-                            value={formData.category}
-                            onChange={(e) => handleInputChange('category', e.target.value)}
-                            className={`w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                              errors.category ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                          >
-                            {categories.map(cat => (
-                              <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                          </select>
-                          {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Underkategori
-                          </label>
-                          <select
-                            value={formData.subcategory}
-                            onChange={(e) => handleInputChange('subcategory', e.target.value)}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                          >
-                            <option value="">Välj underkategori</option>
-                            {getCurrentCategory()?.subcategories.map(sub => (
-                              <option key={sub} value={sub}>{sub.replace('_', ' ')}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                <div>
+                  <label htmlFor="employees" className={labelClass}>
+                    Antal anställda
+                  </label>
+                  <input
+                    id="employees"
+                    inputMode="numeric"
+                    value={employees}
+                    onChange={(event) => setEmployees(event.target.value)}
+                    className={fieldClass}
+                    placeholder="12"
+                  />
+                  {errors.employees && <p className="mt-1 text-sm text-red-600">{errors.employees}</p>}
+                </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Bransch
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.industry}
-                          onChange={(e) => handleInputChange('industry', e.target.value)}
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                          placeholder="t.ex. Fintech, E-handel, Konsulting"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Utropspris (SEK) *
-                        </label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                          <input
-                            type="number"
-                            value={formData.askingPrice}
-                            onChange={(e) => handleInputChange('askingPrice', e.target.value)}
-                            className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                              errors.askingPrice ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                            placeholder="5000000"
-                          />
-                        </div>
-                        {errors.askingPrice && <p className="mt-1 text-sm text-red-600">{errors.askingPrice}</p>}
-                        
-                        <div className="mt-2 flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={formData.negotiable}
-                            onChange={(e) => handleInputChange('negotiable', e.target.checked)}
-                            className="mr-2"
-                          />
-                          <span className="text-sm text-gray-600">Pris kan förhandlas</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Kort beskrivning *
-                        </label>
-                        <div className="relative">
-                          <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                          <textarea
-                            value={formData.description}
-                            onChange={(e) => handleInputChange('description', e.target.value)}
-                            rows={4}
-                            className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                              errors.description ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                            placeholder="Beskriv ditt företag kortfattat (max 300 tecken)..."
-                            maxLength={300}
-                          />
-                        </div>
-                        {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
-                        <p className="mt-1 text-xs text-gray-500">
-                          {formData.description.length}/300 tecken
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Företagsdetaljer */}
-                {currentStep === 2 && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Företagsdetaljer</h2>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Antal anställda *
-                          </label>
-                          <div className="relative">
-                            <Users className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              value={formData.employees}
-                              onChange={(e) => handleInputChange('employees', e.target.value)}
-                              className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                                errors.employees ? 'border-red-500' : 'border-gray-300'
-                              }`}
-                              placeholder="25"
-                              min="0"
-                            />
-                          </div>
-                          {errors.employees && <p className="mt-1 text-sm text-red-600">{errors.employees}</p>}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Grundat år *
-                          </label>
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              value={formData.foundedYear}
-                              onChange={(e) => handleInputChange('foundedYear', e.target.value)}
-                              className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                                errors.foundedYear ? 'border-red-500' : 'border-gray-300'
-                              }`}
-                              placeholder="2015"
-                              min="1900"
-                              max={new Date().getFullYear()}
-                            />
-                          </div>
-                          {errors.foundedYear && <p className="mt-1 text-sm text-red-600">{errors.foundedYear}</p>}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Företagsform
-                          </label>
-                          <select
-                            value={formData.businessType}
-                            onChange={(e) => handleInputChange('businessType', e.target.value)}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                          >
-                            {businessTypes.map(type => (
-                              <option key={type.id} value={type.id}>{type.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Webbsida
-                        </label>
-                        <div className="relative">
-                          <Globe className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                          <input
-                            type="url"
-                            value={formData.website}
-                            onChange={(e) => handleInputChange('website', e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                            placeholder="https://www.dittforetag.se"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Månadsomsättning (SEK)
-                          </label>
-                          <div className="relative">
-                            <TrendingUp className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              value={formData.monthlyRevenue}
-                              onChange={(e) => handleInputChange('monthlyRevenue', e.target.value)}
-                              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                              placeholder="500000"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Månadsvinst (SEK)
-                          </label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              value={formData.monthlyProfit}
-                              onChange={(e) => handleInputChange('monthlyProfit', e.target.value)}
-                              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                              placeholder="150000"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Detaljerad beskrivning
-                        </label>
-                        <textarea
-                          value={formData.longDescription}
-                          onChange={(e) => handleInputChange('longDescription', e.target.value)}
-                          rows={6}
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                          placeholder="Beskriv företaget i detalj - historia, affärsmodell, framtidsutsikter..."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Företagets styrkor och highlights
-                        </label>
-                        <div className="space-y-3">
-                          {formData.highlights.map((highlight, index) => (
-                            <div key={index} className="flex items-center space-x-2">
-                              <input
-                                type="text"
-                                value={highlight}
-                                onChange={(e) => updateHighlight(index, e.target.value)}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                                placeholder="t.ex. Stark tillväxt 300% årligen"
-                              />
-                              {formData.highlights.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeHighlight(index)}
-                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={addHighlight}
-                            className="flex items-center text-emerald-600 hover:text-emerald-700"
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Lägg till highlight
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Anledning till försäljning
-                        </label>
-                        <select
-                          value={formData.reasonForSelling}
-                          onChange={(e) => handleInputChange('reasonForSelling', e.target.value)}
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                        >
-                          <option value="">Välj anledning</option>
-                          <option value="retirement">Pension</option>
-                          <option value="new_venture">Nytt projekt</option>
-                          <option value="relocation">Flytt</option>
-                          <option value="health">Hälsoskäl</option>
-                          <option value="partnership">Partnerskap</option>
-                          <option value="other">Annat</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Önskad tidsram för försäljning
-                        </label>
-                        <select
-                          value={formData.timeframe}
-                          onChange={(e) => handleInputChange('timeframe', e.target.value)}
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                        >
-                          {timeframes.map(tf => (
-                            <option key={tf.id} value={tf.id}>{tf.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Lokalisering och Kontakt */}
-                {currentStep === 3 && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Lokalisering och kontakt</h2>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Stad/Ort
-                          </label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              value={formData.location}
-                              onChange={(e) => handleInputChange('location', e.target.value)}
-                              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                              placeholder="Stockholm"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Fullständig adress (valfritt)
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.address}
-                            onChange={(e) => handleInputChange('address', e.target.value)}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                            placeholder="Storgatan 1, 111 22 Stockholm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.showExactLocation}
-                          onChange={(e) => handleInputChange('showExactLocation', e.target.checked)}
-                          className="mr-3"
-                        />
-                        <span className="text-sm text-gray-700">
-                          Visa exakt plats på karta (rekommenderas för fysiska verksamheter)
-                        </span>
-                      </div>
-
-                      {renderGoogleMap()}
-
-                      <div className="border-t border-gray-200 pt-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Kontaktinformation</h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Kontaktperson *
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.contactName}
-                              onChange={(e) => handleInputChange('contactName', e.target.value)}
-                              className={`w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                                errors.contactName ? 'border-red-500' : 'border-gray-300'
-                              }`}
-                              placeholder="Ditt namn"
-                            />
-                            {errors.contactName && <p className="mt-1 text-sm text-red-600">{errors.contactName}</p>}
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Föredragen kontaktmetod
-                            </label>
-                            <select
-                              value={formData.preferredContactMethod}
-                              onChange={(e) => handleInputChange('preferredContactMethod', e.target.value)}
-                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                            >
-                              <option value="email">E-post</option>
-                              <option value="phone">Telefon</option>
-                              <option value="both">Både e-post och telefon</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              E-post *
-                            </label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                              <input
-                                type="email"
-                                value={formData.contactEmail}
-                                onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 ${
-                                  errors.contactEmail ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                                placeholder="din@email.se"
-                              />
-                            </div>
-                            {errors.contactEmail && <p className="mt-1 text-sm text-red-600">{errors.contactEmail}</p>}
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Telefon
-                            </label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                              <input
-                                type="tel"
-                                value={formData.contactPhone}
-                                onChange={(e) => handleInputChange('contactPhone', e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                                placeholder="+46 70 123 45 67"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 4: Granska och Skicka */}
-                {currentStep === 4 && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Granska och skicka</h2>
-                    <div className="space-y-6">
-                      {/* Summary */}
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h3 className="font-semibold text-gray-900 mb-4">Sammanfattning av din annons</h3>
-                        <div className="space-y-3 text-sm">
-                          <div><strong>Företag:</strong> {formData.title}</div>
-                          <div><strong>Kategori:</strong> {categories.find(c => c.id === formData.category)?.name}</div>
-                          <div><strong>Pris:</strong> {parseInt(formData.askingPrice).toLocaleString('sv-SE')} SEK</div>
-                          <div><strong>Anställda:</strong> {formData.employees}</div>
-                          <div><strong>Plats:</strong> {formData.location}</div>
-                          <div><strong>Kontakt:</strong> {formData.contactName} ({formData.contactEmail})</div>
-                        </div>
-                      </div>
-
-                      {/* Terms */}
-                      <div className="flex items-start">
-                        <input
-                          type="checkbox"
-                          checked={formData.acceptTerms}
-                          onChange={(e) => handleInputChange('acceptTerms', e.target.checked)}
-                          className="mt-1 mr-3"
-                        />
-                        <p className="text-sm text-gray-600">
-                          Jag accepterar 123Hansas användarvillkor och förstår att 123Hansa inte är part i affären.
-                          Jag intygar att all information är korrekt och att jag har rätt att sälja företaget.
-                        </p>
-                      </div>
-                      {errors.acceptTerms && <p className="mt-1 text-sm text-red-600">{errors.acceptTerms}</p>}
-                    </div>
-                  </div>
-                )}
-
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className="flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Föregående
-                  </button>
-
-                  {currentStep < totalSteps ? (
-                    <button
-                      type="button"
-                      onClick={nextStep}
-                      className="flex items-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200"
-                    >
-                      Nästa
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={isSubmitting}
-                      className="flex items-center px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 transition-all duration-200"
-                    >
-                      {isSubmitting ? 'Skickar...' : 'Publicera annons'}
-                    </button>
-                  )}
+                <div>
+                  <label htmlFor="founded" className={labelClass}>
+                    Grundat år
+                  </label>
+                  <input
+                    id="founded"
+                    inputMode="numeric"
+                    value={foundedYear}
+                    onChange={(event) => setFoundedYear(event.target.value)}
+                    className={fieldClass}
+                    placeholder="2009"
+                  />
+                  {errors.foundedYear && <p className="mt-1 text-sm text-red-600">{errors.foundedYear}</p>}
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Gränsen mot förmedling — se docs/BUSINESS.md */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h3 className="font-semibold text-blue-900 mb-4">Så fungerar 123Hansa</h3>
-                <ul className="space-y-3 text-sm text-blue-800">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
-                    <span>123Hansa är en marknadsplats. Vi visar din annons för köpare som söker bolag som ditt.</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
-                    <span>Intresserade köpare kontaktar dig via plattformen. Du väljer själv vem du går vidare med.</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-blue-600" />
-                    <span>Förhandling, avtal och betalning sköter du och köparen direkt, gärna med egna rådgivare. 123Hansa är inte part i affären och tar ingen provision på den.</span>
-                  </li>
-                </ul>
-              </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-gray-600">
+                Annonsen granskas innan den publiceras. Du kan följa den under Min sida.
+              </p>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+              >
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                Skicka till granskning
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </>
