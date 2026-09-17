@@ -1,95 +1,28 @@
-# Development files
-*.log
-*.env.local
-*.env.development
-.DS_Store
-Thumbs.db
+# Vad Vercel inte behöver för att bygga webben.
+#
+# Listan var tidigare full av filer som inte finns längre — 30 MD-filer,
+# demoservrar och tre parallella vercel-konfigurationer. De togs bort ur repot
+# 2026-09-17.
 
-# Node modules (will be installed)
 node_modules/
 apps/*/node_modules/
 packages/*/node_modules/
 
-# Build artifacts (keep source files)
+# Byggartefakter
 apps/web/dist/
-apps/api/dist/
 *.tsbuildinfo
-
-# Development and testing
 apps/web/coverage/
-apps/api/coverage/
-.nyc_output/
-.coverage/
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS files
+# Lokalt
+*.log
+.env
+.env.*
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Local development
-apps/api/prisma/dev.db*
-apps/api/server.log
-apps/api/vite.log
-demo-server.log
-server.log
+# Databasen driftsätts med Supabase CLI, inte av Vercel
+supabase/
 
-# Docker files
-docker-compose.yml
-docker-compose.*.yml
-Dockerfile*
-.dockerignore
-
-# Documentation (keep essential files, exclude heavy docs)
-ANALYTICS_INTELLIGENCE_SETUP.md
-BEGINNER_DEPLOYMENT_GUIDE.md
-CLOUD_LÖSNING.md
-COMPREHENSIVE_DEMO_GUIDE.md
-DEMO_STARTUP_GUIDE.md
-DEPLOYMENT_*.md
-SETUP_*.md
-TEST_*.md
-SESSION_*.md
-SOCIAL_AUTH_*.md
-SUPABASE_*.md
-TESTING_*.md
-TROUBLESHOOTING_*.md
-
-# Test files
-apps/*/test/
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
-
-# Backup and temporary files
-*.backup.*
-*.bak
-*.tmp
-
-# Specific admin and demo exclusions (but keep apps/web!)
-apps/admin/
-test-*.html
-demo-server.js
-enhanced-demo-server.js
-simple-server.js
-test-server.js
-
-# Explicitly keep apps/web (should not be needed, but adding for clarity)
-!apps/web/
-
-# Keep backup directory structure
-!apps-backup/
-!apps-backup/web/
-
-# Keep symbolic link
-!web
+# Dokumentationen behövs inte i bygget
+docs/
+*.md

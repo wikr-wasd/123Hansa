@@ -35,17 +35,20 @@ fungerar i appen — inte när koden är skriven. Se `TESTING.md`.
 - [x] Rätta eslint-configen: `plugin:@typescript-eslint/recommended`, och bort
       med `prettier`-plugin som inte är installerat i något workspace
 - [x] `--passWithNoTests` på web och api. `npm run test` går igenom nu
-- [ ] **Åtgärda de 722 typfelen i `apps/web` och `apps/api`.** 273 av dem är
-      oanvända variabler (TS6133). Ta bort `continue-on-error` på
-      `Typkontroll (ärvd kod)` i `.github/workflows/ci.yml` när de är borta
+- [ ] **Åtgärda de sista 50 typfelen i `apps/web`.** Var 722 i hela repot
+      2026-09-05. `apps/api` är borta, och webbens egna gick från 395 till 50.
+      Ta bort `continue-on-error` på `Typkontroll (ärvd kod)` i
+      `.github/workflows/ci.yml` när de är borta
 - [ ] **Gör linten ren** — api 18 fel/459 varningar, web 33 fel/763 varningar.
       Ta bort `continue-on-error` på lint-steget när det är gjort
 - [ ] **Bestäm om prettier ska in.** `.prettierrc` finns men paketet är inte
       installerat någonstans. Antingen installera det eller ta bort filen
-- [ ] **Städa rotens 30 kvarglömda MD-filer.** 13 av dem påstår att projektet är
-      produktionsredo. Se avsnittet längst ned
-- [ ] **Städa rotens skalskript och demoservrar** — `build-*.sh`, `demo-server.js`,
-      `simple-server.js`, `vercel.*.json` i tre varianter, `test-*.html`
+- [x] **Rotens MD-filer städade** — klart 2026-09-17. 25 borttagna; kvar är
+      `README.md`, `CLAUDE.md` och `CONTRIBUTING.md`
+- [x] **Rotens skalskript och demoservrar städade** — klart 2026-09-17. 33
+      filer borta: `build-*.sh`, `vercel-*.sh`, tre `vercel.*.json`,
+      demoservrarna, `test-*.html`, `scripts/` och Docker-filerna för
+      självhostning
 
 ---
 
@@ -149,7 +152,10 @@ som inte finns. Ordningen här är den som går att bygga i.
       inloggning och session provade i webbläsaren mot lokal databas
 - [ ] **Ta bort `apps/web/api/`** — `auth.ts`, `listings.ts` och `messages.ts`
       är skal med mockdata som inte längre används av webben
-- [ ] **Avveckla `apps/api`** när det som behövs är flyttat
+- [x] **`apps/api` avvecklat** — klart 2026-09-17. 81 filer Express-kod som
+      aldrig driftsattes, och som ensam stod för 319 av repots typfel
+- [x] **`apps/web/api` borttaget** — mockade serverfunktioner som webben inte
+      längre anropade. `vercel.json` har inget functions-block kvar
 - [ ] **Samla valideringen i Zod-scheman** som delas mellan webben och
       serverfunktionerna
 

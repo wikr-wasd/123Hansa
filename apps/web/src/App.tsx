@@ -20,7 +20,6 @@ const CreateListingPreview = lazy(() => import('./pages/listings/CreateListingPr
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
-const ProfessionalServicesDemo = lazy(() => import('./pages/ProfessionalServicesDemo'));
 const HelpPage = lazy(() => import('./pages/footer/HelpPage'));
 const ContactPage = lazy(() => import('./pages/footer/ContactPage'));
 const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
@@ -68,7 +67,6 @@ function App() {
             <Route path="/verify-email" element={<EmailVerificationPage />} />
             <Route path="/listings" element={<ListingsPage />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/professional-services" element={<ProfessionalServicesDemo />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/legal" element={<LegalPage />} />
