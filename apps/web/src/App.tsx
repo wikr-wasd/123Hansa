@@ -16,7 +16,6 @@ const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const ListingsPage = lazy(() => import('./pages/listings/ListingsPage'));
 const ListingDetailPage = lazy(() => import('./pages/listings/ListingDetailPage'));
 const CreateListingPage = lazy(() => import('./pages/listings/CreateListingPage'));
-const CreateListingPreview = lazy(() => import('./pages/listings/CreateListingPreview'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
@@ -80,7 +79,6 @@ function App() {
                 <CreateListingPage />
               </ProtectedRoute>
             } />
-            <Route path="/create-listing-preview" element={<CreateListingPreview />} />
             
             {/* Granskning — behörigheten kontrolleras i sidan och i databasen */}
             <Route path="/admin/review" element={

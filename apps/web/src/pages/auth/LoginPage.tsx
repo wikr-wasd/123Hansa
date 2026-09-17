@@ -1,199 +1,130 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import SocialAuthButtons from '../../components/auth/SocialAuthButtons';
-import { EmailInput } from '../../components/forms/EmailInput';
-import { useEmailValidation } from '../../hooks/useEmailValidation';
+import { useTranslation } from '../../hooks/useTranslation';
+
+// Inloggning mot Supabase Auth. Sidan hade tidigare knappar för Google,
+// LinkedIn, Microsoft och Facebook som inte loggade in någon: de väntade två
+// sekunder, skrev en påhittad token i localStorage och sa "Inloggad med
+// google!". De är borta. Supabase stöder riktiga OAuth-leverantörer den dag de
+// sätts upp med egna nycklar.
+
+interface LocationState {
+  from?: string;
+}
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading } = useAuthStore();
-  const { email, emailError, isEmailValid, setEmail } = useEmailValidation();
-  
-  const [formData, setFormData] = useState({
-    password: '',
-    rememberMe: false,
-  });
-  
+  const { t } = useTranslation();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+  const from = (location.state as LocationState | null)?.from ?? '/dashboard';
+
+  const validate = (): boolean => {
+    const next: Record<string, string> = {};
+    if (!email.trim()) next.email = t('auth.error.email-required');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = t('auth.error.email-invalid');
+    if (!password) next.password = t('auth.error.password-required');
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    // Använd den nya striktare e-postvalideringen
-    if (!email) {
-      newErrors.email = 'E-postadress krävs';
-    } else if (!email.includes('@')) {
-      newErrors.email = 'E-postadressen måste innehålla @ symbol';
-    } else if (emailError) {
-      newErrors.email = emailError;
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Lösenord är obligatoriskt';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validate()) return;
 
     try {
-      await login({ email, password: formData.password, rememberMe: formData.rememberMe });
-      navigate('/dashboard');
-    } catch (error) {
-      // Error is handled by the auth store and toast
+      await login({ email: email.trim(), password, rememberMe });
+      navigate(from, { replace: true });
+    } catch {
+      // Felet visas redan som en avisering av authStore.
     }
   };
+
+  const fieldClass =
+    'w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500';
 
   return (
     <>
       <Helmet>
-        <title>Logga in - 123Hansa</title>
-        <meta name="description" content="Logga in på ditt 123Hansa-konto för att hantera dina företagslistor och transaktioner." />
+        <title>{`${t('auth.login.title')} – 123Hansa`}</title>
+        <meta name="robots" content="noindex" />
       </Helmet>
-      
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-nordic-gray-50">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gradient mb-2">123hansa</h1>
-            <h2 className="text-2xl font-bold text-nordic-gray-900 mb-2">
-              Välkommen tillbaka
-            </h2>
-            <p className="text-nordic-gray-600">
-              Logga in på ditt konto för att fortsätta
-            </p>
-          </div>
 
-          <div className="card">
-            <div className="card-body">
-              <SocialAuthButtons />
-              
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-nordic-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-nordic-gray-500">eller</span>
-                </div>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
+        <div className="w-full max-w-md">
+          <div className="rounded-xl border border-gray-200 bg-white p-8">
+            <h1 className="mb-2 text-2xl font-bold text-gray-900">{t('auth.login.title')}</h1>
+            <p className="mb-6 text-gray-600">{t('auth.login.subtitle')}</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-gray-700">
+                  {t('auth.email')}
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder={t('auth.email-placeholder')}
+                  className={fieldClass}
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <EmailInput
-                  value={email}
-                  onChange={setEmail}
-                  error={emailError || errors.email}
-                  label="E-postadress"
-                  placeholder="din@email.se"
-                  required
-                  autoComplete="email"
+              <div>
+                <label htmlFor="password" className="mb-2 block text-sm font-semibold text-gray-700">
+                  {t('auth.password')}
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder={t('auth.password-placeholder')}
+                  className={fieldClass}
                 />
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              </div>
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-nordic-gray-700 mb-2">
-                    Lösenord
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className={`form-input ${errors.password ? 'border-nordic-red-500 focus:border-nordic-red-500 focus:ring-nordic-red-500' : ''}`}
-                    placeholder="Ditt lösenord"
-                  />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-nordic-red-600">{errors.password}</p>
-                  )}
-                </div>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                />
+                {t('auth.remember-me')}
+              </label>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="rememberMe"
-                      name="rememberMe"
-                      type="checkbox"
-                      checked={formData.rememberMe}
-                      onChange={handleInputChange}
-                      className="form-checkbox"
-                    />
-                    <label htmlFor="rememberMe" className="ml-2 block text-sm text-nordic-gray-700">
-                      Kom ihåg mig
-                    </label>
-                  </div>
-
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-nordic-blue-600 hover:text-nordic-blue-500"
-                  >
-                    Glömt lösenord?
-                  </Link>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary w-full"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <LoadingSpinner size="sm" className="mr-2" />
-                      Loggar in...
-                    </div>
-                  ) : (
-                    'Logga in'
-                  )}
-                </button>
-              </form>
-            </div>
-
-            <div className="card-footer text-center">
-              <p className="text-sm text-nordic-gray-600">
-                Har du inte ett konto?{' '}
-                <Link
-                  to="/register"
-                  className="font-medium text-nordic-blue-600 hover:text-nordic-blue-500"
-                >
-                  Registrera dig här
-                </Link>
-              </p>
-            </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:bg-gray-300"
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                {t('auth.submit-login')}
+              </button>
+            </form>
           </div>
 
-          {/* Additional features */}
-          <div className="text-center">
-            <p className="text-xs text-nordic-gray-500">
-              Genom att logga in godkänner du våra{' '}
-              <Link to="/terms" className="text-nordic-blue-600 hover:text-nordic-blue-500">
-                användarvillkor
-              </Link>{' '}
-              och{' '}
-              <Link to="/privacy" className="text-nordic-blue-600 hover:text-nordic-blue-500">
-                integritetspolicy
-              </Link>
-            </p>
-          </div>
+          <p className="mt-6 text-center text-sm text-gray-600">
+            {t('auth.no-account')}{' '}
+            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-800">
+              {t('auth.to-register')}
+            </Link>
+          </p>
         </div>
       </div>
     </>
