@@ -415,7 +415,7 @@ const BusinessValuationTool: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Tillförlitlighet:</span>
-                  <Badge variant="outline">{result.valuation.confidence}%</Badge>
+                  <Badge variant="secondary">{result.valuation.confidence}%</Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Marknadsposition:</span>
@@ -446,7 +446,7 @@ const BusinessValuationTool: React.FC = () => {
                       </p>
                       <p className="text-sm text-gray-600">Vikt: {Math.round(method.weight * 100)}%</p>
                     </div>
-                    <Badge variant="outline">{method.confidence}% tillförlitlighet</Badge>
+                    <Badge variant="secondary">{method.confidence}% tillförlitlighet</Badge>
                   </div>
                 ))}
               </div>

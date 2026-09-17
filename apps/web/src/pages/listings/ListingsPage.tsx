@@ -125,7 +125,7 @@ const ListingsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [query, country, industry]);
+  }, [query, country, industry, t]);
 
   useEffect(() => {
     load();

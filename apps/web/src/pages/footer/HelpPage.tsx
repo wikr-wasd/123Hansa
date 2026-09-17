@@ -5,10 +5,10 @@ import {
   MessageCircle,
   Phone,
   Mail,
-  FileText,
-  Users,
-  Shield,
-  Clock,
+
+
+
+
   CheckCircle,
   ArrowRight
 } from 'lucide-react';

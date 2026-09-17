@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
   Calculator,
-  TrendingUp,
-  Building2,
-  DollarSign,
-  Users,
-  BarChart3,
+
+
+
+
+
   CheckCircle,
   ArrowRight,
-  Globe,
+
   Clock,
   Award,
   AlertCircle,
@@ -166,9 +166,6 @@ const ValuationPage: React.FC = () => {
     }
   };
 
-  const requestDetailedValuation = () => {
-    toast.success('Begäran skickad! Våra experter återkommer inom 24 timmar.');
-  };
 
   return (
     <>
@@ -408,7 +405,7 @@ const ValuationPage: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Detaljerad utvärdering</h2>
-                  <p className="text-sm text-gray-600 mt-1">Välkommen {user?.name}! Din analys sparas automatiskt.</p>
+                  <p className="text-sm text-gray-600 mt-1">Välkommen {user ? `${user.firstName} ${user.lastName}`.trim() : ''}! Din analys sparas automatiskt.</p>
                 </div>
                 <button
                   onClick={() => setEvaluationType(null)}
@@ -503,7 +500,7 @@ const ValuationPage: React.FC = () => {
                         </label>
                         <input
                           type="text"
-                          defaultValue={user?.name || ''}
+                          defaultValue={user ? `${user.firstName} ${user.lastName}`.trim() : ''}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                           placeholder="Förnamn Efternamn"
                         />
@@ -786,7 +783,7 @@ const ValuationPage: React.FC = () => {
                     disabled={
                       (step === 1 && !formData.companyType) ||
                       (step === 2 && (!formData.industry || !formData.revenue)) ||
-                      (step === 3 && (!formData.contact.name || !formData.contact.email || emailError))
+                      (step === 3 && (!formData.contact.name || !formData.contact.email || Boolean(emailError)))
                     }
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >

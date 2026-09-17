@@ -43,7 +43,6 @@ export const detectDevice = (): DeviceInfo => {
   // Screen size based detection (fallback)
   const isMobileScreen = screenWidth <= 768;
   const isTabletScreen = screenWidth > 768 && screenWidth <= 1024;
-  const isDesktopScreen = screenWidth > 1024;
 
   // Combine user agent and screen size detection
   const isMobile = (isMobileDevice && !isTabletDevice) || (isMobileScreen && !isTabletDevice);
@@ -105,6 +104,6 @@ export const supportsPWAInstall = (): boolean => {
 export const isInstalledPWA = (): boolean => {
   return typeof window !== 'undefined' && (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 };

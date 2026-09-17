@@ -33,28 +33,20 @@ jobs:
       - name: Affärslogik (@hansa/core)
         run: npm run test:core
 
-      # continue-on-error är MEDVETET och TILLFÄLLIGT, av samma skäl som linten
-      # nedan. Rotens tsconfig drog tidigare in hela trädet och gav 25 960 fel;
-      # efter städningen 2026-09-05 återstår 722 ÄKTA fel i den ärvda koden i
-      # apps/web och apps/api. @hansa/core typkontrolleras rent och har ett eget
-      # steg utan continue-on-error nedan. Ta bort raden när de 722 är åtgärdade
-      # — det är en post i docs/TODO.md.
-      - name: Typkontroll (ärvd kod)
+      # continue-on-error är BORTTAGET 2026-09-17. De 722 typfelen är noll:
+      # apps/api avvecklades och webbens egna är åtgärdade. Faller det här
+      # steget ska CI bli röd — det är hela poängen med att ha det.
+      - name: Typkontroll
         run: npm run type-check
-        continue-on-error: true
 
       # Kärnan får INTE ha continue-on-error. Går den sönder ska CI bli röd.
       - name: Typkontroll (@hansa/core)
         run: npm run build:core
 
-      # continue-on-error är MEDVETET och TILLFÄLLIGT. Den ärvda koden i
-      # apps/web och apps/api går inte igenom eslint med --max-warnings 0 än.
-      # Att sätta det till false innan koden är städad hade gjort CI rött på
-      # varje PR, och en pipeline som alltid är röd läser ingen. Ta bort raden
-      # när linten är ren — det är en post i docs/TODO.md.
+      # Också utan continue-on-error sedan 2026-09-17. Linten är ren:
+      # 0 fel och 0 varningar med --max-warnings 0.
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Bygg webben
         run: npm run build:web

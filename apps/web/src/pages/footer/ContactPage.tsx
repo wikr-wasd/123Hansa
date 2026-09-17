@@ -4,8 +4,8 @@ import {
   Mail,
   MapPin,
   Clock,
-  MessageSquare,
-  Users,
+
+
   Building2,
   Send
 } from 'lucide-react';

@@ -73,7 +73,7 @@ const CreateListingPage: React.FC = () => {
       })
       .catch((err) => setLoadError(err instanceof Error ? err.message : t('dash.error')))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [t]);
 
   const selectedOrganization = organizations.find((org) => org.id === organizationId) ?? null;
   const isNewOrganization = organizationId === 'new';

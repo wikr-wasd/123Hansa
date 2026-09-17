@@ -63,7 +63,7 @@ const ListingDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     load();

@@ -90,11 +90,14 @@ export const useMobileScrollControl = () => {
     if (!device.isMobile && !device.isTablet) return;
     
     // Prevent auto-scroll to bottom on page load
-    controller.current.preventNextAutoScroll();
+    // Fånga instansen nu: controller.current kan ha bytts ut när städfunktionen
+    // körs, och då sparas positionen på fel ställe.
+    const instance = controller.current;
+    instance.preventNextAutoScroll();
     
     return () => {
       // Save scroll position when component unmounts
-      controller.current.saveScrollPosition(window.location.pathname);
+      instance.saveScrollPosition(window.location.pathname);
     };
   }, [device.isMobile, device.isTablet]);
   

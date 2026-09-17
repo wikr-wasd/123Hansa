@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Shield, FileText, Users, Eye, Lock, Scale } from 'lucide-react';
+import { Shield, FileText, Eye, Lock } from 'lucide-react';
 
 const LegalPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('terms');

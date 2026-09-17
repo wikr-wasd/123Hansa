@@ -15,6 +15,9 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    // React-reglerna fångar den vanligaste buggen i en React-app: en effekt som
+    // läser något den inte lyssnar på, och därför visar gamla data.
+    'plugin:react-hooks/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -22,7 +25,7 @@ module.exports = {
     sourceType: 'module',
     ecmaFeatures: { jsx: true },
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react-hooks'],
   rules: {
     '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-explicit-any': 'warn',

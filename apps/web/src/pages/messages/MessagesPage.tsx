@@ -85,7 +85,7 @@ const MessagesPage: React.FC = () => {
       active = false;
       unsubscribe();
     };
-  }, [activeId]);
+  }, [activeId, t]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -71,7 +71,7 @@ const DataroomPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     load();

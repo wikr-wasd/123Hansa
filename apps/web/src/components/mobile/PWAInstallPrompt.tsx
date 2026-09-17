@@ -6,9 +6,18 @@ interface PWAInstallPromptProps {
   className?: string;
 }
 
+/**
+ * Webbläsarens installationshändelse. Den står inte i TypeScripts DOM-typer
+ * eftersom den bara finns i Chromium — därför beskrivs den här.
+ */
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ className = '' }) => {
   const { isMobile, isTablet } = useDeviceDetection();
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
 
@@ -21,10 +30,12 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ className = 
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Händelsen är alltid en BeforeInstallPromptEvent, men DOM-typerna känner
+      // inte till den — därför den uttryckliga konverteringen här.
       // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
       // Stash the event so it can be triggered later
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       
       // Show our custom prompt after a delay
       setTimeout(() => {
@@ -59,11 +70,9 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ className = 
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
     
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
+    // Utfallet loggas inte: att en besökare avböjde installationen är inget
+    // vi behöver veta, och konsolutskrifter i produktion är brus.
+    void outcome;
     
     // Clear the deferredPrompt
     setDeferredPrompt(null);

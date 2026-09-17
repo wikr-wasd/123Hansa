@@ -35,12 +35,13 @@ fungerar i appen — inte när koden är skriven. Se `TESTING.md`.
 - [x] Rätta eslint-configen: `plugin:@typescript-eslint/recommended`, och bort
       med `prettier`-plugin som inte är installerat i något workspace
 - [x] `--passWithNoTests` på web och api. `npm run test` går igenom nu
-- [ ] **Åtgärda de sista 50 typfelen i `apps/web`.** Var 722 i hela repot
-      2026-09-05. `apps/api` är borta, och webbens egna gick från 395 till 50.
-      Ta bort `continue-on-error` på `Typkontroll (ärvd kod)` i
-      `.github/workflows/ci.yml` när de är borta
-- [ ] **Gör linten ren** — api 18 fel/459 varningar, web 33 fel/763 varningar.
-      Ta bort `continue-on-error` på lint-steget när det är gjort
+- [x] **Typfelen åtgärdade** — klart 2026-09-17. 722 → 0. `continue-on-error`
+      borttaget ur CI: faller typkontrollen blir bygget rött
+- [x] **Linten ren** — klart 2026-09-17. 0 fel och 0 varningar med
+      `--max-warnings 0`. React-hooks-reglerna tillagda; de fångade fyra
+      effekter som läste språkfunktionen utan att lyssna på den, och en
+      ref-referens som kunde hinna bytas ut före städningen.
+      `continue-on-error` borttaget ur CI
 - [ ] **Bestäm om prettier ska in.** `.prettierrc` finns men paketet är inte
       installerat någonstans. Antingen installera det eller ta bort filen
 - [x] **Rotens MD-filer städade** — klart 2026-09-17. 25 borttagna; kvar är
@@ -118,8 +119,8 @@ valuta och belopp i minsta enhet finns där.
       Supabase. Samtal öppnas när säljaren accepterat intresseanmälan
 - [x] **Loading- och error-states** på annonssidorna — klart 2026-09-16
       (laddning, fel med "Försök igen", tomt resultat med "Rensa filtren")
-- [ ] **Loading- och error-states** på övriga sidor som hämtar data. En tom lista och ett
-      trasigt anrop ser likadana ut för användaren annars.
+- [x] **Loading- och error-states** överallt där data hämtas — klart
+      2026-09-17. En tom lista och ett trasigt anrop ser likadana ut annars
 
 ---
 
