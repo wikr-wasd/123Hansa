@@ -11,8 +11,9 @@ import {
   verifyOrganization,
   type ReviewListing,
 } from '../../services/adminService';
-import { formatListingAmount, LISTING_STATUS_LABELS, type ListingStatus } from '../../services/listingService';
+import { formatListingAmount, LISTING_STATUS_KEYS, type ListingStatus } from '../../services/listingService';
 import { useAuthStore } from '../../stores/authStore';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Granskningsvyn. Utan den måste review_listing() och verify_organization()
 // anropas manuellt mot databasen, vilket inte är rimligt i drift.
@@ -20,14 +21,13 @@ import { useAuthStore } from '../../stores/authStore';
 // Att vyn visas avgörs av am_i_platform_admin(). Att åtgärderna GÅR IGENOM
 // avgörs av databasen, som kontrollerar behörigheten själv (CLAUDE.md regel 5).
 
-const QUEUES: { status: ListingStatus; label: string }[] = [
-  { status: 'pending_review', label: 'Väntar på granskning' },
-  { status: 'published', label: 'Publicerade' },
-  { status: 'rejected', label: 'Nekade' },
-];
+// Granskningsvyn är intern och står kvar på svenska så länge; statusetiketterna
+// delas dock med resten av appen och kommer ur ordboken.
+const QUEUES: ListingStatus[] = ['pending_review', 'published', 'rejected'];
 
 const ReviewPage: React.FC = () => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuthStore();
+  const { t } = useTranslation();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [queue, setQueue] = useState<ListingStatus>('pending_review');
   const [listings, setListings] = useState<ReviewListing[]>([]);
@@ -120,18 +120,18 @@ const ReviewPage: React.FC = () => {
             </p>
           </div>
           <nav className="mx-auto flex max-w-5xl gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8">
-            {QUEUES.map((item) => (
+            {QUEUES.map((status) => (
               <button
-                key={item.status}
+                key={status}
                 type="button"
-                onClick={() => setQueue(item.status)}
+                onClick={() => setQueue(status)}
                 className={`whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium ${
-                  queue === item.status
+                  queue === status
                     ? 'border-blue-600 text-blue-700'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {item.label}
+                {t(LISTING_STATUS_KEYS[status])}
               </button>
             ))}
           </nav>
@@ -177,7 +177,7 @@ const ReviewPage: React.FC = () => {
                 <article key={listing.id} className="rounded-xl border border-gray-200 bg-white p-6">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                      {LISTING_STATUS_LABELS[listing.status]}
+                      {t(LISTING_STATUS_KEYS[listing.status])}
                     </span>
                     <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                       {listing.industry}

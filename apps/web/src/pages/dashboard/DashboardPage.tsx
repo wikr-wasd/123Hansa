@@ -6,14 +6,15 @@ import { AlertCircle, Loader2, Plus, ShieldCheck } from 'lucide-react';
 import type { CountryCode } from '@hansa/core';
 import { useAuthStore } from '../../stores/authStore';
 import { amIAdmin } from '../../services/adminService';
+import { useTranslation } from '../../hooks/useTranslation';
 import { authService, type LocaleCode } from '../../services/authService';
 import {
   fetchMyInterests,
   fetchMyListings,
   fetchReceivedInterests,
   formatListingAmount,
-  INTEREST_STATUS_LABELS,
-  LISTING_STATUS_LABELS,
+  INTEREST_STATUS_KEYS,
+  LISTING_STATUS_KEYS,
   markListingSold,
   respondToInterest,
   submitListingForReview,
@@ -48,6 +49,7 @@ const Badge: React.FC<{ status: string; label: string }> = ({ status, label }) =
 
 const DashboardPage: React.FC = () => {
   const { user, refreshUser } = useAuthStore();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('listings');
 
   const [listings, setListings] = useState<MyListing[]>([]);
@@ -84,7 +86,7 @@ const DashboardPage: React.FC = () => {
       setReceived(incoming);
       setSent(outgoing);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunde inte hämta dina uppgifter');
+      setError(err instanceof Error ? err.message : t('dash.error'));
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +107,7 @@ const DashboardPage: React.FC = () => {
       toast.success(success);
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Åtgärden misslyckades');
+      toast.error(err instanceof Error ? err.message : t('dash.error'));
     }
   };
 
@@ -115,31 +117,31 @@ const DashboardPage: React.FC = () => {
     try {
       await authService.updateProfile({ firstName, lastName, country, language });
       await refreshUser();
-      toast.success('Profilen är sparad');
+      toast.success(t('dash.saved'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Profilen kunde inte sparas');
+      toast.error(err instanceof Error ? err.message : t('dash.error'));
     } finally {
       setIsSavingProfile(false);
     }
   };
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: 'listings', label: 'Mina annonser', count: listings.length },
-    { id: 'interests', label: 'Intresseanmälningar', count: received.length + sent.length },
-    { id: 'profile', label: 'Profil' },
+    { id: 'listings', label: t('dash.tab.listings'), count: listings.length },
+    { id: 'interests', label: t('dash.tab.interests'), count: received.length + sent.length },
+    { id: 'profile', label: t('dash.tab.profile') },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Min sida – 123Hansa</title>
+        <title>{`${t('dash.title')} – 123Hansa`}</title>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
         <header className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-8 sm:px-6 lg:px-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Min sida</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('dash.title')}</h1>
               <p className="text-gray-600">
                 {user ? `${user.firstName} ${user.lastName}`.trim() || user.email : ''}
               </p>
@@ -151,7 +153,7 @@ const DashboardPage: React.FC = () => {
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
                 >
                   <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-                  Granskning
+                  {t('dash.review-queue')}
                 </Link>
               )}
               <Link
@@ -189,7 +191,7 @@ const DashboardPage: React.FC = () => {
           {isLoading && (
             <div className="flex items-center justify-center gap-3 py-20 text-gray-600">
               <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-              <span>Hämtar dina uppgifter…</span>
+              <span>{t('dash.loading')}</span>
             </div>
           )}
 
@@ -197,7 +199,7 @@ const DashboardPage: React.FC = () => {
             <div className="rounded-xl border border-red-200 bg-red-50 p-6" role="alert">
               <div className="mb-2 flex items-center gap-2 text-red-800">
                 <AlertCircle className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-semibold">Kunde inte hämta dina uppgifter</h2>
+                <h2 className="font-semibold">{t('dash.error')}</h2>
               </div>
               <p className="mb-4 text-sm text-red-700">{error}</p>
               <button
@@ -205,7 +207,7 @@ const DashboardPage: React.FC = () => {
                 onClick={load}
                 className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
               >
-                Försök igen
+                {t('listings.retry')}
               </button>
             </div>
           )}
@@ -214,9 +216,9 @@ const DashboardPage: React.FC = () => {
             <section className="space-y-4">
               {listings.length === 0 ? (
                 <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
-                  <h2 className="mb-2 text-lg font-semibold text-gray-900">Du har inga annonser än</h2>
+                  <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('dash.no-listings-title')}</h2>
                   <p className="mb-6 text-gray-600">
-                    Lägg upp ditt bolag så granskar vi annonsen innan den publiceras.
+                    {t('dash.no-listings-body')}
                   </p>
                   <Link
                     to="/create-listing"
@@ -230,15 +232,15 @@ const DashboardPage: React.FC = () => {
                 listings.map((listing) => (
                   <article key={listing.id} className="rounded-xl border border-gray-200 bg-white p-6">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <Badge status={listing.status} label={LISTING_STATUS_LABELS[listing.status]} />
+                      <Badge status={listing.status} label={t(LISTING_STATUS_KEYS[listing.status])} />
                       {listing.isDemo && (
                         <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
-                          Exempelannons
+                          {t('listings.demo-badge')}
                         </span>
                       )}
                       {!listing.organizationVerified && (
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
-                          Organisationen inte verifierad
+                          {t('dash.org-unverified')}
                         </span>
                       )}
                     </div>
@@ -248,24 +250,24 @@ const DashboardPage: React.FC = () => {
 
                     <dl className="mb-4 flex flex-wrap gap-x-8 gap-y-1 text-sm text-gray-600">
                       <div className="flex gap-2">
-                        <dt>Pris:</dt>
+                        <dt>{t('dash.price')}:</dt>
                         <dd className="font-medium text-gray-900">
-                          {formatListingAmount(listing.askingPriceMinor, listing.country) ?? 'På begäran'}
+                          {formatListingAmount(listing.askingPriceMinor, listing.country) ?? t('listings.price-on-request')}
                         </dd>
                       </div>
                       <div className="flex gap-2">
-                        <dt>Organisation:</dt>
+                        <dt>{t('dash.organisation')}:</dt>
                         <dd>{listing.organizationName}</dd>
                       </div>
                       <div className="flex gap-2">
-                        <dt>Intresseanmälningar:</dt>
+                        <dt>{t('dash.interest-count')}:</dt>
                         <dd>{listing.interestCount}</dd>
                       </div>
                     </dl>
 
                     {listing.reviewNote && (
                       <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-                        <strong>Granskarens svar:</strong> {listing.reviewNote}
+                        <strong>{t('dash.review-note')}:</strong> {listing.reviewNote}
                       </p>
                     )}
 
@@ -274,14 +276,14 @@ const DashboardPage: React.FC = () => {
                         to={`/listings/${listing.id}/datarum`}
                         className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                       >
-                        Datarum
+                        {t('dash.dataroom')}
                       </Link>
                       {listing.status === 'published' && (
                         <Link
                           to={`/listings/${listing.id}`}
                           className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
-                          Visa annonsen
+                          {t('dash.view-listing')}
                         </Link>
                       )}
                       {(listing.status === 'draft' || listing.status === 'rejected') && (
@@ -290,7 +292,7 @@ const DashboardPage: React.FC = () => {
                           onClick={() => act(() => submitListingForReview(listing.id), 'Annonsen är inskickad')}
                           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                         >
-                          Skicka till granskning
+                          {t('dash.submit-review')}
                         </button>
                       )}
                       {listing.status === 'published' && (
@@ -300,14 +302,14 @@ const DashboardPage: React.FC = () => {
                             onClick={() => act(() => markListingSold(listing.id), 'Annonsen är markerad som såld')}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                           >
-                            Markera som såld
+                            {t('dash.mark-sold')}
                           </button>
                           <button
                             type="button"
                             onClick={() => act(() => withdrawListing(listing.id), 'Annonsen är tillbakadragen')}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                           >
-                            Dra tillbaka
+                            {t('dash.withdraw')}
                           </button>
                         </>
                       )}
@@ -321,10 +323,10 @@ const DashboardPage: React.FC = () => {
           {!isLoading && !error && tab === 'interests' && (
             <div className="space-y-10">
               <section>
-                <h2 className="mb-4 text-lg font-semibold text-gray-900">På mina annonser</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('dash.received')}</h2>
                 {received.length === 0 ? (
                   <p className="rounded-xl border border-gray-200 bg-white p-6 text-gray-600">
-                    Inga intresseanmälningar än.
+                    {t('dash.received-empty')}
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -332,11 +334,11 @@ const DashboardPage: React.FC = () => {
                       <article key={interest.id} className="rounded-xl border border-gray-200 bg-white p-6">
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                           <h3 className="font-semibold text-gray-900">{interest.listingTitle}</h3>
-                          <Badge status={interest.status} label={INTEREST_STATUS_LABELS[interest.status]} />
+                          <Badge status={interest.status} label={t(INTEREST_STATUS_KEYS[interest.status])} />
                         </div>
                         <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{interest.message}</p>
                         <p className="mb-4 text-xs text-gray-500">
-                          Mottagen {new Date(interest.createdAt).toLocaleDateString('sv-SE')}
+                          {t('dash.received-at')} {new Date(interest.createdAt).toLocaleDateString('sv-SE')}
                         </p>
                         {interest.status === 'pending' && (
                           <div className="flex gap-3">
@@ -345,14 +347,14 @@ const DashboardPage: React.FC = () => {
                               onClick={() => act(() => respondToInterest(interest.id, true), 'Intresset är accepterat')}
                               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                             >
-                              Gå vidare med köparen
+                              {t('dash.accept-buyer')}
                             </button>
                             <button
                               type="button"
                               onClick={() => act(() => respondToInterest(interest.id, false), 'Intresset är avböjt')}
                               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
-                              Avböj
+                              {t('dash.decline')}
                             </button>
                           </div>
                         )}
@@ -363,12 +365,12 @@ const DashboardPage: React.FC = () => {
               </section>
 
               <section>
-                <h2 className="mb-4 text-lg font-semibold text-gray-900">Skickade av mig</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('dash.sent')}</h2>
                 {sent.length === 0 ? (
                   <p className="rounded-xl border border-gray-200 bg-white p-6 text-gray-600">
-                    Du har inte visat intresse för någon annons än.{' '}
+                    {t('dash.sent-empty')}{' '}
                     <Link to="/listings" className="font-medium text-blue-600 hover:text-blue-800">
-                      Bläddra bland annonserna
+                      {t('dash.browse')}
                     </Link>
                     .
                   </p>
@@ -383,7 +385,7 @@ const DashboardPage: React.FC = () => {
                           >
                             {interest.listingTitle}
                           </Link>
-                          <Badge status={interest.status} label={INTEREST_STATUS_LABELS[interest.status]} />
+                          <Badge status={interest.status} label={t(INTEREST_STATUS_KEYS[interest.status])} />
                         </div>
                         <p className="mb-3 whitespace-pre-line text-sm text-gray-700">{interest.message}</p>
                         {interest.status === 'accepted' && (
@@ -392,13 +394,13 @@ const DashboardPage: React.FC = () => {
                               to={`/listings/${interest.listingId}/datarum`}
                               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
-                              Öppna datarummet
+                              {t('dash.open-dataroom')}
                             </Link>
                             <Link
                               to={`/messages?samtal=${interest.id}`}
                               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
-                              Meddelanden
+                              {t('msg.title')}
                             </Link>
                           </div>
                         )}
@@ -412,12 +414,12 @@ const DashboardPage: React.FC = () => {
 
           {!isLoading && !error && tab === 'profile' && (
             <form onSubmit={saveProfile} className="max-w-xl space-y-4 rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="text-lg font-semibold text-gray-900">Profil</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('dash.tab.profile')}</h2>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="first-name" className="mb-2 block text-sm font-semibold text-gray-700">
-                    Förnamn
+                    {t('auth.first-name')}
                   </label>
                   <input
                     id="first-name"
@@ -428,7 +430,7 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <label htmlFor="last-name" className="mb-2 block text-sm font-semibold text-gray-700">
-                    Efternamn
+                    {t('auth.last-name')}
                   </label>
                   <input
                     id="last-name"
@@ -442,7 +444,7 @@ const DashboardPage: React.FC = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="profile-country" className="mb-2 block text-sm font-semibold text-gray-700">
-                    Land
+                    {t('auth.country')}
                   </label>
                   <select
                     id="profile-country"
@@ -450,14 +452,14 @@ const DashboardPage: React.FC = () => {
                     onChange={(event) => setCountry(event.target.value as CountryCode)}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="SE">Sverige</option>
-                    <option value="NO">Norge</option>
-                    <option value="DK">Danmark</option>
+                    <option value="SE">{t('country.SE')}</option>
+                    <option value="NO">{t('country.NO')}</option>
+                    <option value="DK">{t('country.DK')}</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="profile-language" className="mb-2 block text-sm font-semibold text-gray-700">
-                    Språk
+                    {t('auth.language')}
                   </label>
                   <select
                     id="profile-language"
@@ -474,7 +476,7 @@ const DashboardPage: React.FC = () => {
               </div>
 
               <p className="text-sm text-gray-600">
-                E-post: <span className="font-medium text-gray-900">{user?.email}</span>
+                {t('dash.email')}: <span className="font-medium text-gray-900">{user?.email}</span>
               </p>
 
               <button
@@ -483,7 +485,7 @@ const DashboardPage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-300"
               >
                 {isSavingProfile && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-                Spara
+                {t('dash.save')}
               </button>
             </form>
           )}

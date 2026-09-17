@@ -181,13 +181,14 @@ export type ListingStatus =
   | 'sold'
   | 'withdrawn';
 
-export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
-  draft: 'Utkast',
-  pending_review: 'Väntar på granskning',
-  published: 'Publicerad',
-  rejected: 'Nekad',
-  sold: 'Såld',
-  withdrawn: 'Tillbakadragen',
+/** Nyckeln i ordboken, inte texten: statusen visas på användarens språk. */
+export const LISTING_STATUS_KEYS: Record<ListingStatus, string> = {
+  draft: 'status.draft',
+  pending_review: 'status.pending_review',
+  published: 'status.published',
+  rejected: 'status.rejected',
+  sold: 'status.sold',
+  withdrawn: 'status.withdrawn',
 };
 
 export interface MyListing extends Listing {
@@ -321,11 +322,11 @@ export interface SentInterest {
   createdAt: string;
 }
 
-export const INTEREST_STATUS_LABELS: Record<SentInterest['status'], string> = {
-  pending: 'Väntar på svar',
-  accepted: 'Accepterad',
-  declined: 'Avböjd',
-  withdrawn: 'Tillbakadragen',
+export const INTEREST_STATUS_KEYS: Record<SentInterest['status'], string> = {
+  pending: 'status.pending',
+  accepted: 'status.accepted',
+  declined: 'status.declined',
+  withdrawn: 'status.withdrawn',
 };
 
 /** Intresseanmälningar användaren själv har skickat. */

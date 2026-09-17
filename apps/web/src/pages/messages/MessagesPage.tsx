@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { AlertCircle, Loader2, Send } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
+import { useTranslation } from '../../hooks/useTranslation';
 import {
   fetchConversations,
   fetchMessages,
@@ -18,6 +19,7 @@ import {
 
 const MessagesPage: React.FC = () => {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeId = searchParams.get('samtal');
 
@@ -42,7 +44,7 @@ const MessagesPage: React.FC = () => {
         setSearchParams({ samtal: list[0].interestId }, { replace: true });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunde inte hämta dina samtal');
+      setError(err instanceof Error ? err.message : t('msg.error'));
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +68,7 @@ const MessagesPage: React.FC = () => {
         if (active) setMessages(list);
       })
       .catch((err) => {
-        if (active) setError(err instanceof Error ? err.message : 'Kunde inte hämta meddelandena');
+        if (active) setError(err instanceof Error ? err.message : t('msg.error'));
       })
       .finally(() => {
         if (active) setIsLoadingMessages(false);
@@ -101,7 +103,7 @@ const MessagesPage: React.FC = () => {
       );
       setDraft('');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Meddelandet kunde inte skickas');
+      toast.error(err instanceof Error ? err.message : t('msg.error'));
     } finally {
       setIsSending(false);
     }
@@ -110,17 +112,17 @@ const MessagesPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Meddelanden – 123Hansa</title>
+        <title>{`${t('msg.title')} – 123Hansa`}</title>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-          <h1 className="mb-6 text-2xl font-bold text-gray-900">Meddelanden</h1>
+          <h1 className="mb-6 text-2xl font-bold text-gray-900">{t('msg.title')}</h1>
 
           {isLoading && (
             <div className="flex items-center justify-center gap-3 py-20 text-gray-600">
               <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-              <span>Hämtar dina samtal…</span>
+              <span>{t('msg.loading')}</span>
             </div>
           )}
 
@@ -135,17 +137,16 @@ const MessagesPage: React.FC = () => {
                 onClick={loadConversations}
                 className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
               >
-                Försök igen
+                {t('listings.retry')}
               </button>
             </div>
           )}
 
           {!isLoading && !error && conversations.length === 0 && (
             <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">Inga samtal än</h2>
+              <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('msg.empty-title')}</h2>
               <p className="text-gray-600">
-                Ett samtal öppnas när en säljare accepterat din intresseanmälan, eller när du själv
-                accepterat någon annans. Du hanterar intresseanmälningar på{' '}
+                {t('msg.empty-body')}{' '}
                 <Link to="/dashboard" className="font-medium text-blue-600 hover:text-blue-800">
                   Min sida
                 </Link>
@@ -156,7 +157,7 @@ const MessagesPage: React.FC = () => {
 
           {!isLoading && !error && conversations.length > 0 && (
             <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-              <nav className="space-y-2" aria-label="Samtal">
+              <nav className="space-y-2" aria-label={t('msg.conversations')}>
                 {conversations.map((conversation) => {
                   const isActive = conversation.interestId === activeId;
                   return (
@@ -173,7 +174,7 @@ const MessagesPage: React.FC = () => {
                       <p className="mb-1 font-semibold text-gray-900">{conversation.counterpartName}</p>
                       <p className="mb-1 text-sm text-gray-600">{conversation.listingTitle}</p>
                       <p className="text-xs text-gray-500">
-                        {conversation.iAmBuyer ? 'Du visade intresse' : 'Intresse på din annons'}
+                        {conversation.iAmBuyer ? t('msg.you-registered') : t('msg.on-your-listing')}
                       </p>
                     </button>
                   );
@@ -197,13 +198,13 @@ const MessagesPage: React.FC = () => {
                   {isLoadingMessages && (
                     <p className="flex items-center gap-2 text-sm text-gray-500">
                       <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      Hämtar meddelanden…
+                      {t('msg.loading-messages')}
                     </p>
                   )}
 
                   {!isLoadingMessages && messages.length === 0 && (
                     <p className="text-sm text-gray-500">
-                      Inga meddelanden än. Skriv det första.
+                      {t('msg.no-messages')}
                     </p>
                   )}
 
@@ -232,7 +233,7 @@ const MessagesPage: React.FC = () => {
 
                 <form onSubmit={handleSend} className="flex gap-3 border-t border-gray-200 p-4">
                   <label htmlFor="message-draft" className="sr-only">
-                    Skriv ett meddelande
+                    {t('msg.write')}
                   </label>
                   <textarea
                     id="message-draft"
@@ -246,7 +247,7 @@ const MessagesPage: React.FC = () => {
                     }}
                     rows={2}
                     maxLength={10000}
-                    placeholder="Skriv ett meddelande. Enter skickar, skift + enter ger ny rad."
+                    placeholder={t('msg.placeholder')}
                     className="flex-1 resize-none rounded-lg border border-gray-300 p-3 text-sm focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -259,7 +260,7 @@ const MessagesPage: React.FC = () => {
                     ) : (
                       <Send className="h-4 w-4" aria-hidden="true" />
                     )}
-                    Skicka
+                    {t('msg.send')}
                   </button>
                 </form>
               </section>

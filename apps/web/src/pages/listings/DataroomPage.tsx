@@ -19,6 +19,7 @@ import {
 } from '../../services/dataroomService';
 import { fetchListing, type Listing } from '../../services/listingService';
 import { fetchMyListings } from '../../services/listingService';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Datarummet. Köparen kommer in först efter accepterat intresse OCH accepterad
 // aktuell version av sekretessavtalet — kontrollerat av databasen, inte av den
@@ -33,6 +34,7 @@ const formatSize = (bytes: number | null): string => {
 
 const DataroomPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [isSeller, setIsSeller] = useState(false);
@@ -65,7 +67,7 @@ const DataroomPage: React.FC = () => {
       setAccepted(currentNda ? await hasAcceptedNda(currentNda.id) : false);
       setLog(seller ? await fetchAccessLog(id) : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Datarummet kunde inte hämtas');
+      setError(err instanceof Error ? err.message : t('dataroom.error'));
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +84,7 @@ const DataroomPage: React.FC = () => {
       toast.success(success);
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Åtgärden misslyckades');
+      toast.error(err instanceof Error ? err.message : t('dataroom.error'));
     } finally {
       setBusy(null);
     }
@@ -94,7 +96,7 @@ const DataroomPage: React.FC = () => {
       const url = await requestDownloadUrl(document.id);
       window.open(url, '_blank', 'noopener');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Dokumentet kunde inte hämtas');
+      toast.error(err instanceof Error ? err.message : t('dataroom.error'));
     } finally {
       setBusy(null);
     }
@@ -104,7 +106,7 @@ const DataroomPage: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center gap-3 text-gray-600">
         <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-        <span>Hämtar datarummet…</span>
+        <span>{t('dataroom.loading')}</span>
       </div>
     );
   }
@@ -114,7 +116,7 @@ const DataroomPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Datarum – 123Hansa</title>
+        <title>{`${t('dataroom.title')} – 123Hansa`}</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
@@ -125,10 +127,10 @@ const DataroomPage: React.FC = () => {
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Tillbaka till annonsen
+            {t('dataroom.back-to-listing')}
           </Link>
 
-          <h1 className="mb-1 text-2xl font-bold text-gray-900">Datarum</h1>
+          <h1 className="mb-1 text-2xl font-bold text-gray-900">{t('dataroom.title')}</h1>
           <p className="mb-8 text-gray-600">{listing?.title ?? 'Annonsen'}</p>
 
           {error && (
@@ -142,22 +144,22 @@ const DataroomPage: React.FC = () => {
                 onClick={load}
                 className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
               >
-                Försök igen
+                {t('listings.retry')}
               </button>
             </div>
           )}
 
           {/* Sekretessavtalet */}
           <section className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Sekretessavtal</h2>
+            <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('dataroom.nda')}</h2>
 
             {isSeller ? (
               nda ? (
                 <div>
                   <p className="mb-2 text-sm text-gray-600">
-                    Version {nda.version}, publicerad{' '}
-                    {new Date(nda.createdAt).toLocaleDateString('sv-SE')}. En ny version kräver att
-                    köparna accepterar på nytt.
+                    {t('dataroom.nda-version')} {nda.version}, {t('dataroom.nda-published')}{' '}
+                    {new Date(nda.createdAt).toLocaleDateString('sv-SE')}.{' '}
+                    {t('dataroom.nda-new-version-note')}
                   </p>
                   <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-4 font-sans text-sm text-gray-700">
                     {nda.body}
@@ -172,16 +174,13 @@ const DataroomPage: React.FC = () => {
                     setNdaDraft('');
                   }}
                 >
-                  <p className="mb-3 text-sm text-gray-600">
-                    Lägg in ditt eget sekretessavtal. Avtalet är mellan dig och köparen — 123Hansa är
-                    inte part i det. Utan avtal kan ingen köpare se dokumenten.
-                  </p>
+                  <p className="mb-3 text-sm text-gray-600">{t('dataroom.nda-seller-intro')}</p>
                   <textarea
                     value={ndaDraft}
                     onChange={(event) => setNdaDraft(event.target.value)}
                     rows={8}
                     maxLength={50000}
-                    placeholder="Klistra in avtalstexten här."
+                    placeholder={t('dataroom.nda-placeholder')}
                     className="mb-3 w-full rounded-lg border border-gray-300 p-3 text-sm focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -189,15 +188,14 @@ const DataroomPage: React.FC = () => {
                     disabled={busy === 'nda' || ndaDraft.trim().length === 0}
                     className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-gray-300"
                   >
-                    Publicera avtalet
+                    {t('dataroom.nda-publish')}
                   </button>
                 </form>
               )
             ) : nda ? (
               accepted ? (
                 <p className="text-sm text-green-700">
-                  Du har accepterat version {nda.version} av avtalet. Din åtkomst till dokumenten
-                  loggas.
+                  {t('dataroom.nda-accepted')} ({t('dataroom.nda-version')} {nda.version})
                 </p>
               ) : (
                 <div>
@@ -211,28 +209,24 @@ const DataroomPage: React.FC = () => {
                     className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-300"
                   >
                     {busy === 'accept' && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-                    Jag accepterar sekretessavtalet
+                    {t('dataroom.nda-accept')}
                   </button>
-                  <p className="mt-2 text-xs text-gray-500">
-                    Att du accepterat, vilken version och när sparas oföränderligt.
-                  </p>
+                  <p className="mt-2 text-xs text-gray-500">{t('dataroom.nda-accept-note')}</p>
                 </div>
               )
             ) : (
-              <p className="text-sm text-gray-600">
-                Säljaren har inte lagt in något sekretessavtal än. Dokumenten öppnas först då.
-              </p>
+              <p className="text-sm text-gray-600">{t('dataroom.nda-missing')}</p>
             )}
           </section>
 
           {/* Dokumenten */}
           <section className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">Dokument</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('dataroom.documents')}</h2>
               {isSeller && (
                 <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <Upload className="h-4 w-4" aria-hidden="true" />
-                  Ladda upp
+                  {t('dataroom.upload')}
                   <input
                     type="file"
                     className="sr-only"
@@ -251,13 +245,12 @@ const DataroomPage: React.FC = () => {
             {!canRead && (
               <p className="flex items-start gap-2 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
                 <Lock className="mt-0.5 h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                Dokumenten öppnas när säljaren gått vidare med din intresseanmälan och du accepterat
-                sekretessavtalet.
+                {t('dataroom.locked')}
               </p>
             )}
 
             {canRead && documents.length === 0 && (
-              <p className="text-sm text-gray-600">Inga dokument i datarummet än.</p>
+              <p className="text-sm text-gray-600">{t('dataroom.empty')}</p>
             )}
 
             {canRead && documents.length > 0 && (
@@ -286,7 +279,7 @@ const DataroomPage: React.FC = () => {
                         ) : (
                           <Download className="h-4 w-4" aria-hidden="true" />
                         )}
-                        Öppna
+                        {t('dataroom.open')}
                       </button>
                       {isSeller && (
                         <button
@@ -313,20 +306,17 @@ const DataroomPage: React.FC = () => {
           {/* Åtkomstloggen — bara för säljaren */}
           {isSeller && (
             <section className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-lg font-semibold text-gray-900">Vem har öppnat vad</h2>
-              <p className="mb-4 text-sm text-gray-600">
-                Loggen är oföränderlig. Varken du, köparen eller 123Hansa kan ändra eller ta bort en
-                post.
-              </p>
+              <h2 className="mb-1 text-lg font-semibold text-gray-900">{t('dataroom.log-title')}</h2>
+              <p className="mb-4 text-sm text-gray-600">{t('dataroom.log-note')}</p>
 
               {log.length === 0 ? (
-                <p className="text-sm text-gray-600">Ingen har öppnat något dokument än.</p>
+                <p className="text-sm text-gray-600">{t('dataroom.log-empty')}</p>
               ) : (
                 <ul className="divide-y divide-gray-100 text-sm">
                   {log.map((entry) => (
                     <li key={entry.id} className="flex flex-wrap justify-between gap-2 py-2">
                       <span className="text-gray-900">
-                        {entry.userName} öppnade <strong>{entry.documentName}</strong>
+                        {entry.userName} {t('dataroom.log-opened')} <strong>{entry.documentName}</strong>
                       </span>
                       <span className="text-gray-500">
                         {new Date(entry.accessedAt).toLocaleString('sv-SE', {
