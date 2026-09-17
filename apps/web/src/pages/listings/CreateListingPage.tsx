@@ -12,15 +12,12 @@ import {
   type Organization,
 } from '../../services/organizationService';
 import { createListing, submitListingForReview } from '../../services/listingService';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Annonsen sparas i databasen och skickas till granskning. Tidigare sparade den
 // här sidan i webbläsarens localStorage, där ingen annan kunde se den.
 
-const MARKETS: { code: CountryCode; label: string }[] = [
-  { code: 'SE', label: 'Sverige' },
-  { code: 'NO', label: 'Norge' },
-  { code: 'DK', label: 'Danmark' },
-];
+const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
 const INDUSTRIES = [
   'IT och systemutveckling',
@@ -44,6 +41,7 @@ const labelClass = 'mb-2 block text-sm font-semibold text-gray-700';
 
 const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +71,7 @@ const CreateListingPage: React.FC = () => {
         setOrganizations(orgs);
         if (orgs.length > 0) setOrganizationId(orgs[0].id);
       })
-      .catch((err) => setLoadError(err instanceof Error ? err.message : 'Kunde inte hämta dina organisationer'))
+      .catch((err) => setLoadError(err instanceof Error ? err.message : t('dash.error')))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -91,20 +89,20 @@ const CreateListingPage: React.FC = () => {
     const next: Record<string, string> = {};
 
     if (isNewOrganization) {
-      if (!orgName.trim()) next.orgName = 'Ange organisationens namn';
+      if (!orgName.trim()) next.orgName = t('form.error.org-name');
       if (!orgNumber.trim()) {
-        next.orgNumber = `Ange ${organizationNumberLabel(orgCountry).toLowerCase()}`;
+        next.orgNumber = t('form.error.org-number');
       } else {
         const problem = checkOrgNumber(orgNumber, orgCountry);
         if (problem) next.orgNumber = problem;
       }
     }
 
-    if (title.trim().length < 3) next.title = 'Rubriken måste vara minst tre tecken';
-    if (title.trim().length > 160) next.title = 'Rubriken får vara högst 160 tecken';
-    if (!summary.trim()) next.summary = 'Skriv en kort sammanfattning';
-    if (summary.trim().length > 500) next.summary = 'Sammanfattningen får vara högst 500 tecken';
-    if (!description.trim()) next.description = 'Beskriv verksamheten';
+    if (title.trim().length < 3) next.title = t('form.error.headline-short');
+    if (title.trim().length > 160) next.title = t('form.error.headline-long');
+    if (!summary.trim()) next.summary = t('form.error.summary');
+    if (summary.trim().length > 500) next.summary = t('form.error.summary-long');
+    if (!description.trim()) next.description = t('form.error.description');
 
     for (const [key, value] of [
       ['price', price],
@@ -114,18 +112,18 @@ const CreateListingPage: React.FC = () => {
         try {
           parseAmount(value, currency);
         } catch {
-          next[key] = `Ange ett belopp i ${currency}, till exempel 1 500 000`;
+          next[key] = `${t('form.error.amount')} (${currency})`;
         }
       }
     }
 
     if (employees.trim() && !/^\d+$/.test(employees.trim())) {
-      next.employees = 'Ange antal anställda som ett heltal';
+      next.employees = t('form.error.employees');
     }
     if (foundedYear.trim()) {
       const year = Number(foundedYear);
       if (!Number.isInteger(year) || year < 1800 || year > new Date().getFullYear()) {
-        next.foundedYear = 'Ange ett rimligt årtal';
+        next.foundedYear = t('form.error.year');
       }
     }
 
@@ -136,7 +134,7 @@ const CreateListingPage: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validate()) {
-      toast.error('Något saknas i formuläret');
+      toast.error(t('form.error.missing'));
       return;
     }
 
@@ -170,10 +168,10 @@ const CreateListingPage: React.FC = () => {
 
       await submitListingForReview(listingId);
 
-      toast.success('Annonsen är inskickad för granskning');
+      toast.success(t('form.saved'));
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Annonsen kunde inte sparas');
+      toast.error(err instanceof Error ? err.message : t('form.save-failed'));
     } finally {
       setIsSaving(false);
     }
@@ -183,7 +181,7 @@ const CreateListingPage: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center gap-3 text-gray-600">
         <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-        <span>Hämtar dina uppgifter…</span>
+        <span>{t('form.loading')}</span>
       </div>
     );
   }
@@ -191,17 +189,14 @@ const CreateListingPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Lägg upp en annons – 123Hansa</title>
-        <meta name="description" content="Lägg upp ditt företag till salu på 123Hansa." />
+        <title>{`${t('form.title')} – 123Hansa`}</title>
+        <meta name="description" content={t('form.intro')} />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">Lägg upp en annons</h1>
-          <p className="mb-8 text-gray-600">
-            Annonsen granskas innan den publiceras. Du väljer själv vilka intresserade köpare du går
-            vidare med — 123Hansa är inte part i affären.
-          </p>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">{t('form.title')}</h1>
+          <p className="mb-8 text-gray-600">{t('form.intro')}</p>
 
           {loadError && (
             <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
@@ -211,10 +206,10 @@ const CreateListingPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             <section className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">Säljare</h2>
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('form.seller')}</h2>
 
               <label htmlFor="organization" className={labelClass}>
-                Organisation
+                {t('form.organisation')}
               </label>
               <select
                 id="organization"
@@ -227,14 +222,14 @@ const CreateListingPage: React.FC = () => {
                     {org.name} ({org.orgNumber}, {org.country})
                   </option>
                 ))}
-                <option value="new">+ Ny organisation</option>
+                <option value="new">+ {t('form.new-organisation')}</option>
               </select>
 
               {isNewOrganization ? (
                 <div className="space-y-4 rounded-lg bg-gray-50 p-4">
                   <div>
                     <label htmlFor="org-name" className={labelClass}>
-                      Namn *
+                      {t('form.org-name')} *
                     </label>
                     <input
                       id="org-name"
@@ -249,7 +244,7 @@ const CreateListingPage: React.FC = () => {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label htmlFor="org-country" className={labelClass}>
-                        Land *
+                        {t('auth.country')} *
                       </label>
                       <select
                         id="org-country"
@@ -257,9 +252,9 @@ const CreateListingPage: React.FC = () => {
                         onChange={(event) => setOrgCountry(event.target.value as CountryCode)}
                         className={fieldClass}
                       >
-                        {MARKETS.map((market) => (
-                          <option key={market.code} value={market.code}>
-                            {market.label}
+                        {MARKETS.map((code) => (
+                          <option key={code} value={code}>
+                            {t(`country.${code}`)}
                           </option>
                         ))}
                       </select>
@@ -282,7 +277,7 @@ const CreateListingPage: React.FC = () => {
                       {!errors.orgNumber && !orgNumberProblem && orgNumber.trim() && (
                         <p className="mt-1 flex items-center gap-1 text-sm text-green-700">
                           <CheckCircle className="h-4 w-4" aria-hidden="true" />
-                          Numret har rätt kontrollsiffra
+                          {t('form.org-number-ok')}
                         </p>
                       )}
                     </div>
@@ -290,7 +285,7 @@ const CreateListingPage: React.FC = () => {
 
                   <div>
                     <label htmlFor="org-kind" className={labelClass}>
-                      Typ
+                      {t('form.org-type')}
                     </label>
                     <select
                       id="org-kind"
@@ -298,8 +293,8 @@ const CreateListingPage: React.FC = () => {
                       onChange={(event) => setOrgKind(event.target.value as 'company' | 'broker')}
                       className={fieldClass}
                     >
-                      <option value="company">Bolag som säljer sin egen verksamhet</option>
-                      <option value="broker">Mäklare eller rådgivare som säljer åt andra</option>
+                      <option value="company">{t('form.org-type-company')}</option>
+                      <option value="broker">{t('form.org-type-broker')}</option>
                     </select>
                   </div>
                 </div>
@@ -309,13 +304,12 @@ const CreateListingPage: React.FC = () => {
                     {selectedOrganization.verifiedAt ? (
                       <span className="flex items-center gap-2 text-green-700">
                         <CheckCircle className="h-4 w-4" aria-hidden="true" />
-                        Verifierad organisation
+                        {t('form.org-verified')}
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 text-amber-700">
                         <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                        Organisationen är inte verifierad än. Annonsen kan skickas in, men publiceras
-                        först när vi kontrollerat uppgifterna.
+                        {t('form.org-unverified')}
                       </span>
                     )}
                   </p>
@@ -324,33 +318,33 @@ const CreateListingPage: React.FC = () => {
             </section>
 
             <section className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">Om verksamheten</h2>
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('form.about')}</h2>
 
               <div className="space-y-4">
                 <div>
                   <label htmlFor="title" className={labelClass}>
-                    Rubrik *
+                    {t('form.headline')} *
                   </label>
                   <input
                     id="title"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     className={fieldClass}
-                    placeholder="Etablerat konsultbolag i Göteborg"
+                    placeholder={t('form.headline-placeholder')}
                   />
                   {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
                 </div>
 
                 <div>
                   <label htmlFor="summary" className={labelClass}>
-                    Kort sammanfattning *
+                    {t('form.summary')} *
                   </label>
                   <input
                     id="summary"
                     value={summary}
                     onChange={(event) => setSummary(event.target.value)}
                     className={fieldClass}
-                    placeholder="Tolv anställda, långa kundrelationer, ägaren går i pension."
+                    placeholder={t('form.summary-placeholder')}
                     maxLength={500}
                   />
                   {errors.summary && <p className="mt-1 text-sm text-red-600">{errors.summary}</p>}
@@ -358,7 +352,7 @@ const CreateListingPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="description" className={labelClass}>
-                    Beskrivning *
+                    {t('form.description')} *
                   </label>
                   <textarea
                     id="description"
@@ -367,7 +361,7 @@ const CreateListingPage: React.FC = () => {
                     rows={8}
                     maxLength={20000}
                     className={fieldClass}
-                    placeholder="Beskriv verksamheten, kunderna, personalen och varför den säljs. Känsliga uppgifter delar du senare, med köpare du valt."
+                    placeholder={t('form.description-placeholder')}
                   />
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
                 </div>
@@ -375,7 +369,7 @@ const CreateListingPage: React.FC = () => {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="industry" className={labelClass}>
-                      Bransch *
+                      {t('form.industry')} *
                     </label>
                     <select
                       id="industry"
@@ -393,7 +387,7 @@ const CreateListingPage: React.FC = () => {
 
                   <div>
                     <label htmlFor="region" className={labelClass}>
-                      Ort eller region
+                      {t('form.region')}
                     </label>
                     <input
                       id="region"
@@ -408,16 +402,13 @@ const CreateListingPage: React.FC = () => {
             </section>
 
             <section className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-lg font-semibold text-gray-900">Siffror</h2>
-              <p className="mb-4 text-sm text-gray-600">
-                Beloppen anges i {currency}, som följer av organisationens land. Lämna priset tomt om
-                du hellre skriver "pris på begäran".
-              </p>
+              <h2 className="mb-1 text-lg font-semibold text-gray-900">{t('form.figures')}</h2>
+              <p className="mb-4 text-sm text-gray-600">{t('form.figures-intro')}</p>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="price" className={labelClass}>
-                    Utgångspris ({currency})
+                    {t('form.asking-price')} ({currency})
                   </label>
                   <input
                     id="price"
@@ -432,7 +423,7 @@ const CreateListingPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="revenue" className={labelClass}>
-                    Årsomsättning ({currency})
+                    {t('form.revenue')} ({currency})
                   </label>
                   <input
                     id="revenue"
@@ -447,7 +438,7 @@ const CreateListingPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="employees" className={labelClass}>
-                    Antal anställda
+                    {t('form.employees')}
                   </label>
                   <input
                     id="employees"
@@ -462,7 +453,7 @@ const CreateListingPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="founded" className={labelClass}>
-                    Grundat år
+                    {t('form.founded')}
                   </label>
                   <input
                     id="founded"
@@ -478,16 +469,14 @@ const CreateListingPage: React.FC = () => {
             </section>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-gray-600">
-                Annonsen granskas innan den publiceras. Du kan följa den under Min sida.
-              </p>
+              <p className="text-sm text-gray-600">{t('form.submit-note')}</p>
               <button
                 type="submit"
                 disabled={isSaving}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-                Skicka till granskning
+                {t('form.submit')}
               </button>
             </div>
           </form>

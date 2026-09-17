@@ -71,9 +71,14 @@ hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt 
 - [x] **Nyckelparitet testad** — klart 2026-09-16. 11 tester: samma nyckelmängd,
       inga tomma strängar, och inte bara kopierad svenska. De första riktiga
       testerna i `apps/web`
-- [ ] **Byt ut hårdkodad svenska i JSX.** Klart 2026-09-16: menyn, sidfoten,
-      startsidan, annonslistan och annonssidan. Kvar: Min sida, datarummet,
-      granskningen, annonsformuläret, meddelanden, inloggning och registrering
+- [ ] **Byt ut hårdkodad svenska i JSX.** Klart: menyn, sidfoten, startsidan,
+      annonslistan, annonssidan, inloggning, registrering, Min sida,
+      meddelanden, datarummet och annonsformuläret. Kvar: notissidan och de tre
+      fotsidorna (hjälp, kontakt, juridik). Granskningsvyn står kvar på svenska
+      med flit — den är intern
+- [ ] **Branscherna är svenska strängar i databasen.** En dansk köpare filtrerar
+      på "Livsmedel". De borde vara nycklar som översätts vid visning, som
+      statusetiketterna
 - [ ] **Ta bort hårdkodad `SEK` och `sv-SE`.** 42 filer nämner `SEK`. Priser ska
       formateras med `formatMoney()` och `intlLocaleFor(country)`.
 - [ ] **Lägg landsväljare i annonsformuläret**, och låt landet styra valuta,
