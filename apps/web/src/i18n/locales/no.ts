@@ -256,6 +256,18 @@ const no: Dictionary = {
   'form.error.missing': 'Noe mangler i skjemaet',
   'form.saved': 'Annonsen er sendt til gjennomgang',
   'form.save-failed': 'Annonsen kunne ikke lagres',
+
+  'notif.title': 'Varsler',
+  'notif.subtitle': 'Det som har skjedd med annonsene og interessemeldingene dine.',
+  'notif.loading': 'Henter varsler…',
+  'notif.error': 'Varslene kunne ikke hentes',
+  'notif.empty': 'Ingenting har skjedd ennå.',
+  'notif.interest-received': 'Ny interessemelding på annonsen din',
+  'notif.interest-accepted': 'Selgeren går videre med interessemeldingen din',
+  'notif.interest-declined': 'Selgeren avslo interessemeldingen din',
+  'notif.listing-published': 'Annonsen din er publisert',
+  'notif.listing-rejected': 'Annonsen din ble avslått i gjennomgangen',
+  'notif.message-received': 'Ny melding',
 };
 
 export default no;

@@ -254,6 +254,18 @@ const da: Dictionary = {
   'form.error.missing': 'Noget mangler i formularen',
   'form.saved': 'Annoncen er sendt til gennemgang',
   'form.save-failed': 'Annoncen kunne ikke gemmes',
+
+  'notif.title': 'Notifikationer',
+  'notif.subtitle': 'Det, der er sket med dine annoncer og interessetilkendegivelser.',
+  'notif.loading': 'Henter notifikationer…',
+  'notif.error': 'Notifikationerne kunne ikke hentes',
+  'notif.empty': 'Der er ikke sket noget endnu.',
+  'notif.interest-received': 'Ny interessetilkendegivelse på din annonce',
+  'notif.interest-accepted': 'Sælgeren går videre med din interessetilkendegivelse',
+  'notif.interest-declined': 'Sælgeren afviste din interessetilkendegivelse',
+  'notif.listing-published': 'Din annonce er offentliggjort',
+  'notif.listing-rejected': 'Din annonce blev afvist i gennemgangen',
+  'notif.message-received': 'Ny besked',
 };
 
 export default da;

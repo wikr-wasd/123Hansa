@@ -252,6 +252,18 @@ const en: Dictionary = {
   'form.error.missing': 'Something is missing in the form',
   'form.saved': 'The listing has been submitted for review',
   'form.save-failed': 'The listing could not be saved',
+
+  'notif.title': 'Notifications',
+  'notif.subtitle': 'What has happened with your listings and interest.',
+  'notif.loading': 'Loading notifications…',
+  'notif.error': 'The notifications could not be loaded',
+  'notif.empty': 'Nothing has happened yet.',
+  'notif.interest-received': 'New interest in your listing',
+  'notif.interest-accepted': 'The seller is taking your interest further',
+  'notif.interest-declined': 'The seller declined your interest',
+  'notif.listing-published': 'Your listing has been published',
+  'notif.listing-rejected': 'Your listing was rejected in review',
+  'notif.message-received': 'New message',
 };
 
 export default en;

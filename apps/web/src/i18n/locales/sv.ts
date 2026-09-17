@@ -265,6 +265,18 @@ const sv = {
   'form.error.missing': 'Något saknas i formuläret',
   'form.saved': 'Annonsen är inskickad för granskning',
   'form.save-failed': 'Annonsen kunde inte sparas',
+
+  'notif.title': 'Notiser',
+  'notif.subtitle': 'Det som hänt med dina annonser och intresseanmälningar.',
+  'notif.loading': 'Hämtar notiser…',
+  'notif.error': 'Notiserna kunde inte hämtas',
+  'notif.empty': 'Inget har hänt än.',
+  'notif.interest-received': 'Ny intresseanmälan på din annons',
+  'notif.interest-accepted': 'Säljaren går vidare med din intresseanmälan',
+  'notif.interest-declined': 'Säljaren avböjde din intresseanmälan',
+  'notif.listing-published': 'Din annons är publicerad',
+  'notif.listing-rejected': 'Din annons blev nekad i granskningen',
+  'notif.message-received': 'Nytt meddelande',
 } as const;
 
 /**
