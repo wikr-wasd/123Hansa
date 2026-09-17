@@ -268,13 +268,24 @@ Beslutad från start, se `BUSINESS.md`. Byggs **innan** första riktiga använda
 registreras — en användarmodell utan screening går inte att eftermontera utan att
 screena alla befintliga i efterhand.
 
-- [ ] **DPIA och post i `PERSONUPPGIFTER.md`** — före första screeningen
-- [ ] Välj leverantör för sanktions- och PEP-listor
-- [ ] Screening av person vid registrering, av bolag och verkliga huvudmän vid
-      annons och vid köparprofil för bolag
+- [x] **DPIA-underlaget i `PERSONUPPGIFTER.md`** (2026-09-17). ⚠️ Underlaget är
+      skrivet, men det är **inte** en genomförd DPIA — den kräver jurist och
+      måste göras innan den första skarpa körningen
+- [ ] Välj leverantör för sanktions- och PEP-listor. Anropet ligger bakom
+      `ScreeningProvider` i `supabase/functions/screening-run/index.ts`; i dag
+      finns bara `manual`, som aldrig svarar `clear`
+- [x] Manuell granskning av träffar i adminpanelen, med logg över beslutet
+      (`/admin/screening`). Beslutet kräver en människa och en motivering, och
+      `screening_decisions` går inte att skriva om i efterhand
+- [x] En träff stoppar publicering, inte bara visar en varning —
+      `verify_organization()` vägrar när läget är `hit`, `blocked` eller
+      `pending`, och utan verifiering kan annonsen inte publiceras
+- [ ] Screening av **person** vid registrering, och av verkliga huvudmän.
+      Tabellen tar redan `subject_type = 'person'`; det som saknas är var i
+      flödet den utlöses
+- [ ] Screening som villkor för **datarumsåtkomst**, inte bara för publicering
 - [ ] Omprövning när listorna uppdateras
-- [ ] Manuell granskning av träffar i adminpanelen, med logg över beslutet
-- [ ] En träff stoppar publicering och datarumsåtkomst, inte bara visar en varning
+- [ ] Gallring av `raw_response` enligt policyn i `PERSONUPPGIFTER.md`
 
 ## Fas 5c — Intäkter
 

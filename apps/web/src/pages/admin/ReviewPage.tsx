@@ -7,7 +7,9 @@ import { countryInfo, validateOrgNumber } from '@hansa/core';
 import {
   amIAdmin,
   fetchListingsForReview,
+  fetchScreeningState,
   reviewListing,
+  runScreening,
   verifyOrganization,
   type ReviewListing,
 } from '../../services/adminService';
@@ -25,6 +27,15 @@ import { useTranslation } from '../../hooks/useTranslation';
 // delas dock med resten av appen och kommer ur ordboken.
 const QUEUES: ListingStatus[] = ['pending_review', 'published', 'rejected'];
 
+// Screeningläget som granskaren ser det. `null` betyder att ingen kontroll är
+// gjord — det är INTE samma sak som "inget att anmärka", och texten säger det.
+const SCREENING_TEXT: Record<string, { label: string; tone: string }> = {
+  clear: { label: 'Screening: ingen anmärkning', tone: 'text-green-700' },
+  hit: { label: 'Screening: träff som ingen tagit ställning till', tone: 'text-red-700' },
+  blocked: { label: 'Screening: blockerad av granskare', tone: 'text-red-700' },
+  pending: { label: 'Screening: påbörjad, inte avgjord', tone: 'text-amber-700' },
+};
+
 const ReviewPage: React.FC = () => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuthStore();
   const { t } = useTranslation();
@@ -35,6 +46,9 @@ const ReviewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Screeningläge per organisation, hämtat efter annonserna. Saknas nyckeln är
+  // läget inte hämtat än; är värdet null finns ingen kontroll.
+  const [screening, setScreening] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -51,7 +65,23 @@ const ReviewPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      setListings(await fetchListingsForReview(queue));
+      const rows = await fetchListingsForReview(queue);
+      setListings(rows);
+
+      // Ett uppslag per unik organisation, inte per annons.
+      const organizationIds = [...new Set(rows.map((row) => row.organization.id))];
+      const states = await Promise.all(
+        organizationIds.map(async (id) => {
+          try {
+            return [id, await fetchScreeningState('organization', id)] as const;
+          } catch {
+            // Ett misslyckat uppslag får inte tömma granskningskön. Läget visas
+            // som okänt, och verifieringen stoppas ändå av databasen.
+            return [id, null] as const;
+          }
+        })
+      );
+      setScreening(Object.fromEntries(states));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kunde inte hämta annonserna');
     } finally {
@@ -116,7 +146,10 @@ const ReviewPage: React.FC = () => {
               Granskning
             </h1>
             <p className="text-gray-600">
-              Kontrollera uppgifterna mot bolagsregistret innan du publicerar.
+              Kontrollera uppgifterna mot bolagsregistret innan du publicerar.{' '}
+              <Link to="/admin/screening" className="font-medium text-blue-600 hover:text-blue-800">
+                Screeningkön
+              </Link>
             </p>
           </div>
           <nav className="mx-auto flex max-w-5xl gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8">
@@ -172,6 +205,9 @@ const ReviewPage: React.FC = () => {
             listings.map((listing) => {
               const orgCheck = validateOrgNumber(listing.organization.orgNumber, listing.organization.country);
               const isBusy = busyId === listing.id;
+              const screeningState = screening[listing.organization.id] ?? null;
+              const screeningOpen =
+                screeningState === 'hit' || screeningState === 'blocked' || screeningState === 'pending';
 
               return (
                 <article key={listing.id} className="rounded-xl border border-gray-200 bg-white p-6">
@@ -229,15 +265,59 @@ const ReviewPage: React.FC = () => {
                         )}
                       </p>
 
-                      <p className="mt-2 text-sm">
-                        {listing.organization.verifiedAt ? (
-                          <span className="text-green-700">
-                            Verifierad {new Date(listing.organization.verifiedAt).toLocaleDateString('sv-SE')}
-                          </span>
-                        ) : (
+                      <div className="mt-2 space-y-2 text-sm">
+                        <p className={screeningState ? SCREENING_TEXT[screeningState]?.tone : 'text-amber-700'}>
+                          {screeningState
+                            ? SCREENING_TEXT[screeningState]?.label ?? `Screening: ${screeningState}`
+                            : 'Screening: ingen kontroll gjord'}
+                          {screeningOpen && (
+                            <>
+                              {' · '}
+                              <Link to="/admin/screening" className="font-medium underline">
+                                avgör ärendet
+                              </Link>
+                            </>
+                          )}
+                        </p>
+
+                        {!screeningState && (
                           <button
                             type="button"
                             disabled={isBusy}
+                            onClick={() =>
+                              act(
+                                listing.id,
+                                () =>
+                                  runScreening({
+                                    subjectType: 'organization',
+                                    subjectId: listing.organization.id,
+                                    name: listing.organization.name,
+                                    country: listing.organization.country,
+                                  }),
+                                'Kontrollen är registrerad och väntar på granskning'
+                              )
+                            }
+                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                          >
+                            Kör screening
+                          </button>
+                        )}
+
+                        {listing.organization.verifiedAt ? (
+                          <p className="text-green-700">
+                            Verifierad {new Date(listing.organization.verifiedAt).toLocaleDateString('sv-SE')}
+                          </p>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isBusy || screeningOpen || !screeningState}
+                            title={
+                              screeningOpen
+                                ? 'Screeningen måste avgöras först'
+                                : !screeningState
+                                  ? 'Ingen screening är gjord'
+                                  : undefined
+                            }
                             onClick={() =>
                               act(
                                 listing.id,
@@ -250,7 +330,7 @@ const ReviewPage: React.FC = () => {
                             Markera organisationen som verifierad
                           </button>
                         )}
-                      </p>
+                      </div>
                     </div>
 
                     <div>

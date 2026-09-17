@@ -22,8 +22,8 @@ Det är därför `ARCHITECTURE.md` har en statustabell och inte bara en beskrivn
 | Var | Vad | Kräver | Läge |
 |---|---|---|---|
 | `packages/core` | Pengar, valuta, moms, provision, org.nr, språkval | inget | 🟢 83 tester |
-| `supabase/tests` | Behörighet i databasen (RLS, triggers, datarum, logg) | Docker | 🟢 61 tester |
-| `apps/web` | Rena moduler och komponenter | inget | 🔴 i praktiken inga |
+| `supabase/tests` | Behörighet i databasen (RLS, triggers, datarum, logg, screening) | Docker | 🟢 83 tester |
+| `apps/web` | Rena moduler och komponenter | inget | 🟡 bara ordboksparitet |
 | `apps/api` | Route handlers, validering, behörighet | databas | 🔴 i praktiken inga |
 | Röktest | Hela flödet mot levande app | app + databas | 🔴 finns inte |
 
@@ -42,8 +42,17 @@ noll rader, och en trigger på tabellen körs aldrig. Testa sådana fall genom a
 läsa tillbaka värdet som `postgres`, inte med `throws_ok`. Det första utkastet av
 testet för sekretessavtalen gick i just den fällan.
 
+`screening.test.sql` provar inte att en rad går att skriva, utan att den får
+**konsekvens**: att en oavgjord träff hindrar verifiering, att ett blockerande
+beslut väger tyngre än en tidigare godkänd kontroll, och att ett fattat beslut
+inte går att skriva om. Testet hittade en riktig bugg — två kontroller i samma
+sekund gav godtycklig ordning, så en träff kunde tystas av en äldre godkänd
+kontroll. Därav kolumnen `seq`.
+
 Databastesterna bevisar att reglerna **i databasen** håller. De bevisar ingenting
-om att webben anropar databasen — i dag gör den det inte alls.
+om att webben anropar databasen. Sedan 2026-09-16 gör den det — men det är
+kontrollerat för hand i webbläsaren, inte av ett test. Ett röktest saknas
+fortfarande, och det är den enskilt största luckan i tabellen ovan.
 
 ---
 

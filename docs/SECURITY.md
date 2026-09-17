@@ -42,13 +42,26 @@ En ny skyddad yta ska läggas till i **alla tre** lagren i samma commit.
 | Kontaktuppgifter till säljare | ❌ | ❌ | — | ✅ | ✅ |
 | Skapa annons | ❌ | ❌ | ✅ | — | ✅ |
 | Due diligence-dokument | ❌ | ❌ | egna | ✅ efter NDA | ✅ loggat |
-| Lägga bud | ❌ | ❌ | — | ✅ | ❌ |
+| Screeningkontroller och beslut | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Begära en screeningkörning | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Adminpanel | ❌ | ❌ | ❌ | ❌ | ✅ + MFA |
 | `/api/admin/*` | ❌ | ❌ | ❌ | ❌ | ✅ server-side verifierat |
+
+Budgivning står medvetet **inte** i tabellen. Plattformen tar inget bud — se
+`BUSINESS.md`. Raden fanns här tidigare och togs bort 2026-09-17; en åtkomstregel
+för en funktion som inte ska finnas inbjuder till att bygga den.
 
 Rollen ska läsas från en källa **klienten inte kan sätta**. Ett fält i en JWT som
 klienten själv skickar med är inte en sådan källa om det inte är signerat av
 servern och verifierat vid varje anrop.
+
+**Screeningen är inte bara läsbegränsad, den är skrivbegränsad i tre steg.**
+Ingen — inte ens en administratör — skriver en kontroll direkt: `authenticated`
+har bara `select` på tabellerna, `record_screening_check()` kräver
+tjänstenyckeln, och `decide_screening()` kräver både administratör och en
+motivering på minst tre tecken. Den registrerade själv ser ingenting av detta i
+klienten; rätten till besked och utdrag är en rutin, inte en tabell som ligger
+öppen.
 
 ---
 

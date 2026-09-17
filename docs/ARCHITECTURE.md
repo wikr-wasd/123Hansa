@@ -135,8 +135,9 @@ och affären avbryts med "priset har ändrats" utan att någon förstår varför
 ## Dataflödet på marknadsplatsen
 
 Så här ska det se ut enligt strategin 2026-09-15 (`BUSINESS.md`). Steg 1 och 3–6
-är byggda mot databasen. Screeningen i steg 2 finns inte, och avgifterna i steg 1
-väntar på prisbeslut.
+är byggda mot databasen. Screeningen av **bolag** i steg 2 är byggd sedan
+2026-09-17, men utan listleverantör — se nedan. Screeningen av person och
+verklig huvudman finns inte, och avgifterna i steg 1 väntar på prisbeslut.
 
 1. **Säljaren skapar en annons** och betalar listningsavgiften. Land väljs, och
    landet avgör valuta, moms och vilket organisationsnummerformat som krävs.
@@ -158,6 +159,23 @@ väntar på prisbeslut.
 Här tar plattformens ansvar slut. **Det finns inget steg 8.** Ett bud, en
 köpeskilling eller ett avtal där plattformen är part kräver ett nytt beslut i
 `OPEN-QUESTIONS.md`, eftersom det flyttar 123Hansa mot förmedlarrollen.
+
+### Screeningen i steg 2 — vad som finns och vad som inte gör det
+
+Migrationen `20260917100000_screening.sql` och `/admin/screening` bygger
+*apparaten*: kontroller, beslut med tvingande motivering, oföränderlig logg och
+— avgörande — en **konsekvens**. `verify_organization()` vägrar när läget är
+`hit`, `blocked` eller `pending`, och en overifierad organisation kan inte
+publicera. Kedjan är provad i webbläsaren och i `screening.test.sql`.
+
+Det som **inte** finns är själva listuppslaget. `screening-run` har bara
+leverantören `manual`, som aldrig svarar `clear` utan lämnar ärendet åt en
+människa. Det är avsiktligt: en kontroll som säger "inget att anmärka" utan att
+ha frågat någon ser ut som ett bevis, och är farligare än ingen kontroll alls.
+
+Tre saker måste alltså vara sanna samtidigt innan någon säger att 123Hansa
+screenar: leverantör upphandlad, DPIA genomförd med jurist, och personer och
+verkliga huvudmän screenade — inte bara bolaget.
 
 ---
 

@@ -161,7 +161,7 @@ const DashboardPage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
               >
                 <Plus className="h-5 w-5" aria-hidden="true" />
-                Lägg upp en annons
+                {t('dash.new-listing')}
               </Link>
             </div>
           </div>
@@ -225,7 +225,7 @@ const DashboardPage: React.FC = () => {
                     className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
                   >
                     <Plus className="h-5 w-5" aria-hidden="true" />
-                    Lägg upp en annons
+                    {t('dash.new-listing')}
                   </Link>
                 </div>
               ) : (

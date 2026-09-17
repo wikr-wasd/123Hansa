@@ -28,6 +28,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 // Granskningsvyn. Vem som kommer in avgörs av am_i_platform_admin() i
 // databasen, och varje åtgärd kontrolleras dessutom av databasen själv.
 const ReviewPage = lazy(() => import('./pages/admin/ReviewPage'));
+const ScreeningPage = lazy(() => import('./pages/admin/ScreeningPage'));
 const DataroomPage = lazy(() => import('./pages/listings/DataroomPage'));
 
 // Auth pages
@@ -84,6 +85,11 @@ function App() {
             <Route path="/admin/review" element={
               <ProtectedRoute>
                 <ReviewPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/screening" element={
+              <ProtectedRoute>
+                <ScreeningPage />
               </ProtectedRoute>
             } />
             

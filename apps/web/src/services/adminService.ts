@@ -99,3 +99,97 @@ export async function reviewListing(listingId: string, approve: boolean, note?: 
   });
   if (error) throw new Error(error.message);
 }
+
+// --- Screening --------------------------------------------------------------
+// Alla åtgärder går genom databasfunktioner som gör sin egen behörighets-
+// kontroll. Underlaget för dataskyddet står i docs/PERSONUPPGIFTER.md.
+
+export type ScreeningStatus = 'pending' | 'clear' | 'hit' | 'error';
+
+export interface ScreeningCheck {
+  id: string;
+  subjectType: 'person' | 'organization';
+  subjectId: string;
+  searchedName: string;
+  country: string | null;
+  provider: string;
+  status: ScreeningStatus;
+  hitCount: number;
+  checkedAt: string;
+  /** Senaste beslutet, om någon tagit ställning. */
+  decision: { outcome: 'cleared' | 'blocked'; reason: string; decidedAt: string } | null;
+}
+
+export async function fetchScreeningChecks(onlyOpen = true): Promise<ScreeningCheck[]> {
+  let request = supabase()
+    .from('screening_checks')
+    .select('id, subject_type, subject_id, searched_name, country, provider, status, hit_count, checked_at, screening_decisions(outcome, reason, decided_at)')
+    .order('checked_at', { ascending: false })
+    .limit(100);
+
+  if (onlyOpen) request = request.in('status', ['pending', 'hit', 'error']);
+
+  const { data, error } = await request;
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row: Record<string, unknown>) => {
+    const decisions = (row.screening_decisions ?? []) as Array<{
+      outcome: 'cleared' | 'blocked';
+      reason: string;
+      decided_at: string;
+    }>;
+    const latest = [...decisions].sort((a, b) => b.decided_at.localeCompare(a.decided_at))[0];
+
+    return {
+      id: row.id as string,
+      subjectType: row.subject_type as 'person' | 'organization',
+      subjectId: row.subject_id as string,
+      searchedName: row.searched_name as string,
+      country: (row.country as string | null) ?? null,
+      provider: row.provider as string,
+      status: row.status as ScreeningStatus,
+      hitCount: (row.hit_count as number) ?? 0,
+      checkedAt: row.checked_at as string,
+      decision: latest
+        ? { outcome: latest.outcome, reason: latest.reason, decidedAt: latest.decided_at }
+        : null,
+    };
+  });
+}
+
+/**
+ * Senaste avgörandet för ett subjekt: 'clear', 'hit', 'blocked', 'pending'
+ * eller null om ingen kontroll gjorts. Räknas ut i databasen, inte här.
+ */
+export async function fetchScreeningState(
+  subjectType: 'person' | 'organization',
+  subjectId: string
+): Promise<string | null> {
+  const { data, error } = await supabase().rpc('screening_state', {
+    p_subject_type: subjectType,
+    p_subject_id: subjectId,
+  });
+  if (error) throw new Error(error.message);
+  return (data as string | null) ?? null;
+}
+
+/** Granskarens beslut. Motiveringen är obligatorisk — databasen kräver den. */
+export async function decideScreening(checkId: string, clear: boolean, reason: string): Promise<void> {
+  const { error } = await supabase().rpc('decide_screening', {
+    p_check: checkId,
+    p_clear: clear,
+    p_reason: reason,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Begär en ny körning. Leverantören avgörs av serverfunktionen, inte av klienten. */
+export async function runScreening(input: {
+  subjectType: 'person' | 'organization';
+  subjectId: string;
+  name: string;
+  country: string | null;
+}): Promise<void> {
+  const { error } = await supabase().functions.invoke('screening-run', { body: input });
+  if (error) throw new Error(error.message);
+}

@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       dataroom_documents: {
@@ -514,16 +539,135 @@ export type Database = {
         }
         Relationships: []
       }
+      screening_checks: {
+        Row: {
+          checked_at: string
+          country: string | null
+          created_at: string
+          hit_count: number
+          id: string
+          provider: string
+          raw_response: Json | null
+          searched_name: string
+          seq: number
+          status: Database["public"]["Enums"]["screening_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["screening_subject"]
+        }
+        Insert: {
+          checked_at?: string
+          country?: string | null
+          created_at?: string
+          hit_count?: number
+          id?: string
+          provider?: string
+          raw_response?: Json | null
+          searched_name: string
+          seq?: never
+          status?: Database["public"]["Enums"]["screening_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["screening_subject"]
+        }
+        Update: {
+          checked_at?: string
+          country?: string | null
+          created_at?: string
+          hit_count?: number
+          id?: string
+          provider?: string
+          raw_response?: Json | null
+          searched_name?: string
+          seq?: never
+          status?: Database["public"]["Enums"]["screening_status"]
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["screening_subject"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_checks_country_fkey"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["country"]
+          },
+        ]
+      }
+      screening_decisions: {
+        Row: {
+          check_id: string
+          decided_at: string
+          decided_by: string
+          id: string
+          outcome: Database["public"]["Enums"]["screening_outcome"]
+          reason: string
+        }
+        Insert: {
+          check_id: string
+          decided_at?: string
+          decided_by: string
+          id?: string
+          outcome: Database["public"]["Enums"]["screening_outcome"]
+          reason: string
+        }
+        Update: {
+          check_id?: string
+          decided_at?: string
+          decided_by?: string
+          id?: string
+          outcome?: Database["public"]["Enums"]["screening_outcome"]
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_decisions_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "screening_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_decisions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       am_i_platform_admin: { Args: never; Returns: boolean }
+      decide_screening: {
+        Args: { p_check: string; p_clear: boolean; p_reason: string }
+        Returns: Database["public"]["Enums"]["screening_outcome"]
+      }
       record_document_access: { Args: { p_document: string }; Returns: string }
+      record_screening_check: {
+        Args: {
+          p_country: string
+          p_hit_count: number
+          p_provider: string
+          p_raw?: Json
+          p_searched_name: string
+          p_status: Database["public"]["Enums"]["screening_status"]
+          p_subject_id: string
+          p_subject_type: Database["public"]["Enums"]["screening_subject"]
+        }
+        Returns: string
+      }
       review_listing: {
         Args: { p_approve: boolean; p_listing: string; p_note?: string }
         Returns: Database["public"]["Enums"]["listing_status"]
+      }
+      screening_state: {
+        Args: {
+          p_subject_id: string
+          p_subject_type: Database["public"]["Enums"]["screening_subject"]
+        }
+        Returns: string
       }
       verify_organization: {
         Args: { p_organization: string; p_verified?: boolean }
@@ -541,6 +685,9 @@ export type Database = {
         | "withdrawn"
       member_role: "owner" | "member"
       organization_kind: "company" | "broker"
+      screening_outcome: "cleared" | "blocked"
+      screening_status: "pending" | "clear" | "hit" | "error"
+      screening_subject: "person" | "organization"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -666,6 +813,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       interest_status: ["pending", "accepted", "declined", "withdrawn"],
@@ -679,6 +829,9 @@ export const Constants = {
       ],
       member_role: ["owner", "member"],
       organization_kind: ["company", "broker"],
+      screening_outcome: ["cleared", "blocked"],
+      screening_status: ["pending", "clear", "hit", "error"],
+      screening_subject: ["person", "organization"],
     },
   },
 } as const
