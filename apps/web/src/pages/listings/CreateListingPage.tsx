@@ -3,7 +3,14 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { countryInfo, parseAmount, type CountryCode } from '@hansa/core';
+import {
+  countryInfo,
+  industryTranslationKey,
+  INDUSTRY_KEYS,
+  parseAmount,
+  type CountryCode,
+  type Industry,
+} from '@hansa/core';
 import {
   checkOrgNumber,
   createOrganization,
@@ -19,21 +26,9 @@ import { useTranslation } from '../../hooks/useTranslation';
 
 const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
-const INDUSTRIES = [
-  'IT och systemutveckling',
-  'E-handel',
-  'Konsult och tjänster',
-  'Tillverkning',
-  'Bygg och anläggning',
-  'Detaljhandel',
-  'Restaurang och café',
-  'Vård och hälsa',
-  'Transport och logistik',
-  'Fastighetsservice',
-  'Ekonomi och redovisning',
-  'Livsmedel',
-  'Annan bransch',
-];
+// Branscherna kommer ur @hansa/core och lagras som nycklar. Listan låg tidigare
+// här som svenska texter, vilket gav en dansk säljare svenska alternativ i en
+// dansk blankett — och gjorde branschen omöjlig att översätta i efterhand.
 
 const fieldClass =
   'w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500';
@@ -57,7 +52,7 @@ const CreateListingPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
-  const [industry, setIndustry] = useState(INDUSTRIES[0]);
+  const [industry, setIndustry] = useState<Industry>(INDUSTRY_KEYS[0]);
   const [region, setRegion] = useState('');
   const [price, setPrice] = useState('');
   const [revenue, setRevenue] = useState('');
@@ -374,12 +369,12 @@ const CreateListingPage: React.FC = () => {
                     <select
                       id="industry"
                       value={industry}
-                      onChange={(event) => setIndustry(event.target.value)}
+                      onChange={(event) => setIndustry(event.target.value as Industry)}
                       className={fieldClass}
                     >
-                      {INDUSTRIES.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                      {INDUSTRY_KEYS.map((key) => (
+                        <option key={key} value={key}>
+                          {t(industryTranslationKey(key))}
                         </option>
                       ))}
                     </select>

@@ -1,4 +1,4 @@
-import type { CountryCode } from '@hansa/core';
+import type { CountryCode, Industry } from '@hansa/core';
 import { supabase } from '../lib/supabase';
 import type { ListingStatus } from './listingService';
 
@@ -10,7 +10,7 @@ export interface ReviewListing {
   title: string;
   summary: string;
   description: string;
-  industry: string;
+  industry: Industry;
   region: string;
   country: CountryCode;
   askingPriceMinor: number | null;
@@ -62,7 +62,7 @@ export async function fetchListingsForReview(status: ListingStatus = 'pending_re
       title: row.title as string,
       summary: row.summary as string,
       description: row.description as string,
-      industry: row.industry as string,
+      industry: row.industry as Industry,
       region: row.region as string,
       country: row.country as CountryCode,
       askingPriceMinor: (row.asking_price_minor as number | null) ?? null,

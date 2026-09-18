@@ -21,6 +21,7 @@ import { isSupabaseConfigured, missingConfigMessage } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import { DemoBadge } from './ListingsPage';
+import { industryTranslationKey } from '@hansa/core';
 
 const Fact: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3">
@@ -158,7 +159,7 @@ const ListingDetailPage: React.FC = () => {
             <header className="rounded-xl border border-gray-200 bg-white p-6">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                  {listing.industry}
+                  {t(industryTranslationKey(listing.industry))}
                 </span>
                 {listing.isDemo && <DemoBadge />}
               </div>

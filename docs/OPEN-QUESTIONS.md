@@ -262,7 +262,45 @@ Det finns i dag två saker med samma namn:
 Alternativen för nummer två: bygga den med en riktig värderingspartner som
 utför arbetet, eller ta bort den. Att sälja den i befintligt skick går inte.
 
-**Status:** ⬜ obesvarad
+**Åtgärd 2026-09-17, Claude:** betaldelen är **borttagen ur koden**. Den låg
+kvar som en knapp märkt "Beställ och betala — 2.500 SEK" med texterna "Säker
+betalning via Stripe" och "Pengarna återbetalas om du inte är nöjd". Knappen
+visade en notis och gjorde ingenting annat: ingen betalning gick igenom, inga
+uppgifter sparades, ingen blev kontaktad. Sidan lovade ett återkommande samtal
+inom 24 timmar som ingen kunde hålla.
+
+`/valuation` visar nu samma schablon som startsidan, räknad i `@hansa/core`,
+med sina förbehåll utskrivna. Samtidigt försvann en egen värderingsformel
+(`omsättning × multiplikator`, utan valuta och utan rörelseresultat) som låg
+inbyggd i komponenten och gav ett annat svar än kärnan på samma bolag.
+
+**Frågan kvarstår:** ska tjänsten byggas med en partner, eller ska 123Hansa
+stanna vid schablonen? Det som är avgjort är bara att den inte får säljas innan
+den finns.
+
+**Status:** ⬜ obesvarad — men koden ljuger inte längre under tiden
+
+---
+
+## 16. Branschlistan — täcker den vad säljare faktiskt annonserar?
+
+Branscherna blev nycklar 2026-09-17 (`packages/core/src/industry.ts`, enum i
+databasen). Tretton val, översatta i alla fyra ordböckerna.
+
+Vid bytet visade det sig att demoannonsen för en tung fordonsverkstad hade
+branschen "Fordon och verkstad" — handskriven, eftersom listan saknade den.
+Den står nu som `other`.
+
+Det är en signal, inte ett fel: taxonomin är gissad, inte härledd ur vad
+säljare faktiskt vill annonsera. Frågan är om listan ska utökas (fordonsservice,
+utbildning, media, bygghandel?) eller om `other` räcker tills det finns riktiga
+annonser att titta på.
+
+Att lägga till en bransch kräver tre saker samtidigt: nyckeln i `INDUSTRY_KEYS`,
+ett värde i databasens enum, och en **multipel** i `INDUSTRY_MULTIPLES` — typen
+tvingar fram det sista, så en ny bransch kan inte tyst värderas som `other`.
+
+**Status:** ⬜ obesvarad. Blockerar ingenting; `other` fungerar under tiden.
 
 ---
 

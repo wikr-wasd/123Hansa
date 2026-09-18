@@ -266,6 +266,21 @@ const da: Dictionary = {
   'notif.listing-published': 'Din annonce er offentliggjort',
   'notif.listing-rejected': 'Din annonce blev afvist i gennemgangen',
   'notif.message-received': 'Ny besked',
+
+  // Brancher. Nøglerne kommer fra INDUSTRY_KEYS i @hansa/core.
+  'industry.software': 'IT og systemudvikling',
+  'industry.ecommerce': 'E-handel',
+  'industry.consulting': 'Konsulent og service',
+  'industry.accounting': 'Regnskab og økonomi',
+  'industry.manufacturing': 'Produktion',
+  'industry.construction': 'Bygge og anlæg',
+  'industry.retail': 'Detailhandel',
+  'industry.food': 'Fødevarer',
+  'industry.restaurant': 'Restaurant og café',
+  'industry.healthcare': 'Sundhed og pleje',
+  'industry.transport': 'Transport og logistik',
+  'industry.property_services': 'Ejendomsservice',
+  'industry.other': 'Anden branche',
 };
 
 export default da;

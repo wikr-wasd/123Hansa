@@ -3,8 +3,10 @@ import {
   formatMoney,
   intlLocaleFor,
   isCountryCode,
+  isIndustry,
   money,
   type CountryCode,
+  type Industry,
 } from '@hansa/core';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/database';
@@ -19,7 +21,7 @@ export interface Listing {
   title: string;
   summary: string;
   description: string;
-  industry: string;
+  industry: Industry;
   region: string;
   country: CountryCode;
   /** Heltal i minsta enhet. null betyder "pris på begäran". */
@@ -35,7 +37,7 @@ export interface Listing {
 export interface ListingFilters {
   query?: string;
   country?: CountryCode | 'ALL';
-  industry?: string;
+  industry?: Industry;
   limit?: number;
   offset?: number;
 }
@@ -60,7 +62,7 @@ function toListing(row: Partial<ListingRow>): Listing {
     title: row.title as string,
     summary: row.summary ?? '',
     description: row.description ?? '',
-    industry: row.industry as string,
+    industry: row.industry as Industry,
     region: row.region ?? '',
     country,
     askingPriceMinor: row.asking_price_minor ?? null,
@@ -98,8 +100,13 @@ export async function fetchListings(filters: ListingFilters = {}): Promise<Listi
   if (industry) request = request.eq('industry', industry);
   if (query && query.trim()) {
     const term = `%${query.trim().replace(/[%_]/g, (match) => `\\${match}`)}%`;
+    // Branschen står INTE med här. Den är en enum sedan 2026-09-17, och `ilike`
+    // mot en enum ger 400 från PostgREST. Att söka på branschens namn vore
+    // dessutom fel: namnet är olika på varje språk, så en dansk sökning hade
+    // träffat annonser vars bransch råkar heta samma sak på svenska. Branschen
+    // väljs i filtret bredvid, där den matchas på nyckel.
     request = request.or(
-      `title.ilike.${term},summary.ilike.${term},description.ilike.${term},industry.ilike.${term},region.ilike.${term}`
+      `title.ilike.${term},summary.ilike.${term},description.ilike.${term},region.ilike.${term}`
     );
   }
 
@@ -121,15 +128,24 @@ export async function fetchListing(id: string): Promise<Listing | null> {
   return data ? toListing(data) : null;
 }
 
-/** Branscher som faktiskt finns bland publicerade annonser. */
-export async function fetchIndustries(): Promise<string[]> {
+/**
+ * Branschnycklar som faktiskt finns bland publicerade annonser.
+ *
+ * Bara de som används, inte hela listan: ett filter med tretton val där tio är
+ * tomma är sämre än ett med tre som ger träff.
+ *
+ * Sorteringen sker INTE här. Nycklarna ska sorteras efter sin översatta text i
+ * användarens språk, och den finns bara i komponenten — att sortera på nyckeln
+ * hade gett ordningen 'accounting, construction, …' oavsett språk.
+ */
+export async function fetchIndustries(): Promise<Industry[]> {
   const { data, error } = await supabase()
     .from('listings')
     .select('industry')
     .eq('status', 'published');
 
   if (error) throw new Error(error.message);
-  return [...new Set((data ?? []).map((row) => row.industry))].sort((a, b) => a.localeCompare(b, 'sv'));
+  return [...new Set((data ?? []).map((row) => row.industry as Industry))].filter(isIndustry);
 }
 
 export interface InterestRequest {
@@ -206,7 +222,7 @@ export interface NewListing {
   title: string;
   summary: string;
   description: string;
-  industry: string;
+  industry: Industry;
   region: string;
   askingPriceMinor: number | null;
   revenueMinor: number | null;
@@ -279,7 +295,7 @@ export async function createListing(input: NewListing): Promise<string> {
       title: input.title.trim(),
       summary: input.summary.trim(),
       description: input.description.trim(),
-      industry: input.industry.trim(),
+      industry: input.industry,
       region: input.region.trim(),
       asking_price_minor: input.askingPriceMinor,
       revenue_minor: input.revenueMinor,

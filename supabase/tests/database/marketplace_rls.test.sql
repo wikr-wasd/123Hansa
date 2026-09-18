@@ -55,23 +55,23 @@ select throws_ok($$ select * from public.platform_admins $$, '42501', null,
 -- Annons -------------------------------------------------------------------
 select lives_ok($$
   insert into public.listings (id, organization_id, country, currency, title, industry, asking_price_minor)
-  values ('cccccccc-cccc-4ccc-8ccc-000000000001', 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Konsultbolag i Göteborg', 'Konsult', 250000000) $$,
+  values ('cccccccc-cccc-4ccc-8ccc-000000000001', 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Konsultbolag i Göteborg', 'consulting', 250000000) $$,
   'säljaren skapar ett utkast');
 select throws_ok($$
   insert into public.listings (organization_id, country, currency, title, industry)
-  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'NOK', 'Fel valuta', 'Konsult') $$,
+  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'NOK', 'Fel valuta', 'consulting') $$,
   '23503', null, 'valutan måste följa landet');
 select throws_ok($$
   insert into public.listings (organization_id, country, currency, title, industry)
-  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'HR', 'EUR', 'Bolag i Zagreb', 'Konsult') $$,
+  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'HR', 'EUR', 'Bolag i Zagreb', 'consulting') $$,
   'P0001', null, 'land som inte är lanserat nekas');
 select throws_ok($$
   insert into public.listings (organization_id, country, currency, title, industry, is_demo)
-  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Falsk demo', 'Konsult', true) $$,
+  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Falsk demo', 'consulting', true) $$,
   'P0001', null, 'säljaren kan inte skapa en demoannons');
 select throws_ok($$
   insert into public.listings (organization_id, country, currency, title, industry, status)
-  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Direktpublicerad', 'Konsult', 'published') $$,
+  values ('bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'SE', 'SEK', 'Direktpublicerad', 'consulting', 'published') $$,
   'P0001', null, 'säljaren kan inte skapa en publicerad annons');
 select throws_ok($$ update public.listings set status = 'published' where id = 'cccccccc-cccc-4ccc-8ccc-000000000001' $$,
   'P0001', null, 'säljaren kan inte publicera själv');
@@ -121,7 +121,7 @@ select is((select title from public.listings where id = 'cccccccc-cccc-4ccc-8ccc
 
 -- Demoannons, skapad av plattformen
 insert into public.listings (id, organization_id, created_by, status, is_demo, country, currency, title, industry)
-values ('cccccccc-cccc-4ccc-8ccc-000000000002', 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'aaaaaaaa-aaaa-4aaa-8aaa-000000000001', 'published', true, 'SE', 'SEK', 'Exempelannons', 'Handel');
+values ('cccccccc-cccc-4ccc-8ccc-000000000002', 'bbbbbbbb-bbbb-4bbb-8bbb-000000000001', 'aaaaaaaa-aaaa-4aaa-8aaa-000000000001', 'published', true, 'SE', 'SEK', 'Exempelannons', 'retail');
 
 -- Intresse och meddelanden -------------------------------------------------
 set local role authenticated;

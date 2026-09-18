@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { AlertCircle, CheckCircle, Loader2, ShieldCheck } from 'lucide-react';
-import { countryInfo, validateOrgNumber } from '@hansa/core';
+import { countryInfo, industryTranslationKey, validateOrgNumber } from '@hansa/core';
 import {
   amIAdmin,
   fetchListingsForReview,
@@ -216,7 +216,7 @@ const ReviewPage: React.FC = () => {
                       {t(LISTING_STATUS_KEYS[listing.status])}
                     </span>
                     <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                      {listing.industry}
+                      {t(industryTranslationKey(listing.industry))}
                     </span>
                     <span className="text-xs text-gray-500">
                       Inkom {new Date(listing.createdAt).toLocaleDateString('sv-SE')}

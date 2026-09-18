@@ -8,6 +8,7 @@
  */
 
 export * from './country.js';
+export * from './industry.js';
 export * from './locale.js';
 export * from './money.js';
 export * from './orgnumber.js';

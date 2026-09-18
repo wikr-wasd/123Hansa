@@ -277,6 +277,22 @@ const sv = {
   'notif.listing-published': 'Din annons är publicerad',
   'notif.listing-rejected': 'Din annons blev nekad i granskningen',
   'notif.message-received': 'Nytt meddelande',
+
+  // Branscher. Nycklarna kommer ur INDUSTRY_KEYS i @hansa/core och lagras som
+  // nycklar i databasen — texten här går att formulera om utan att röra data.
+  'industry.software': 'IT och systemutveckling',
+  'industry.ecommerce': 'E-handel',
+  'industry.consulting': 'Konsult och tjänster',
+  'industry.accounting': 'Ekonomi och redovisning',
+  'industry.manufacturing': 'Tillverkning',
+  'industry.construction': 'Bygg och anläggning',
+  'industry.retail': 'Detaljhandel',
+  'industry.food': 'Livsmedel',
+  'industry.restaurant': 'Restaurang och café',
+  'industry.healthcare': 'Vård och hälsa',
+  'industry.transport': 'Transport och logistik',
+  'industry.property_services': 'Fastighetsservice',
+  'industry.other': 'Annan bransch',
 } as const;
 
 /**

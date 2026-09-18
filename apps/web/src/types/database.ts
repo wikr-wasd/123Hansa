@@ -212,7 +212,7 @@ export type Database = {
           employees: number | null
           founded_year: number | null
           id: string
-          industry: string
+          industry: Database["public"]["Enums"]["listing_industry"]
           is_demo: boolean
           organization_id: string
           published_at: string | null
@@ -234,7 +234,7 @@ export type Database = {
           employees?: number | null
           founded_year?: number | null
           id?: string
-          industry: string
+          industry?: Database["public"]["Enums"]["listing_industry"]
           is_demo?: boolean
           organization_id: string
           published_at?: string | null
@@ -256,7 +256,7 @@ export type Database = {
           employees?: number | null
           founded_year?: number | null
           id?: string
-          industry?: string
+          industry?: Database["public"]["Enums"]["listing_industry"]
           is_demo?: boolean
           organization_id?: string
           published_at?: string | null
@@ -502,7 +502,7 @@ export type Database = {
           countries: string[]
           created_at: string
           id: string
-          industries: string[]
+          industries: Database["public"]["Enums"]["listing_industry"][]
           max_price_minor: number | null
           min_price_minor: number | null
           name: string
@@ -515,7 +515,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           id?: string
-          industries?: string[]
+          industries?: Database["public"]["Enums"]["listing_industry"][]
           max_price_minor?: number | null
           min_price_minor?: number | null
           name: string
@@ -528,7 +528,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           id?: string
-          industries?: string[]
+          industries?: Database["public"]["Enums"]["listing_industry"][]
           max_price_minor?: number | null
           min_price_minor?: number | null
           name?: string
@@ -676,6 +676,20 @@ export type Database = {
     }
     Enums: {
       interest_status: "pending" | "accepted" | "declined" | "withdrawn"
+      listing_industry:
+        | "software"
+        | "ecommerce"
+        | "consulting"
+        | "accounting"
+        | "manufacturing"
+        | "construction"
+        | "retail"
+        | "food"
+        | "restaurant"
+        | "healthcare"
+        | "transport"
+        | "property_services"
+        | "other"
       listing_status:
         | "draft"
         | "pending_review"
@@ -819,6 +833,21 @@ export const Constants = {
   public: {
     Enums: {
       interest_status: ["pending", "accepted", "declined", "withdrawn"],
+      listing_industry: [
+        "software",
+        "ecommerce",
+        "consulting",
+        "accounting",
+        "manufacturing",
+        "construction",
+        "retail",
+        "food",
+        "restaurant",
+        "healthcare",
+        "transport",
+        "property_services",
+        "other",
+      ],
       listing_status: [
         "draft",
         "pending_review",

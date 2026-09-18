@@ -264,6 +264,21 @@ const en: Dictionary = {
   'notif.listing-published': 'Your listing has been published',
   'notif.listing-rejected': 'Your listing was rejected in review',
   'notif.message-received': 'New message',
+
+  // Industries. Keys come from INDUSTRY_KEYS in @hansa/core.
+  'industry.software': 'IT and software',
+  'industry.ecommerce': 'E-commerce',
+  'industry.consulting': 'Consulting and services',
+  'industry.accounting': 'Accounting and finance',
+  'industry.manufacturing': 'Manufacturing',
+  'industry.construction': 'Construction',
+  'industry.retail': 'Retail',
+  'industry.food': 'Food production',
+  'industry.restaurant': 'Restaurants and cafés',
+  'industry.healthcare': 'Health and care',
+  'industry.transport': 'Transport and logistics',
+  'industry.property_services': 'Property services',
+  'industry.other': 'Other industry',
 };
 
 export default en;

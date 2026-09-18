@@ -48,6 +48,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Webbens egna tester kördes INTE i CI fram till 2026-09-17 — steget ovan
+      # körde bara test:core. Följden var att ordbokstesterna fanns men inte
+      # skyddade någonting: en nyckel som saknades i danskan hade gått igenom.
+      - name: Webbens tester (ordboksparitet)
+        run: npm run test:web
+
       - name: Bygg webben
         run: npm run build:web
 

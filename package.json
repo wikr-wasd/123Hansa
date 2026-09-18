@@ -19,7 +19,7 @@
     "build:web": "npm run build --workspace=@123hansa/web",
     "test": "npm run test:core && npm run test:web",
     "test:core": "npm run test --workspace=@hansa/core",
-    "test:web": "npm run test --workspace=@123hansa/web -- --run",
+    "test:web": "npm run test --workspace=@123hansa/web",
     "test:db": "supabase test db",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",

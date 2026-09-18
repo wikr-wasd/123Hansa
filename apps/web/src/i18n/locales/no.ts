@@ -268,6 +268,21 @@ const no: Dictionary = {
   'notif.listing-published': 'Annonsen din er publisert',
   'notif.listing-rejected': 'Annonsen din ble avslått i gjennomgangen',
   'notif.message-received': 'Ny melding',
+
+  // Bransjer. Nøklene kommer fra INDUSTRY_KEYS i @hansa/core.
+  'industry.software': 'IT og systemutvikling',
+  'industry.ecommerce': 'Netthandel',
+  'industry.consulting': 'Konsulent og tjenester',
+  'industry.accounting': 'Regnskap og økonomi',
+  'industry.manufacturing': 'Produksjon',
+  'industry.construction': 'Bygg og anlegg',
+  'industry.retail': 'Detaljhandel',
+  'industry.food': 'Næringsmidler',
+  'industry.restaurant': 'Restaurant og kafé',
+  'industry.healthcare': 'Helse og omsorg',
+  'industry.transport': 'Transport og logistikk',
+  'industry.property_services': 'Eiendomsservice',
+  'industry.other': 'Annen bransje',
 };
 
 export default no;

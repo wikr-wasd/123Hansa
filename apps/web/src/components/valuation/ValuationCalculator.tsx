@@ -4,12 +4,15 @@ import {
   countryInfo,
   estimateValuation,
   formatMoney,
+  industryTranslationKey,
+  INDUSTRY_KEYS,
   intlLocaleFor,
   parseAmount,
   type CountryCode,
   type ValuationIndustry,
   type ValuationResult,
 } from '@hansa/core';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Räkningen sker i @hansa/core (CLAUDE.md regel 3). Komponenten samlar in
 // uppgifter, visar resultatet och säger vad det bygger på — den räknar inte själv.
@@ -20,21 +23,13 @@ const MARKETS: { code: CountryCode; label: string }[] = [
   { code: 'DK', label: 'Danmark' },
 ];
 
-const INDUSTRIES: { value: ValuationIndustry; label: string }[] = [
-  { value: 'software', label: 'IT och mjukvara' },
-  { value: 'ecommerce', label: 'E-handel' },
-  { value: 'consulting', label: 'Konsult och tjänster' },
-  { value: 'manufacturing', label: 'Tillverkning' },
-  { value: 'construction', label: 'Bygg och anläggning' },
-  { value: 'retail', label: 'Detaljhandel' },
-  { value: 'restaurant', label: 'Restaurang och café' },
-  { value: 'healthcare', label: 'Vård och hälsa' },
-  { value: 'transport', label: 'Transport och logistik' },
-  { value: 'property_services', label: 'Fastighetsservice' },
-  { value: 'other', label: 'Annan bransch' },
-];
+// Branscherna kommer ur @hansa/core, samma lista som annonserna använder.
+// Listan låg tidigare här med egna svenska texter, och gled isär från
+// annonsformulärets — samma bransch hette 'IT och mjukvara' på ett ställe och
+// 'IT och systemutveckling' på det andra.
 
 const ValuationCalculator: React.FC = () => {
+  const { t } = useTranslation();
   const [country, setCountry] = useState<CountryCode>('SE');
   const [industry, setIndustry] = useState<ValuationIndustry>('consulting');
   const [revenue, setRevenue] = useState('');
@@ -112,9 +107,9 @@ const ValuationCalculator: React.FC = () => {
               onChange={(event) => setIndustry(event.target.value as ValuationIndustry)}
               className={fieldClass}
             >
-              {INDUSTRIES.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {INDUSTRY_KEYS.map((key) => (
+                <option key={key} value={key}>
+                  {t(industryTranslationKey(key))}
                 </option>
               ))}
             </select>

@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Users, Building2, AlertCircle, Loader2 } from 'lucide-react';
-import type { CountryCode } from '@hansa/core';
+import {
+  industryTranslationKey,
+  isIndustry,
+  type CountryCode,
+  type Industry,
+} from '@hansa/core';
 import {
   fetchIndustries,
   fetchListings,
@@ -46,7 +51,7 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-          {listing.industry}
+          {t(industryTranslationKey(listing.industry))}
         </span>
         {listing.isDemo && <DemoBadge />}
       </div>
@@ -87,16 +92,20 @@ const ListingCard: React.FC<{ listing: Listing }> = ({ listing }) => {
 };
 
 const ListingsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, getCurrentLanguage } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const query = searchParams.get('q') ?? '';
   const country = (searchParams.get('country') as CountryCode | 'ALL' | null) ?? 'ALL';
-  const industry = searchParams.get('industry') ?? '';
+  // Adressraden är användarens, och den kan innehålla vad som helst. Branschen
+  // är en enum i databasen, så ett påhittat värde ger 400 i stället för noll
+  // träffar. Okänt värde behandlas som inget filter alls.
+  const industryParam = searchParams.get('industry') ?? '';
+  const industry: Industry | '' = isIndustry(industryParam) ? industryParam : '';
 
   const [searchField, setSearchField] = useState(query);
   const [listings, setListings] = useState<Listing[]>([]);
-  const [industries, setIndustries] = useState<string[]>([]);
+  const [industries, setIndustries] = useState<Industry[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -234,11 +243,16 @@ const ListingsPage: React.FC = () => {
                   className="w-full rounded-lg border border-gray-300 py-3 px-4 focus:border-transparent focus:ring-2 focus:ring-blue-500 md:w-56"
                 >
                   <option value="">{t('listings.all-industries')}</option>
-                  {industries.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
+                  {industries
+                    .map((key) => ({ key, label: t(industryTranslationKey(key)) }))
+                    // Sorteras på den översatta texten, inte på nyckeln: en
+                    // dansk lista ska stå i dansk bokstavsordning.
+                    .sort((a, b) => a.label.localeCompare(b.label, getCurrentLanguage()))
+                    .map(({ key, label }) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
                 </select>
               </div>
 
