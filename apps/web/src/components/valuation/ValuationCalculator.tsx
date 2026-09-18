@@ -17,11 +17,9 @@ import { useTranslation } from '../../hooks/useTranslation';
 // Räkningen sker i @hansa/core (CLAUDE.md regel 3). Komponenten samlar in
 // uppgifter, visar resultatet och säger vad det bygger på — den räknar inte själv.
 
-const MARKETS: { code: CountryCode; label: string }[] = [
-  { code: 'SE', label: 'Sverige' },
-  { code: 'NO', label: 'Norge' },
-  { code: 'DK', label: 'Danmark' },
-];
+// Lanseringsmarknaderna. Namnen kommer ur ordboken — ett land heter olika på
+// olika språk, och 'Sverige' mitt i ett danskt formulär läser som ett fel.
+const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
 // Branscherna kommer ur @hansa/core, samma lista som annonserna använder.
 // Listan låg tidigare här med egna svenska texter, och gled isär från
@@ -60,9 +58,9 @@ const ValuationCalculator: React.FC = () => {
         error: null,
       };
     } catch (err) {
-      return { result: null, error: err instanceof Error ? err.message : 'Kunde inte räkna' };
+      return { result: null, error: err instanceof Error ? err.message : t('valuation.error') };
     }
-  }, [revenue, ebit, employees, years, industry, currency]);
+  }, [revenue, ebit, employees, years, industry, currency, t]);
 
   const fieldClass =
     'w-full rounded-lg border border-slate-300 px-4 py-3 text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500';
@@ -71,9 +69,9 @@ const ValuationCalculator: React.FC = () => {
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
       <div className="mb-6">
-        <h3 className="mb-2 text-2xl font-bold text-slate-900">Vad kan bolaget vara värt?</h3>
+        <h3 className="mb-2 text-2xl font-bold text-slate-900">{t('valuation.title')}</h3>
         <p className="text-gray-600">
-          En snabb uppskattning utifrån branschmultiplar. Ingen registrering, ingenting sparas.
+          {t('valuation.intro')}
         </p>
       </div>
 
@@ -81,7 +79,7 @@ const ValuationCalculator: React.FC = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="valuation-country" className={labelClass}>
-              Land
+              {t('valuation.country')}
             </label>
             <select
               id="valuation-country"
@@ -89,9 +87,9 @@ const ValuationCalculator: React.FC = () => {
               onChange={(event) => setCountry(event.target.value as CountryCode)}
               className={fieldClass}
             >
-              {MARKETS.map((market) => (
-                <option key={market.code} value={market.code}>
-                  {market.label} ({countryInfo(market.code).currency})
+              {MARKETS.map((code) => (
+                <option key={code} value={code}>
+                  {t(`country.${code}`)} ({countryInfo(code).currency})
                 </option>
               ))}
             </select>
@@ -99,7 +97,7 @@ const ValuationCalculator: React.FC = () => {
 
           <div>
             <label htmlFor="valuation-industry" className={labelClass}>
-              Bransch
+              {t('valuation.industry')}
             </label>
             <select
               id="valuation-industry"
@@ -119,7 +117,7 @@ const ValuationCalculator: React.FC = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="valuation-revenue" className={labelClass}>
-              Årsomsättning ({currency}) *
+              {t('valuation.revenue')} ({currency}) *
             </label>
             <input
               id="valuation-revenue"
@@ -133,7 +131,7 @@ const ValuationCalculator: React.FC = () => {
 
           <div>
             <label htmlFor="valuation-ebit" className={labelClass}>
-              Rörelseresultat ({currency})
+              {t('valuation.ebit')} ({currency})
             </label>
             <input
               id="valuation-ebit"
@@ -149,7 +147,7 @@ const ValuationCalculator: React.FC = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="valuation-employees" className={labelClass}>
-              Antal anställda
+              {t('valuation.employees')}
             </label>
             <input
               id="valuation-employees"
@@ -163,7 +161,7 @@ const ValuationCalculator: React.FC = () => {
 
           <div>
             <label htmlFor="valuation-years" className={labelClass}>
-              År i verksamhet
+              {t('valuation.years')}
             </label>
             <input
               id="valuation-years"
@@ -184,30 +182,37 @@ const ValuationCalculator: React.FC = () => {
 
         {!revenue.trim() && !error && (
           <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-            Fyll i årsomsättningen för att se ett spann. Med rörelseresultatet blir det betydligt
-            mer träffsäkert.
+            {t('valuation.empty')}
           </p>
         )}
 
         {result && (
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
-            <p className="mb-1 text-sm font-semibold text-blue-800">Uppskattat värde</p>
+            <p className="mb-1 text-sm font-semibold text-blue-800">{t('valuation.result')}</p>
             <p className="mb-1 text-3xl font-bold text-blue-900">
               {formatMoney(result.mid, locale, { currencyDisplay: 'code' })}
             </p>
             <p className="mb-4 text-sm text-blue-800">
-              Spann: {formatMoney(result.low, locale, { currencyDisplay: 'code' })} –{' '}
+              {t('valuation.range')}: {formatMoney(result.low, locale, { currencyDisplay: 'code' })} –{' '}
               {formatMoney(result.high, locale, { currencyDisplay: 'code' })}
             </p>
 
             <div className="rounded-lg bg-white p-4">
               <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Info className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                Så är det räknat
+                {t('valuation.how')}
               </p>
               <ul className="space-y-2 text-xs leading-relaxed text-slate-600">
                 {result.assumptions.map((assumption) => (
-                  <li key={assumption}>{assumption}</li>
+                  // Kärnan svarar med en KOD och sina tal, inte med en färdig
+                  // mening. Formuleringen hör hemma i ordboken, så att en dansk
+                  // användare inte får svenska förklaringar under siffran.
+                  <li key={assumption.code}>
+                    {t(`valuation.assumption.${assumption.code}`, {
+                      low: 'low' in assumption ? assumption.low : undefined,
+                      high: 'high' in assumption ? assumption.high : undefined,
+                    })}
+                  </li>
                 ))}
               </ul>
             </div>

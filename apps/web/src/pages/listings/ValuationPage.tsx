@@ -1,8 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Calculator, FileText } from 'lucide-react';
+import { AlertTriangle, ArrowRight, FileText } from 'lucide-react';
 import ValuationCalculator from '../../components/valuation/ValuationCalculator';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Värderingssidan.
 //
@@ -26,82 +27,54 @@ import ValuationCalculator from '../../components/valuation/ValuationCalculator'
 // "vi kontaktar dig inom 24 timmar" väntar på ett samtal som aldrig kommer.
 //
 // Sidan gör nu en sak, och gör den på riktigt: en schablonuppskattning räknad i
-// @hansa/core, med sina antaganden utskrivna.
+// @hansa/core, med sina antaganden utskrivna. Kalkylatorn bär sin egen rubrik,
+// så sidan upprepar den inte.
 
-const ValuationPage: React.FC = () => (
-  <>
-    <Helmet>
-      <title>Värdering – 123Hansa</title>
-      <meta
-        name="description"
-        content="Uppskatta vad ditt bolag kan vara värt utifrån branschmultiplar. Ingen registrering."
-      />
-    </Helmet>
+const ValuationPage: React.FC = () => {
+  const { t } = useTranslation();
 
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-          <h1 className="mb-3 flex items-center gap-3 text-3xl font-bold text-gray-900">
-            <Calculator className="h-8 w-8 text-blue-600" aria-hidden="true" />
-            Vad kan bolaget vara värt?
-          </h1>
-          <p className="max-w-2xl text-lg text-gray-600">
-            En uppskattning utifrån branschmultiplar för små och medelstora nordiska bolag. Du
-            behöver inget konto, och ingenting sparas.
-          </p>
-        </div>
-      </header>
+  return (
+    <>
+      <Helmet>
+        <title>{t('valuation.page.title')} – 123Hansa</title>
+        <meta name="description" content={t('valuation.intro')} />
+      </Helmet>
 
-      <main className="mx-auto max-w-4xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
-        <ValuationCalculator />
+      <div className="min-h-screen bg-gray-50">
+        <main className="mx-auto max-w-3xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
+          <ValuationCalculator />
 
-        <section className="rounded-xl border border-amber-300 bg-amber-50 p-6">
-          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-amber-900">
-            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-            Vad det här inte är
-          </h2>
-          <ul className="space-y-2 text-sm text-amber-900">
-            <li>
-              <strong>Det är inte en värdering.</strong> Det är en schablon som ska ge en
-              storleksordning innan du lägger upp en annons. En köpare kommer att räkna själv.
-            </li>
-            <li>
-              <strong>Multiplarna är marknadsschabloner</strong>, inte 123Hansas egen affärsdata —
-              den finns inte än. När plattformen har genomförda affärer ersätts de av faktiska
-              utfall.
-            </li>
-            <li>
-              <strong>Två bolag med samma siffror kan vara värda helt olika mycket.</strong>
-              Kundkoncentration, avtalslängder, hur beroende verksamheten är av dig som ägare och
-              vad som ingår i affären avgör mer än multipeln.
-            </li>
-            <li>
-              <strong>Uppskattningen ersätter inte en revisor</strong> eller en due diligence, och
-              123Hansa är inte part i affären.
-            </li>
-          </ul>
-        </section>
+          <section className="rounded-xl border border-amber-300 bg-amber-50 p-6">
+            <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-amber-900">
+              <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
+              {t('valuation.page.caveat-title')}
+            </h2>
+            <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-amber-900">
+              <li>{t('valuation.page.caveat-1')}</li>
+              <li>{t('valuation.page.caveat-2')}</li>
+              <li>{t('valuation.page.caveat-3')}</li>
+              <li>{t('valuation.page.caveat-4')}</li>
+            </ul>
+          </section>
 
-        <section className="rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <FileText className="h-5 w-5 text-blue-600" aria-hidden="true" />
-            Nästa steg
-          </h2>
-          <p className="mb-4 text-gray-700">
-            Vill du testa siffran mot marknaden är annonsen vägen dit. Du sätter själv priset — eller
-            låter det stå som &rdquo;pris på begäran&rdquo; och ser vilka som hör av sig.
-          </p>
-          <Link
-            to="/create-listing"
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
-          >
-            Lägg upp en annons
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </Link>
-        </section>
-      </main>
-    </div>
-  </>
-);
+          <section className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <FileText className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
+              {t('valuation.page.next-title')}
+            </h2>
+            <p className="mb-4 leading-relaxed text-gray-700">{t('valuation.page.next-body')}</p>
+            <Link
+              to="/create-listing"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+            >
+              {t('dash.new-listing')}
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          </section>
+        </main>
+      </div>
+    </>
+  );
+};
 
 export default ValuationPage;

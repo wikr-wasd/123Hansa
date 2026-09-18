@@ -18,13 +18,13 @@ describe('estimateValuation', () => {
   it('faller tillbaka på omsättning när rörelseresultat saknas', () => {
     const result = estimateValuation(base);
     expect(result.method).toBe('revenue');
-    expect(result.assumptions.some((a) => a.includes('Rörelseresultat saknas'))).toBe(true);
+    expect(result.assumptions.some((a) => a.code === 'ebit-missing')).toBe(true);
   });
 
   it('faller tillbaka på omsättning vid förlust, och säger varför', () => {
     const result = estimateValuation({ ...base, ebitMinor: -1_000_000 });
     expect(result.method).toBe('revenue');
-    expect(result.assumptions.some((a) => a.includes('inget positivt rörelseresultat'))).toBe(true);
+    expect(result.assumptions.some((a) => a.code === 'ebit-not-positive')).toBe(true);
   });
 
   it('ger alltid heltal i minsta enhet', () => {
@@ -67,13 +67,19 @@ describe('estimateValuation', () => {
     const soloOwner = estimateValuation({ ...base, ebitMinor: 80_000_000, employees: 1 });
     expect(soloOwner.low.amount).toBeLessThan(withStaff.low.amount);
     expect(soloOwner.high.amount).toBeLessThan(withStaff.high.amount);
-    expect(soloOwner.assumptions.some((a) => a.includes('drivs av en person'))).toBe(true);
+    expect(soloOwner.assumptions.some((a) => a.code === 'single-person')).toBe(true);
   });
 
   it('svarar alltid med sina antaganden, och säger att det är en schablon', () => {
     const result = estimateValuation(base);
     expect(result.assumptions.length).toBeGreaterThan(0);
-    expect(result.assumptions.some((a) => a.includes('inte en värdering'))).toBe(true);
+    // Schablonförbehållet följer ALLTID med, och står sist.
+    expect(result.assumptions.some((a) => a.code === 'rule-of-thumb')).toBe(true);
+    expect(result.assumptions.at(-1)?.code).toBe('rule-of-thumb');
+    // Koderna är språkneutrala: ingen färdig mening får smyga sig in i kärnan.
+    for (const assumption of result.assumptions) {
+      expect(assumption.code).toMatch(/^[a-z-]+$/);
+    }
   });
 
   it('använder branschens egna multiplar', () => {

@@ -96,13 +96,44 @@ export interface ValuationInput {
 
 export type ValuationMethod = 'ebit' | 'revenue';
 
+/**
+ * Ett antagande bakom spannet, som KOD och inte som färdig mening.
+ *
+ * Meningarna stod tidigare på svenska här inne. Det gjorde @hansa/core
+ * språkberoende: en dansk användare fick ett danskt gränssnitt med svenska
+ * förklaringar under siffran, och paketet — som ska kunna köras var som helst —
+ * bar plötsligt på en översättning.
+ *
+ * Nu returneras koden och de tal som hör till. Webben slår upp
+ * `valuation.assumption.<kod>` i ordboken och fyller i talen. Samma uppdelning
+ * som för branscherna: kärnan räknar, gränssnittet formulerar.
+ */
+export type ValuationAssumption =
+  /** Räknat på rörelseresultatet. `low` och `high` är multiplarna. */
+  | { readonly code: 'ebit-multiple'; readonly low: number; readonly high: number }
+  /** Räknat på omsättningen. `low` och `high` är multiplarna. */
+  | { readonly code: 'revenue-multiple'; readonly low: number; readonly high: number }
+  /** Rörelseresultat saknades helt. */
+  | { readonly code: 'ebit-missing' }
+  /** Rörelseresultat fanns men var noll eller negativt. */
+  | { readonly code: 'ebit-not-positive' }
+  /** Verksamheten är yngre än tre år. */
+  | { readonly code: 'young-business' }
+  /** Verksamheten drivs av en person. */
+  | { readonly code: 'single-person' }
+  /** Det här är en schablon, inte en värdering. Följer alltid med, sist. */
+  | { readonly code: 'rule-of-thumb' };
+
 export interface ValuationResult {
   readonly low: Money;
   readonly mid: Money;
   readonly high: Money;
   readonly method: ValuationMethod;
-  /** Vad beräkningen bygger på, i klartext. Visas alltid tillsammans med spannet. */
-  readonly assumptions: string[];
+  /**
+   * Vad beräkningen bygger på. Visas ALLTID tillsammans med spannet — den som
+   * visar ett spann utan att säga vad det bygger på ljuger med statistik.
+   */
+  readonly assumptions: ValuationAssumption[];
 }
 
 function requireInteger(value: number, name: string): void {
@@ -139,7 +170,7 @@ export function estimateValuation(input: ValuationInput): ValuationResult {
   }
 
   const multiples = INDUSTRY_MULTIPLES[industry];
-  const assumptions: string[] = [];
+  const assumptions: ValuationAssumption[] = [];
 
   const useEbit = ebitMinor !== undefined && ebitMinor > 0;
   const method: ValuationMethod = useEbit ? 'ebit' : 'revenue';
@@ -150,42 +181,36 @@ export function estimateValuation(input: ValuationInput): ValuationResult {
   if (useEbit) {
     low = (ebitMinor as number) * multiples.ebitLow;
     high = (ebitMinor as number) * multiples.ebitHigh;
-    assumptions.push(
-      `Räknat på rörelseresultatet med multipel ${multiples.ebitLow}–${multiples.ebitHigh} för branschen.`
-    );
+    assumptions.push({ code: 'ebit-multiple', low: multiples.ebitLow, high: multiples.ebitHigh });
   } else {
     low = revenueMinor * multiples.revenueLow;
     high = revenueMinor * multiples.revenueHigh;
-    assumptions.push(
-      `Räknat på omsättningen med multipel ${multiples.revenueLow}–${multiples.revenueHigh} för branschen.`
-    );
+    assumptions.push({
+      code: 'revenue-multiple',
+      low: multiples.revenueLow,
+      high: multiples.revenueHigh,
+    });
     if (ebitMinor !== undefined && ebitMinor <= 0) {
-      assumptions.push(
-        'Bolaget redovisar inget positivt rörelseresultat, så omsättningen används i stället. Ett bolag utan vinst värderas i praktiken på vad köparen tror sig kunna göra med verksamheten.'
-      );
+      assumptions.push({ code: 'ebit-not-positive' });
     } else {
-      assumptions.push('Rörelseresultat saknas. Med det blir spannet betydligt smalare.');
+      assumptions.push({ code: 'ebit-missing' });
     }
   }
 
   // Ung verksamhet: mindre historik att luta sig mot, alltså större osäkerhet nedåt.
   if (yearsInBusiness !== undefined && yearsInBusiness < 3) {
     low *= 0.8;
-    assumptions.push('Verksamheten är yngre än tre år, vilket drar ned den nedre delen av spannet.');
+    assumptions.push({ code: 'young-business' });
   }
 
   // Ett bolag som står och faller med ägaren är svårare att sälja.
   if (employees !== undefined && employees <= 1) {
     low *= 0.7;
     high *= 0.85;
-    assumptions.push(
-      'Verksamheten drivs av en person. Köparen betalar för det som finns kvar när ägaren slutar, vilket sänker värdet.'
-    );
+    assumptions.push({ code: 'single-person' });
   }
 
-  assumptions.push(
-    'Schablon utifrån branschmultiplar, inte en värdering. Skulder, avtal, kundberoende och ägarberoende kan ändra bilden i båda riktningar.'
-  );
+  assumptions.push({ code: 'rule-of-thumb' });
 
   const lowMinor = Math.max(0, Math.round(low));
   const highMinor = Math.max(lowMinor, Math.round(high));

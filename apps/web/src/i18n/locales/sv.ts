@@ -293,6 +293,38 @@ const sv = {
   'industry.transport': 'Transport och logistik',
   'industry.property_services': 'Fastighetsservice',
   'industry.other': 'Annan bransch',
+
+  // Värderingen. {{low}} och {{high}} är multiplar, inte belopp.
+  'valuation.title': 'Vad kan bolaget vara värt?',
+  'valuation.intro': 'En snabb uppskattning utifrån branschmultiplar. Ingen registrering, ingenting sparas.',
+  'valuation.country': 'Land',
+  'valuation.industry': 'Bransch',
+  'valuation.revenue': 'Årsomsättning',
+  'valuation.ebit': 'Rörelseresultat',
+  'valuation.employees': 'Antal anställda',
+  'valuation.years': 'År i verksamhet',
+  'valuation.empty': 'Fyll i årsomsättningen för att se ett spann. Med rörelseresultatet blir det betydligt mer träffsäkert.',
+  'valuation.result': 'Uppskattat värde',
+  'valuation.range': 'Spann',
+  'valuation.how': 'Så är det räknat',
+  'valuation.error': 'Kunde inte räkna',
+  'valuation.assumption.ebit-multiple': 'Räknat på rörelseresultatet med multipel {{low}}–{{high}} för branschen.',
+  'valuation.assumption.revenue-multiple': 'Räknat på omsättningen med multipel {{low}}–{{high}} för branschen.',
+  'valuation.assumption.ebit-missing': 'Rörelseresultat saknas. Med det blir spannet betydligt smalare.',
+  'valuation.assumption.ebit-not-positive': 'Bolaget redovisar inget positivt rörelseresultat, så omsättningen används i stället. Ett bolag utan vinst värderas i praktiken på vad köparen tror sig kunna göra med verksamheten.',
+  'valuation.assumption.young-business': 'Verksamheten är yngre än tre år, vilket drar ned den nedre delen av spannet.',
+  'valuation.assumption.single-person': 'Verksamheten drivs av en person. Köparen betalar för det som finns kvar när ägaren slutar, vilket sänker värdet.',
+  'valuation.assumption.rule-of-thumb': 'Schablon utifrån branschmultiplar, inte en värdering. Skulder, avtal, kundberoende och ägarberoende kan ändra bilden i båda riktningar.',
+
+  // Värderingssidan runt kalkylatorn.
+  'valuation.page.title': 'Värdering',
+  'valuation.page.caveat-title': 'Vad det här inte är',
+  'valuation.page.caveat-1': 'Det är inte en värdering. Det är en schablon som ska ge en storleksordning innan du lägger upp en annons. En köpare kommer att räkna själv.',
+  'valuation.page.caveat-2': 'Multiplarna är marknadsschabloner, inte 123Hansas egen affärsdata — den finns inte än. När plattformen har genomförda affärer ersätts de av faktiska utfall.',
+  'valuation.page.caveat-3': 'Två bolag med samma siffror kan vara värda helt olika mycket. Kundkoncentration, avtalslängder, hur beroende verksamheten är av dig som ägare och vad som ingår i affären avgör mer än multipeln.',
+  'valuation.page.caveat-4': 'Uppskattningen ersätter inte en revisor eller en due diligence, och 123Hansa är inte part i affären.',
+  'valuation.page.next-title': 'Nästa steg',
+  'valuation.page.next-body': 'Vill du testa siffran mot marknaden är annonsen vägen dit. Du sätter själv priset — eller låter det stå som pris på begäran och ser vilka som hör av sig.',
 } as const;
 
 /**
