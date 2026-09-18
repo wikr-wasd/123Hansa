@@ -77,9 +77,12 @@ hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt 
       meddelanden, datarummet och annonsformuläret. Kvar: notissidan och de tre
       fotsidorna (hjälp, kontakt, juridik). Granskningsvyn står kvar på svenska
       med flit — den är intern
-- [ ] **Branscherna är svenska strängar i databasen.** En dansk köpare filtrerar
-      på "Livsmedel". De borde vara nycklar som översätts vid visning, som
-      statusetiketterna
+- [x] **Branscherna är nycklar** — klart 2026-09-17. `INDUSTRY_KEYS` i
+      `@hansa/core`, enum i databasen, översatta i alla fyra ordböckerna.
+      Samma lista styr värderingsmultiplarna, så en ny bransch inte kan läggas
+      till utan att någon tar ställning till dess multipel. Tre listor som
+      glidit isär blev en. Kvarstår: taxonomin är gissad — se
+      `OPEN-QUESTIONS.md` fråga 16
 - [ ] **Ta bort hårdkodad `SEK` och `sv-SE`.** 42 filer nämner `SEK`. Priser ska
       formateras med `formatMoney()` och `intlLocaleFor(country)`.
 - [ ] **Lägg landsväljare i annonsformuläret**, och låt landet styra valuta,
@@ -227,8 +230,13 @@ som låtsas göra det plattformen uttryckligen inte ska göra.
 - [x] **Värderingsschablonen** — klart 2026-09-16. `estimateValuation()` i
       `@hansa/core` med 13 tester, och en räknare på startsidan som visar
       spann, valuta per land och sina egna antaganden
-- [ ] **Värderingstjänsten för 2 500 SEK** (`ValuationPage.tsx`) säljer en
-      "professionell värdering från våra experter" som inte finns. Se
+- [x] **Värderingstjänsten för 2 500 SEK är borttagen ur koden** — 2026-09-17.
+      Knappen "Beställ och betala" visade en notis och gjorde ingenting: ingen
+      betalning, inget sparat, ingen som blev kontaktad, trots texterna "Säker
+      betalning via Stripe" och "Pengarna återbetalas om du inte är nöjd".
+      Sidan bar dessutom en egen värderingsformel som gav ett annat svar än
+      `@hansa/core`. `/valuation` visar nu samma schablon som startsidan.
+      **Frågan om tjänsten ska byggas med en partner kvarstår** —
       `OPEN-QUESTIONS.md` fråga 15
 - [ ] **Hämta bolagsuppgifter från officiella register** — adapter per land,
       anrop på servern. Se `OPEN-QUESTIONS.md` fråga 14. Skrapning av
