@@ -103,8 +103,13 @@ valuta och belopp i minsta enhet finns där.
       hämtar annonser ur Supabase och formaterar belopp med `@hansa/core`
 - [x] **Demoannonserna i en källa** — klart 2026-09-16. Sex annonser i
       `supabase/seed.sql` med `is_demo = true`, inte längre kopior i komponenter
-- [ ] **Gamla mockdata som är kvar**: notissidan (`/notifications`). Allt annat
-      i webben hämtar nu riktig data
+- [x] **All mockdata är borta ur webben** — klart 2026-09-17. Notissidan var
+      sist kvar på listan men hade redan byggts om: den härleder notiser ur det
+      som faktiskt hänt (intresseanmälningar, granskning, meddelanden), inte ur
+      en `notifications`-tabell som inte finns. Sista fyndet var
+      `components/analytics/BusinessValuationTool.tsx` — 537 rader som ingen
+      importerade, med ett påhittat värderingsresultat, hårdkodad `SEK` och
+      division med 1 000 000 rakt i komponenten. Borttagen
 - [x] ~~Bestäm vad som händer med de 30 demoannonserna.~~ Besvarat 2026-09-15:
       kvar, märkta. Se `OPEN-QUESTIONS.md`, fråga 7
 - [x] **Märk demoannonserna "Exempelannons"** — klart 2026-09-16. Märkta i
