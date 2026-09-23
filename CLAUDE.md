@@ -337,6 +337,20 @@ GitHub API går att göra oautentiserat mot publika repon.
 `[System.IO.File]::ReadAllText(path, UTF8)` — eller Git Bash, vilket är det som
 används genomgående här.
 
+### Databastesterna kräver Docker Desktop, som inte ligger i Program Files
+
+`npm run test:db` startar en lokal Postgres i Docker. Är Docker Desktop inte
+igång faller `supabase status` med `failed to connect to the docker API at
+npipe:////./pipe/dockerDesktopLinuxEngine`, vilket läser som att Supabase är
+trasigt. Programmet ligger inte där man letar:
+
+```bash
+"$LOCALAPPDATA/Programs/DockerDesktop/Docker Desktop.exe"   # inte Program Files
+```
+
+Starta det, vänta tills `docker info` svarar, och kör sedan `npm run db:reset`
+innan `npm run test:db` — annars testas gårdagens schema.
+
 ### Öppna appen på `localhost`, aldrig på `127.0.0.1`
 
 Vite-servern är satt till `strictPort` på 3002. Vissa resurser blockeras för en
