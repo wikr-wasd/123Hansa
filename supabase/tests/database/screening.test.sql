@@ -109,6 +109,36 @@ select throws_ok($$
   '42501', null, 'en vanlig användare kan inte läsa screeningläget');
 reset role;
 
+-- Senaste beslutet gäller, inte det strängaste -------------------------------
+-- Tre beslut i samma transaktion får identisk decided_at, eftersom now() är
+-- transaktionens tid. Ordningen måste därför komma ur `seq`. Innan den kolumnen
+-- fanns avgjorde ett slumpmässigt uuid, och testet ovan föll ungefär varannan
+-- körning — i CI gick det igenom fyra commits i rad på ren tur.
+--
+-- Det här testet vänder på ordningen med flit: hade funktionen i stället
+-- kodats som "blockerad vinner alltid" vore raden ovan grön av fel skäl, och
+-- en organisation som rentvåtts efter en blockering hade aldrig kunnat
+-- verifieras igen.
+set local role postgres;
+set local request.jwt.claims to '{"sub": "11111111-1111-4111-8111-000000000002", "role": "authenticated"}';
+select public.decide_screening(
+  (select id from public.screening_checks order by seq desc limit 1),
+  true, 'Kontrollerad mot födelsedatum och medborgarskap: fel person.');
+
+select is(private.screening_state('organization', '22222222-2222-4222-8222-000000000001'), 'clear',
+  'ett rentvående EFTER en blockering gäller — det är senaste beslutet som styr');
+
+select isnt(public.verify_organization('22222222-2222-4222-8222-000000000001'), null,
+  'och organisationen går att verifiera igen');
+
+-- Och tillbaka till blockerat, så att resten av filen läser samma läge som förut.
+select public.decide_screening(
+  (select id from public.screening_checks order by seq desc limit 1),
+  false, 'Ny uppgift: träffen är bekräftad ändå.');
+select is(private.screening_state('organization', '22222222-2222-4222-8222-000000000001'), 'blocked',
+  'och ett nytt blockerande beslut tar över igen');
+reset role;
+
 -- Besluten är bevis ----------------------------------------------------------
 select throws_ok($$ update public.screening_decisions set reason = 'Ändrad efteråt' $$,
   'P0001', null, 'ett fattat beslut kan inte skrivas om, inte ens av plattformen');
