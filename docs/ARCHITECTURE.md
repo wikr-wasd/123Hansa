@@ -6,6 +6,48 @@ Läs det här först. Repots tidigare dokumentation beskrev projektet som
 "produktionsredo för 1000+ användare"; det stämde inte, och den som bygger vidare
 på den beskrivningen bygger fel.
 
+### Status 2026-09-23 — den här tabellen gäller
+
+Tabellerna längre ned är ögonblicksbilder från 2026-09-05 och 2026-09-15. De
+står kvar som historik, men flera rader i dem är inte längre sanna: typfelen är
+noll, linten är ren, `apps/web` har tester och notissidan hämtar riktig data.
+Läs den här tabellen först.
+
+| Del | Läge | Kommentar |
+|---|---|---|
+| `@hansa/core` | 🟢 Klar och testad | 114 tester. Pengar, land, moms, org.nr, språk, branscher, värdering |
+| Mockdata i webben | 🟢 Borta | Noll träffar på `TODO`, `FIXME`, `placeholder` och `coming soon` i `apps/web/src`, `packages/core/src` och `supabase` |
+| Annonser, Min sida, meddelanden, datarum | 🟢 Mot databasen | Med laddnings- och felläge överallt |
+| Matchning | 🟡 Matchar, skickar inte | `private.listing_matches_search()` är enda stället regeln bor. Utskicket saknas: det finns ingen e-postinfrastruktur i repot alls |
+| AML-screening | 🟡 Apparaten klar, ingen leverantör | En träff stoppar publicering. ⚠️ Gjorde det INTE mellan 2026-09-17 och 2026-09-23 — se nedan |
+| Lanseringsländer | 🟢 Ur databasen | `markets.launched`. En UPDATE öppnar ett land, ingen kodändring |
+| i18n | 🟡 Fyra språk, fem sidor kvar | `sv`, `en`, `no`, `da` med nyckelparitet i test. `bs` saknas. Hjälp, kontakt, juridik, e-postbekräftelse och 404 står kvar på svenska |
+| Databasschema | 🟢 Elva migrationer | RLS i samma migration som tabellen. 107 behörighetstester gröna |
+| Typkontroll och lint | 🟢 Rena | 0 fel, 0 varningar med `--max-warnings 0` |
+| Tester | 🟢 236 totalt | 114 i kärnan, 11 ordboksparitet, 107 i databasen |
+| Bygge lokalt | 🟢 Går igenom | `npm run verify` rent |
+| **Vercel** | 🔴 **Sex röda deployer i rad** | Root Directory är `apps/web`, men `build:web` finns bara i rotens `package.json`. **Ingen preview-URL existerar.** Bara William kan ändra inställningen |
+| **Supabase i molnet** | 🔴 **Finns inte** | Appen har bara körts mot lokal Docker. Det gamla projektet är pausat och ligger i `us-east-1` |
+| Betalning och intäkter | 🔴 Inte byggt | Prisnivåerna är obeslutade (`OPEN-QUESTIONS.md` fråga 1). Ingen intäktsväg är implementerad |
+| Brancher | 🟡 I takt men efter | `main` och `staging` ingår båda HELT i `dev` — noll commits som inte finns där. `dev` är 144 commits före `main`, men inget har glidit isär: en `--ff-only`-merge går igenom |
+
+#### Ett flackigt test är farligare än ett rött
+
+Mellan 2026-09-17 och 2026-09-23 stod det i `TODO.md` att en screeningträff
+stoppar publicering. Det gjorde den inte alltid. `private.screening_state()`
+valde senaste beslutet med `decided_at` och `id` som tiebreaker — men
+`decided_at` har `default now()`, och now() är transaktionens tid. Två beslut i
+samma sekund avgjordes därför av ett slumpmässigt uuid, och ett blockerande
+beslut kunde förlora mot ett tidigare rentvående.
+
+Testet fanns hela tiden. Det föll i tre lokala körningar av fem — och var grönt
+i CI fyra commits i rad. Lärdomen är inte att skriva fler tester utan att ett
+test som ibland är grönt läses som ett skydd som finns. Rättat 2026-09-23 med en
+`seq`-kolumn på `screening_decisions`, samma lösning som `screening_checks` fick
+från början.
+
+### Ögonblicksbild 2026-09-05
+
 Status vid genomgången **2026-09-05**:
 
 | Del | Läge | Kommentar |

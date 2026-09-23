@@ -58,9 +58,12 @@ fungerar i appen — inte när koden är skriven. Se `TESTING.md`.
 Lanseringen gäller SE, NO och DK (strategin omprövad 2026-09-15). Kärnan kan
 hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt igenom.
 
-- [ ] **Lanseringsländer som konfiguration** — registrering, annonsformulär och
-      filter erbjuder bara SE, NO och DK. Övriga länder i `@hansa/core` ligger
-      kvar men visas inte
+- [x] **Lanseringsländer som konfiguration** — klart 2026-09-23. Listan kommer
+      ur `markets.launched` i databasen, som funnits sedan v1 men aldrig lästs.
+      Sex komponenter hade var sin kopia av `['SE','NO','DK']`. Nu finns en
+      `CountrySelect` och en `marketService`. Provat i webbläsaren: en UPDATE på
+      `markets` lade till Kroatien i registreringen utan kodändring, och
+      ordböckerna har `country.HR` och `country.BA` så att det håller
 - [x] **Ordböckerna `no` och `da` kompletta** — klart 2026-09-16. Alla fyra
       språken har samma 77 nycklar. ⚠️ Norska och danska är översatta av
       utvecklare, inte av modersmålstalare — ska läsas igenom före lansering
@@ -83,12 +86,18 @@ hantera fem länder; **appen kan inte ens hantera tre** — den är svensk rakt 
       till utan att någon tar ställning till dess multipel. Tre listor som
       glidit isär blev en. Kvarstår: taxonomin är gissad — se
       `OPEN-QUESTIONS.md` fråga 16
-- [ ] **Ta bort hårdkodad `SEK` och `sv-SE`.** 42 filer nämner `SEK`. Priser ska
-      formateras med `formatMoney()` och `intlLocaleFor(country)`.
-- [ ] **Lägg landsväljare i annonsformuläret**, och låt landet styra valuta,
-      momssats och organisationsnummerfält.
-- [ ] **Koppla in `validateOrgNumber()`** i formuläret, med landets egen etikett
-      (`orgNumberLabel`) och begripligt felmeddelande.
+- [x] **Hårdkodad `SEK` och `sv-SE` borttagen** — klart 2026-09-23. `SEK` finns
+      bara kvar i tre kommentarer. `sv-SE` låg på elva ställen: annonsens datum
+      följer nu annonsens land, läsarens egna datum läsarens land
+      (`useViewerLocale()`). Granskningsvyerna står kvar på svenska med flit och
+      har en kommentar som säger det.
+      ⚠️ Siffran "42 filer" i den gamla raden var aldrig sann efter
+      2026-09-17 — den stod kvar i sex dagar efter att arbetet gjorts
+- [x] **Landsväljare i annonsformuläret** — fanns redan 2026-09-16; raden var
+      felaktigt obockad fram till 2026-09-23. Landet styr valuta och
+      organisationsnummerfält
+- [x] **`validateOrgNumber()` inkopplad** — i `organizationService.ts`, med
+      landets egen etikett (`orgNumberLabel`). Också felaktigt obockad
 - [ ] **Språk i URL:en** för indexerade sidor (`/sv/...`, `/no/...`, `/da/...`)
       med hreflang enligt `alternateTags()`. Google indexerar en URL, inte en cookie.
 
@@ -139,8 +148,11 @@ som inte finns. Ordningen här är den som går att bygga i.
 
 - [x] ~~Bestäm: Express eller Vercel functions.~~ Besvarat 2026-09-15: Supabase +
       Vercel functions. Se `OPEN-QUESTIONS.md`, fråga 9
-- [ ] **Skapa Supabase-projekt i EU** för dev, och senare ett för produktion.
-      Väntar på Williams godkännande av kostnaden
+- [ ] ⛔ **Skapa Supabase-projekt i EU** för dev, och senare ett för produktion.
+      Väntar på Williams godkännande av kostnaden. Kontrollerat 2026-09-23:
+      inget sådant projekt finns. `apps/web/.env.local` pekar på
+      `http://127.0.0.1:54421` — appen har aldrig körts mot något annat än den
+      lokala databasen i Docker
 - [ ] **Kontrollera innehållet i det gamla projektet** "123Hansa"
       (`pmtnrqtkuygyyodcovds`, `us-east-1`, pausat) innan det tas bort
 - [x] **Schema v1 som SQL-migrationer** — klart 2026-09-15.
@@ -161,7 +173,14 @@ som inte finns. Ordningen här är den som går att bygga i.
       `/admin/review`: kö för väntande, publicerade och nekade annonser,
       kontroll av organisationsnumret med `validateOrgNumber()`, verifiering av
       organisationen och svar till säljaren
-- [ ] **Bevakningarna ska skicka något** — matchning mot nya annonser och utskick
+- [x] **Bevakningarna matchar** — klart 2026-09-23.
+      `private.listing_matches_search()` är enda stället regeln bor, en trigger
+      fyller på vid publicering och `refresh_saved_search()` söker bakåt.
+      Bevakningssidan visar träffarna och kvitterar dem som lästa
+- [ ] **Bevakningarna ska SKICKA något.** Matchningen finns, utskicket inte.
+      Det finns ingen e-postinfrastruktur alls i repot — noll träffar på Resend,
+      SendGrid, Postmark och SMTP. Köparen ser sina träffar bara om hen går in
+      på sidan
 - [x] **Inloggning via Supabase Auth** — klart 2026-09-16. Registrering,
       inloggning och session provade i webbläsaren mot lokal databas
 - [ ] **Ta bort `apps/web/api/`** — `auth.ts`, `listings.ts` och `messages.ts`
@@ -257,9 +276,13 @@ som låtsas göra det plattformen uttryckligen inte ska göra.
 
 ## Fas 5 — Marknadsplatsens kärna
 
-- [ ] **Köparprofiler** — sökkriterier: bransch, land, storlek, prisspann
-- [ ] **Matchning** — bevakningar och utskick när en annons matchar en profil.
-      Rangordning efter relevans, aldrig efter betald exponering
+- [x] **Köparprofiler** — klart 2026-09-23 som bevakningar: bransch, land och
+      prisspann. Storlek (omsättning, anställda) saknas fortfarande som kriterium
+- [x] **Matchning** — klart 2026-09-23. Ingen relevanspoäng: en bevakning är ett
+      filter, och alla annonser som passerar det matchar lika mycket. Sorteras
+      på publiceringsdatum, aldrig på betald exponering. Prisfilter jämförs
+      aldrig över valutagränser — plattformen har ingen växelkurs.
+      Utskicket saknas, se fas 3
 - [ ] **Intresseanmälan** — köparen visar intresse, säljaren väljer vem som går
       vidare. Kontaktuppgifter delas inte automatiskt
 - [x] **Datarum** — klart 2026-09-16 på `/listings/:id/datarum`. Säljaren
@@ -292,7 +315,14 @@ screena alla befintliga i efterhand.
       `screening_decisions` går inte att skriva om i efterhand
 - [x] En träff stoppar publicering, inte bara visar en varning —
       `verify_organization()` vägrar när läget är `hit`, `blocked` eller
-      `pending`, och utan verifiering kan annonsen inte publiceras
+      `pending`, och utan verifiering kan annonsen inte publiceras.
+      ⚠️ **Stämde inte mellan 2026-09-17 och 2026-09-23.**
+      `screening_state()` valde senaste beslutet med `decided_at` och ett
+      slumpmässigt uuid som tiebreaker. now() är transaktionens tid, så två
+      beslut i samma sekund avgjordes av slumpen, och ett blockerande beslut
+      kunde förlora mot ett tidigare rentvående. Testet fanns och föll i tre
+      körningar av fem — men var grönt i CI fyra commits i rad, och raden här
+      stod ikryssad under tiden. Rättad med en `seq`-kolumn
 - [ ] Screening av **person** vid registrering, och av verkliga huvudmän.
       Tabellen tar redan `subject_type = 'person'`; det som saknas är var i
       flödet den utlöses
@@ -329,13 +359,20 @@ Inte före lansering. Strategin omprövad 2026-09-15: Norden först.
 
 ## Fas 6 — Drift
 
-- [ ] **Verifiera att ett Vercel-projekt faktiskt bygger repot.** Lova aldrig en
-      preview-URL du inte sett. Se `DEPLOYMENT.md`.
-      2026-09-15: båda projekten faller på Root Directory `apps/web`. William
-      ändrar det i dashboarden
-- [ ] **Ta bort Vercel-projektet `123hansa-staging`** — det bygger samma repo en
-      gång till
-- [ ] **Ta bort branchen `staging`** — den ingår helt i `dev`
+- [ ] ⛔ **Vercel bygger fortfarande inte.** Kontrollerat 2026-09-23: de sex
+      senaste deployerna är `ERROR`, den senaste på `dev`. Byggloggen säger
+      `npm error Missing script: "build:web"` med
+      `npm error location /vercel/path0/apps/web`. Root Directory står på
+      `apps/web`, men `build:web` finns bara i rotens `package.json` — och
+      rotens `vercel.json` läses inte alls, eftersom den ligger utanför Root
+      Directory. **Fixen är att tömma Root Directory i dashboarden.** Bara
+      William kommer åt den inställningen. Ingen preview-URL existerar förrän
+      det är gjort
+- [x] **Vercel-projektet `123hansa-staging` är borta** — bekräftat 2026-09-23.
+      Kontot har bara `123-hansa-web` kvar
+- [ ] **Ta bort branchen `staging`** — kontrollerat 2026-09-23: den har noll
+      commits som inte finns i `dev`, så inget går förlorat. Väntar på Williams
+      ord, eftersom en borttagen remote-branch inte går att ångra lika enkelt
 - [ ] **Vercel Pro före lansering.** Hobby-planen är enligt Vercels villkor bara
       för icke-kommersiellt bruk
 - [ ] Separata miljöer för `dev` och `main` med egna databaser
@@ -362,7 +399,10 @@ ECSP-tillståndet är på väg. Se `BUSINESS.md` och `OPEN-QUESTIONS.md` fråga 
 
 ## Löpande
 
-- [ ] Håll `main` och `dev` i takt. De gled isär till 114 commits en gång.
+- [ ] Håll `main` och `dev` i takt. Kontrollerat 2026-09-23: `main` har noll
+      commits som inte finns i `dev`, så de har inte glidit isär — `main` är
+      bara 144 commits efter. En `git merge dev --ff-only` går igenom den dag
+      William godkänner en preview.
 - [ ] Uppdatera `ARCHITECTURE.md` när något ändrar status. Ett dokument som
       ljuger om status är farligare än inget dokument alls.
 - [ ] Skriv in svar i `OPEN-QUESTIONS.md` **innan** de skrivs in i kod.
