@@ -135,6 +135,18 @@ export function isCountryCode(value: unknown): value is CountryCode {
   return typeof value === 'string' && (COUNTRY_CODES as readonly string[]).includes(value);
 }
 
+/**
+ * Är strängen en valuta plattformen kan räkna i?
+ *
+ * Behövs för värden som kommer ur databasen eller ett formulär som `text`.
+ * Utan vakten hade en okänd valuta letat sig in i `Money`, och då är det
+ * `CURRENCY_INFO[...]` som kraschar långt senare — med en felpekare i
+ * formateringen i stället för där värdet kom in.
+ */
+export function isCurrencyCode(value: unknown): value is CurrencyCode {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(CURRENCY_INFO, value);
+}
+
 export function countryInfo(code: CountryCode): CountryInfo {
   return COUNTRY_INFO[code];
 }

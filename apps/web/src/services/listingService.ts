@@ -50,7 +50,14 @@ export interface ListingPage {
 const SELECTED_COLUMNS =
   'id, title, summary, description, industry, region, country, currency, asking_price_minor, revenue_minor, employees, founded_year, is_demo, published_at';
 
-function toListing(row: Partial<ListingRow>): Listing {
+/**
+ * En rad ur `listings` blir en `Listing`.
+ *
+ * Exporterad för att bevakningarna ska använda SAMMA konvertering. En egen
+ * kopia där hade kunnat tolka land eller belopp annorlunda, och då visar
+ * matchningslistan ett annat pris än annonssidan för samma annons.
+ */
+export function toListing(row: Partial<ListingRow>): Listing {
   const country = row.country;
   if (!isCountryCode(country)) {
     // Landet styr valuta, format och språk. Ett okänt land är ett datafel som

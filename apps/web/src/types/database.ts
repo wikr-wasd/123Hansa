@@ -634,6 +634,45 @@ export type Database = {
           },
         ]
       }
+      search_matches: {
+        Row: {
+          id: string
+          listing_id: string
+          matched_at: string
+          saved_search_id: string
+          seen_at: string | null
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          matched_at?: string
+          saved_search_id: string
+          seen_at?: string | null
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          matched_at?: string
+          saved_search_id?: string
+          seen_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_matches_saved_search_id_fkey"
+            columns: ["saved_search_id"]
+            isOneToOne: false
+            referencedRelation: "saved_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -658,6 +697,7 @@ export type Database = {
         }
         Returns: string
       }
+      refresh_saved_search: { Args: { p_search: string }; Returns: number }
       review_listing: {
         Args: { p_approve: boolean; p_listing: string; p_note?: string }
         Returns: Database["public"]["Enums"]["listing_status"]

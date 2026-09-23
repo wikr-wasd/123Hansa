@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   COUNTRY_CODES, COUNTRY_INFO, CURRENCY_INFO, countriesUsingCurrency, currencyOf,
-  isAllowedVatRate, isCountryCode, standardVatRate,
+  isAllowedVatRate, isCountryCode, isCurrencyCode, standardVatRate,
 } from './country.js';
 import { LOCALES } from './locale.js';
 
@@ -95,5 +95,26 @@ describe('isCountryCode', () => {
     expect(isCountryCode('RS')).toBe(false); // Serbien är Burps marknad, inte Hansas
     expect(isCountryCode('se')).toBe(false);
     expect(isCountryCode(null)).toBe(false);
+  });
+});
+
+describe('isCurrencyCode', () => {
+  it('känner igen plattformens valutor', () => {
+    for (const code of COUNTRY_CODES) {
+      expect(isCurrencyCode(currencyOf(code))).toBe(true);
+    }
+  });
+
+  it('avvisar allt annat', () => {
+    // USD är en riktig valuta, men inte en 123Hansa kan räkna i — och det är
+    // skillnaden som spelar roll.
+    expect(isCurrencyCode('USD')).toBe(false);
+    expect(isCurrencyCode('sek')).toBe(false);
+    expect(isCurrencyCode('')).toBe(false);
+    expect(isCurrencyCode(null)).toBe(false);
+    expect(isCurrencyCode(undefined)).toBe(false);
+    // Ärvda egenskaper från Object.prototype får inte räknas som valutor.
+    expect(isCurrencyCode('toString')).toBe(false);
+    expect(isCurrencyCode('constructor')).toBe(false);
   });
 });

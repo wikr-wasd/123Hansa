@@ -76,6 +76,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <LoadingSpinner size="sm" />
               ) : isAuthenticated ? (
                 <>
+                  <Link
+                    to="/bevakningar"
+                    className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
+                  >
+                    {t('watch.title')}
+                  </Link>
                   <Link 
                     to="/messages" 
                     className="text-nordic-gray-700 hover:text-nordic-blue-600 px-3 py-2 text-sm font-medium whitespace-nowrap"
@@ -147,6 +153,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 py-3"><LoadingSpinner size="sm" /></div>
             ) : isAuthenticated ? (
               <>
+                <Link to="/bevakningar" className={mobileLinkClass}>{t('watch.title')}</Link>
                 <Link to="/messages" className={mobileLinkClass}>{t('messages')}</Link>
                 <Link to="/dashboard" className={mobileLinkClass}>{t('dashboard')}</Link>
                 <button type="button" onClick={handleLogout} className={`${mobileLinkClass} w-full text-left`}>

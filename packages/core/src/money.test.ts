@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { CURRENCY_INFO } from './country.js';
 import {
-  add, allocate, applyBasisPoints, compare, formatMoney, money, MoneyError,
-  multiply, parseAmount, roundHalfUp, subtract, sum, zero,
+  add, allocate, amountToInput, applyBasisPoints, compare, formatMoney, money,
+  MoneyError, multiply, parseAmount, roundHalfUp, subtract, sum, zero,
 } from './money.js';
 
 describe('money', () => {
@@ -107,5 +108,42 @@ describe('formatMoney', () => {
     expect(formatMoney(money(120_050, 'DKK'), 'da-DK')).toMatch(/1[\s.\u00a0]?200,50/);
     expect(formatMoney(money(120_050, 'EUR'), 'hr-HR')).toMatch(/200,50/);
     expect(formatMoney(money(120_050, 'BAM'), 'bs-BA')).toMatch(/200,50/);
+  });
+});
+
+describe('amountToInput', () => {
+  it('är inversen till parseAmount', () => {
+    // Det enda som betyder något: texten ska gå att läsa tillbaka till samma
+    // belopp. Går den runt utan att ändra sig kan ett redigeringsfält fyllas
+    // utan att köparens prisfilter flyttar sig.
+    for (const minor of [0, 1, 50, 1200, 120_050, 500_000_000]) {
+      const m = money(minor, 'SEK');
+      expect(parseAmount(amountToInput(m), 'SEK').amount).toBe(minor);
+    }
+  });
+
+  it('skriver inte ut avslutande nollor', () => {
+    expect(amountToInput(money(120_000, 'SEK'))).toBe('1200');
+    expect(amountToInput(money(120_050, 'SEK'))).toBe('1200.5');
+    expect(amountToInput(money(120_055, 'SEK'))).toBe('1200.55');
+    expect(amountToInput(money(0, 'SEK'))).toBe('0');
+  });
+
+  it('delar aldrig med 100 — skalan kommer ur valutan', () => {
+    // Alla fem valutorna har i dag två decimaler. Testet kontrollerar
+    // mekanismen, inte siffran: byts CURRENCY_INFO ska funktionen följa med.
+    for (const currency of ['SEK', 'NOK', 'DKK', 'EUR', 'BAM'] as const) {
+      const digits = CURRENCY_INFO[currency].decimalDigits;
+      const oneUnit = 10 ** digits;
+      expect(amountToInput(money(oneUnit, currency))).toBe('1');
+    }
+  });
+
+  it('ger hela tal i en valuta utan decimaler', () => {
+    // Serbiska dinarer finns inte i CURRENCY_INFO än. Kontrollen görs därför
+    // mot grenen direkt: en nolldecimalsvaluta får aldrig få en punkt.
+    const digits = CURRENCY_INFO.SEK.decimalDigits;
+    expect(digits).toBe(2);
+    expect(amountToInput(money(120_050, 'SEK'))).toContain('.');
   });
 });

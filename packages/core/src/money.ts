@@ -184,3 +184,28 @@ export function parseAmount(input: string, currency: CurrencyCode): Money {
   }
   return money(roundHalfUp(value * 10 ** info.decimalDigits), currency);
 }
+
+/**
+ * Skriver ett belopp så att det kan läggas tillbaka i ett inmatningsfält.
+ *
+ * Inversen till `parseAmount()`, och det enda andra stället där division med
+ * valutans skala får ske. Ett redigeringsfält får inte formateras med
+ * `formatMoney()`: tusentalsavgränsare och valutakod går inte att skriva vidare
+ * i, och användaren möter sitt eget belopp som något hen måste städa först.
+ *
+ * Skalan kommer ur CURRENCY_INFO. 120050 öre blir "1200.5", men i en valuta
+ * utan decimaler blir samma tal "120050" — det är hela poängen med att inte
+ * dividera med 100 rakt i en komponent.
+ *
+ * Punkt, inte komma, eftersom `parseAmount()` tar emot båda och punkten är den
+ * som inte kan förväxlas med en tusentalsavgränsare.
+ */
+export function amountToInput(m: Money): string {
+  const info = CURRENCY_INFO[m.currency];
+  if (info.decimalDigits === 0) return String(m.amount);
+
+  const text = (m.amount / 10 ** info.decimalDigits).toFixed(info.decimalDigits);
+  // Avslutande nollor är brus i ett fält som ska redigeras: "1200.00" läser
+  // som ett formaterat värde, "1200" som ett tal man just skrivit.
+  return text.replace(/\.?0+$/, '');
+}

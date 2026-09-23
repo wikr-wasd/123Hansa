@@ -19,6 +19,7 @@ const CreateListingPage = lazy(() => import('./pages/listings/CreateListingPage'
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const SavedSearchesPage = lazy(() => import('./pages/SavedSearchesPage'));
 const HelpPage = lazy(() => import('./pages/footer/HelpPage'));
 const ContactPage = lazy(() => import('./pages/footer/ContactPage'));
 const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
@@ -85,6 +86,11 @@ function App() {
             <Route path="/admin/review" element={
               <ProtectedRoute>
                 <ReviewPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/bevakningar" element={
+              <ProtectedRoute>
+                <SavedSearchesPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/screening" element={
