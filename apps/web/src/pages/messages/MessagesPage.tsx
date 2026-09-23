@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { AlertCircle, Loader2, Send } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useViewerLocale } from '../../hooks/useViewerLocale';
 import {
   fetchConversations,
   fetchMessages,
@@ -20,6 +21,7 @@ import {
 const MessagesPage: React.FC = () => {
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  const locale = useViewerLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeId = searchParams.get('samtal');
 
@@ -219,7 +221,7 @@ const MessagesPage: React.FC = () => {
                         >
                           <p className="whitespace-pre-line text-sm">{message.body}</p>
                           <p className={`mt-1 text-xs ${isMine ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {new Date(message.createdAt).toLocaleString('sv-SE', {
+                            {new Date(message.createdAt).toLocaleString(locale, {
                               dateStyle: 'short',
                               timeStyle: 'short',
                             })}

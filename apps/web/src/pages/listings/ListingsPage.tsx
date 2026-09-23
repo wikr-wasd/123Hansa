@@ -16,15 +16,7 @@ import {
 } from '../../services/listingService';
 import { isSupabaseConfigured, missingConfigMessage } from '../../lib/supabase';
 import { useTranslation } from '../../hooks/useTranslation';
-
-// Lanseringsmarknaderna. Kroatien och Bosnien finns i @hansa/core men öppnas
-// först i ett senare skede (docs/BUSINESS.md).
-const MARKETS: { code: CountryCode | 'ALL'; labelKey: string }[] = [
-  { code: 'ALL', labelKey: 'listings.all-countries' },
-  { code: 'SE', labelKey: 'country.SE' },
-  { code: 'NO', labelKey: 'country.NO' },
-  { code: 'DK', labelKey: 'country.DK' },
-];
+import CountrySelect from '../../components/ui/CountrySelect';
 
 const PAGE_SIZE = 12;
 
@@ -218,18 +210,13 @@ const ListingsPage: React.FC = () => {
                 <label htmlFor="country-filter" className="sr-only">
                   {t('listings.country-label')}
                 </label>
-                <select
+                <CountrySelect
                   id="country-filter"
-                  value={country}
-                  onChange={(event) => updateParam('country', event.target.value)}
+                  value={country as CountryCode | 'ALL'}
+                  onChange={(value) => updateParam('country', value)}
                   className="w-full rounded-lg border border-gray-300 py-3 px-4 focus:border-transparent focus:ring-2 focus:ring-blue-500 md:w-44"
-                >
-                  {MARKETS.map((market) => (
-                    <option key={market.code} value={market.code}>
-                      {t(market.labelKey)}
-                    </option>
-                  ))}
-                </select>
+                  allOption
+                />
               </div>
 
               <div>

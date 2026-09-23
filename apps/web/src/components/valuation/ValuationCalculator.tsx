@@ -13,13 +13,10 @@ import {
   type ValuationResult,
 } from '@hansa/core';
 import { useTranslation } from '../../hooks/useTranslation';
+import CountrySelect from '../ui/CountrySelect';
 
 // Räkningen sker i @hansa/core (CLAUDE.md regel 3). Komponenten samlar in
 // uppgifter, visar resultatet och säger vad det bygger på — den räknar inte själv.
-
-// Lanseringsmarknaderna. Namnen kommer ur ordboken — ett land heter olika på
-// olika språk, och 'Sverige' mitt i ett danskt formulär läser som ett fel.
-const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
 // Branscherna kommer ur @hansa/core, samma lista som annonserna använder.
 // Listan låg tidigare här med egna svenska texter, och gled isär från
@@ -81,18 +78,13 @@ const ValuationCalculator: React.FC = () => {
             <label htmlFor="valuation-country" className={labelClass}>
               {t('valuation.country')}
             </label>
-            <select
+            <CountrySelect
               id="valuation-country"
               value={country}
-              onChange={(event) => setCountry(event.target.value as CountryCode)}
+              onChange={(value) => setCountry(value as CountryCode)}
               className={fieldClass}
-            >
-              {MARKETS.map((code) => (
-                <option key={code} value={code}>
-                  {t(`country.${code}`)} ({countryInfo(code).currency})
-                </option>
-              ))}
-            </select>
+              showCurrency
+            />
           </div>
 
           <div>

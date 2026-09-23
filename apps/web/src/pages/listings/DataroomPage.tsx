@@ -20,6 +20,7 @@ import {
 import { fetchListing, type Listing } from '../../services/listingService';
 import { fetchMyListings } from '../../services/listingService';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useViewerLocale } from '../../hooks/useViewerLocale';
 
 // Datarummet. Köparen kommer in först efter accepterat intresse OCH accepterad
 // aktuell version av sekretessavtalet — kontrollerat av databasen, inte av den
@@ -35,6 +36,7 @@ const formatSize = (bytes: number | null): string => {
 const DataroomPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
+  const locale = useViewerLocale();
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [isSeller, setIsSeller] = useState(false);
@@ -158,7 +160,7 @@ const DataroomPage: React.FC = () => {
                 <div>
                   <p className="mb-2 text-sm text-gray-600">
                     {t('dataroom.nda-version')} {nda.version}, {t('dataroom.nda-published')}{' '}
-                    {new Date(nda.createdAt).toLocaleDateString('sv-SE')}.{' '}
+                    {new Date(nda.createdAt).toLocaleDateString(locale)}.{' '}
                     {t('dataroom.nda-new-version-note')}
                   </p>
                   <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-4 font-sans text-sm text-gray-700">
@@ -262,7 +264,7 @@ const DataroomPage: React.FC = () => {
                       <span>
                         <span className="block font-medium text-gray-900">{document.name}</span>
                         <span className="text-xs text-gray-500">
-                          {formatSize(document.sizeBytes)} · {new Date(document.createdAt).toLocaleDateString('sv-SE')}
+                          {formatSize(document.sizeBytes)} · {new Date(document.createdAt).toLocaleDateString(locale)}
                         </span>
                       </span>
                     </span>
@@ -319,7 +321,7 @@ const DataroomPage: React.FC = () => {
                         {entry.userName} {t('dataroom.log-opened')} <strong>{entry.documentName}</strong>
                       </span>
                       <span className="text-gray-500">
-                        {new Date(entry.accessedAt).toLocaleString('sv-SE', {
+                        {new Date(entry.accessedAt).toLocaleString(locale, {
                           dateStyle: 'short',
                           timeStyle: 'short',
                         })}

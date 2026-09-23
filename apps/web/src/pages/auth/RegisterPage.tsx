@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import type { CountryCode, LocaleCode } from '@hansa/core';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
+import CountrySelect from '../../components/ui/CountrySelect';
 
 // Registrering mot Supabase Auth. Land och språk sparas på profilen, och landet
 // styr sedan valuta och organisationsnummerformat i annonsformuläret.
@@ -12,7 +13,6 @@ import { useTranslation } from '../../hooks/useTranslation';
 // Bara lanseringsmarknaderna erbjuds. @hansa/core kan fem länder, men Kroatien
 // och Bosnien öppnas i ett senare skede (docs/BUSINESS.md).
 
-const COUNTRIES: CountryCode[] = ['SE', 'NO', 'DK'];
 const LANGUAGES: { code: LocaleCode; label: string }[] = [
   { code: 'sv', label: 'Svenska' },
   { code: 'no', label: 'Norsk' },
@@ -138,18 +138,12 @@ const RegisterPage: React.FC = () => {
                   <label htmlFor="country" className={labelClass}>
                     {t('auth.country')}
                   </label>
-                  <select
+                  <CountrySelect
                     id="country"
                     value={country}
-                    onChange={(event) => setCountry(event.target.value as CountryCode)}
+                    onChange={(value) => setCountry(value as CountryCode)}
                     className={fieldClass}
-                  >
-                    {COUNTRIES.map((code) => (
-                      <option key={code} value={code}>
-                        {t(`country.${code}`)}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>

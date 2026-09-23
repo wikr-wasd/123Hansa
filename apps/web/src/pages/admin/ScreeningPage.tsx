@@ -11,6 +11,11 @@ import {
 } from '../../services/adminService';
 import { useAuthStore } from '../../stores/authStore';
 
+// Datumen här står med flit på svenska. Granskningsvyn är intern — den läses av
+// plattformens egen personal, inte av säljare eller köpare — och samma val är
+// redan gjort för texterna på sidan (docs/TODO.md, fas 1). En grep efter
+// 'sv-SE' ska hitta den här kommentaren och inte läsa raden som en glömska.
+
 // Granskarens vy för screeningträffar.
 //
 // Två regler styr sidan, och båda kommer ur docs/PERSONUPPGIFTER.md:

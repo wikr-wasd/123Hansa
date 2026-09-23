@@ -56,6 +56,12 @@ const sv = {
   'country.SE': 'Sverige',
   'country.NO': 'Norge',
   'country.DK': 'Danmark',
+  // Kroatien och Bosnien är inte öppna vid lansering, men namnen finns här
+  // så att en öppning blir en UPDATE i markets-tabellen och inte en release.
+  'country.HR': 'Kroatien',
+  'country.BA': 'Bosnien och Hercegovina',
+  'country.loading': 'Hämtar länder…',
+  'country.error': 'Länderna kunde inte hämtas',
 
   // Annonslistan
   'listings.title': 'Företag till salu',

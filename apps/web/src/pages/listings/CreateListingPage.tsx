@@ -20,11 +20,11 @@ import {
 } from '../../services/organizationService';
 import { createListing, submitListingForReview } from '../../services/listingService';
 import { useTranslation } from '../../hooks/useTranslation';
+import CountrySelect from '../../components/ui/CountrySelect';
 
 // Annonsen sparas i databasen och skickas till granskning. Tidigare sparade den
 // här sidan i webbläsarens localStorage, där ingen annan kunde se den.
 
-const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
 // Branscherna kommer ur @hansa/core och lagras som nycklar. Listan låg tidigare
 // här som svenska texter, vilket gav en dansk säljare svenska alternativ i en
@@ -241,18 +241,13 @@ const CreateListingPage: React.FC = () => {
                       <label htmlFor="org-country" className={labelClass}>
                         {t('auth.country')} *
                       </label>
-                      <select
+                      <CountrySelect
                         id="org-country"
                         value={orgCountry}
-                        onChange={(event) => setOrgCountry(event.target.value as CountryCode)}
+                        onChange={(value) => setOrgCountry(value as CountryCode)}
                         className={fieldClass}
-                      >
-                        {MARKETS.map((code) => (
-                          <option key={code} value={code}>
-                            {t(`country.${code}`)}
-                          </option>
-                        ))}
-                      </select>
+                        required
+                      />
                     </div>
 
                     <div>

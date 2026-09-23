@@ -7,6 +7,8 @@ import type { CountryCode } from '@hansa/core';
 import { useAuthStore } from '../../stores/authStore';
 import { amIAdmin } from '../../services/adminService';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useViewerLocale } from '../../hooks/useViewerLocale';
+import CountrySelect from '../../components/ui/CountrySelect';
 import { authService, type LocaleCode } from '../../services/authService';
 import {
   fetchMyInterests,
@@ -50,6 +52,7 @@ const Badge: React.FC<{ status: string; label: string }> = ({ status, label }) =
 const DashboardPage: React.FC = () => {
   const { user, refreshUser } = useAuthStore();
   const { t } = useTranslation();
+  const locale = useViewerLocale();
   const [tab, setTab] = useState<Tab>('listings');
 
   const [listings, setListings] = useState<MyListing[]>([]);
@@ -338,7 +341,7 @@ const DashboardPage: React.FC = () => {
                         </div>
                         <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{interest.message}</p>
                         <p className="mb-4 text-xs text-gray-500">
-                          {t('dash.received-at')} {new Date(interest.createdAt).toLocaleDateString('sv-SE')}
+                          {t('dash.received-at')} {new Date(interest.createdAt).toLocaleDateString(locale)}
                         </p>
                         {interest.status === 'pending' && (
                           <div className="flex gap-3">
@@ -446,16 +449,12 @@ const DashboardPage: React.FC = () => {
                   <label htmlFor="profile-country" className="mb-2 block text-sm font-semibold text-gray-700">
                     {t('auth.country')}
                   </label>
-                  <select
+                  <CountrySelect
                     id="profile-country"
                     value={country}
-                    onChange={(event) => setCountry(event.target.value as CountryCode)}
+                    onChange={(value) => setCountry(value as CountryCode)}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="SE">{t('country.SE')}</option>
-                    <option value="NO">{t('country.NO')}</option>
-                    <option value="DK">{t('country.DK')}</option>
-                  </select>
+                  />
                 </div>
                 <div>
                   <label htmlFor="profile-language" className="mb-2 block text-sm font-semibold text-gray-700">

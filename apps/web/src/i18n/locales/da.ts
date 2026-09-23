@@ -48,6 +48,10 @@ const da: Dictionary = {
   'country.SE': 'Sverige',
   'country.NO': 'Norge',
   'country.DK': 'Danmark',
+  'country.HR': 'Kroatien',
+  'country.BA': 'Bosnien-Hercegovina',
+  'country.loading': 'Henter lande…',
+  'country.error': 'Landene kunne ikke hentes',
 
   'listings.title': 'Virksomheder til salg',
   'listings.subtitle': 'Købere og sælgere finder hinanden her og handler direkte med hinanden.',

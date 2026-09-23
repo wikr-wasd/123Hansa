@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { AlertCircle, Bell, Loader2 } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
+import { useViewerLocale } from '../hooks/useViewerLocale';
 import { fetchNotifications, type Notification } from '../services/notificationService';
 
 // Notiserna kommer ur det som faktiskt hänt: intresseanmälningar, svaren på
@@ -19,6 +20,7 @@ const KIND_KEYS: Record<Notification['kind'], string> = {
 
 const NotificationsPage: React.FC = () => {
   const { t } = useTranslation();
+  const locale = useViewerLocale();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +98,7 @@ const NotificationsPage: React.FC = () => {
                       <span className="text-sm text-gray-600">{notification.subject}</span>
                     </span>
                     <span className="text-xs text-gray-500">
-                      {new Date(notification.at).toLocaleString('sv-SE', {
+                      {new Date(notification.at).toLocaleString(locale, {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}

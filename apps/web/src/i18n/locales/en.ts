@@ -46,6 +46,10 @@ const en: Dictionary = {
   'country.SE': 'Sweden',
   'country.NO': 'Norway',
   'country.DK': 'Denmark',
+  'country.HR': 'Croatia',
+  'country.BA': 'Bosnia and Herzegovina',
+  'country.loading': 'Loading countries…',
+  'country.error': 'Countries could not be loaded',
 
   'listings.title': 'Businesses for sale',
   'listings.subtitle': 'Buyers and sellers find each other here and deal directly with one another.',

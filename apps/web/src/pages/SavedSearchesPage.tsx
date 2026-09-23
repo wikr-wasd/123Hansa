@@ -12,7 +12,6 @@ import {
   isCurrencyCode,
   money,
   parseAmount,
-  type CountryCode,
   type Industry,
 } from '@hansa/core';
 import {
@@ -29,14 +28,13 @@ import {
 import { formatListingAmount } from '../services/listingService';
 import { useAuthStore } from '../stores/authStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { useLaunchedCountries } from '../hooks/useMarkets';
 
 // Bevakningar: köparens sida av matchningen.
 //
 // Matchningen sker i databasen. Den här sidan sparar kriterier och visar
 // resultatet — den avgör aldrig själv vad som matchar, för då hade listan och
 // notiserna kunnat säga olika saker om samma annons.
-
-const MARKETS: CountryCode[] = ['SE', 'NO', 'DK'];
 
 const emptyForm: NewSavedSearch = {
   name: '',
@@ -81,6 +79,10 @@ function formatRange(search: SavedSearch, locale: string): string {
 const SavedSearchesPage: React.FC = () => {
   const { t, getCurrentLanguage } = useTranslation();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuthStore();
+  // Länderna kommer ur markets-tabellen, inte ur en lista här. Sidan visar
+  // chips i stället för en select och kan därför inte använda CountrySelect,
+  // men källan är densamma.
+  const { countries: markets, isLoading: isLoadingMarkets } = useLaunchedCountries();
 
   const [searches, setSearches] = useState<SavedSearch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -309,7 +311,10 @@ const SavedSearchesPage: React.FC = () => {
                   {t('watch.countries')}
                 </legend>
                 <div className="flex flex-wrap gap-2">
-                  {MARKETS.map((code) => (
+                  {isLoadingMarkets && (
+                    <span className="text-sm text-gray-500">{t('country.loading')}</span>
+                  )}
+                  {markets.map((code) => (
                     <button
                       key={code}
                       type="button"
@@ -371,11 +376,15 @@ const SavedSearchesPage: React.FC = () => {
                       className={fieldClass}
                     >
                       <option value="">—</option>
-                      {MARKETS.map((code) => (
-                        <option key={code} value={countryInfo(code).currency}>
-                          {countryInfo(code).currency}
-                        </option>
-                      ))}
+                      {/* En valuta per öppen marknad. Dubbletter kan uppstå den dag
+                          två länder delar valuta — därför unika värden. */}
+                      {[...new Set(markets.map((code) => countryInfo(code).currency))].map(
+                        (currency) => (
+                          <option key={currency} value={currency}>
+                            {currency}
+                          </option>
+                        )
+                      )}
                     </select>
                   </div>
                   <div>

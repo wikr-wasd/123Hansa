@@ -21,7 +21,7 @@ import { isSupabaseConfigured, missingConfigMessage } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import { DemoBadge } from './ListingsPage';
-import { industryTranslationKey } from '@hansa/core';
+import { industryTranslationKey, intlLocaleFor } from '@hansa/core';
 
 const Fact: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3">
@@ -265,8 +265,13 @@ const ListingDetailPage: React.FC = () => {
                 <div className="flex justify-between gap-4">
                   <dt>{t('listing.published')}</dt>
                   <dd>
+                    {/* Annonsens eget datum följer annonsens land, precis som
+                        priset. En svensk som läser en dansk annons ser danskt
+                        datumformat — det är annonsen som är dansk, inte läsaren. */}
                     {listing.publishedAt
-                      ? new Date(listing.publishedAt).toLocaleDateString('sv-SE')
+                      ? new Date(listing.publishedAt).toLocaleDateString(
+                          intlLocaleFor(listing.country)
+                        )
                       : '—'}
                   </dd>
                 </div>

@@ -17,6 +17,11 @@ import { formatListingAmount, LISTING_STATUS_KEYS, type ListingStatus } from '..
 import { useAuthStore } from '../../stores/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
 
+// Datumen här står med flit på svenska. Granskningsvyn är intern — den läses av
+// plattformens egen personal, inte av säljare eller köpare — och samma val är
+// redan gjort för texterna på sidan (docs/TODO.md, fas 1). En grep efter
+// 'sv-SE' ska hitta den här kommentaren och inte läsa raden som en glömska.
+
 // Granskningsvyn. Utan den måste review_listing() och verify_organization()
 // anropas manuellt mot databasen, vilket inte är rimligt i drift.
 //
